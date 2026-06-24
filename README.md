@@ -20,7 +20,7 @@ This project contains some performance benchmarks using the [Rust Scientific Lib
 
 Currently, we present some results involving the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse).
 
-The computations presented here use all features (`intel_mkl`, `local_sparse`, and `cudss`). Thus, KLU, UMFPACK, and MUMPS are compiled locally with Intel MKL. On the other hand, the Linux binary from [NVIDIA cuDSS](https://developer.nvidia.com/cudss) is employed for the calculations with cuDSS. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
+The computations presented here use all features (`intel_mkl`, `local_sparse`, and `cudss`). Thus, UMFPACK and MUMPS are compiled locally with Intel MKL. On the other hand, the Linux binary from [NVIDIA cuDSS](https://developer.nvidia.com/cudss) is employed for the calculations with cuDSS. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
 
 
 
