@@ -1,53 +1,39 @@
-use benchmark_russell::{AllResults, MATRICES, MATRICES_UMFPACK, StrError, performance_table_md};
+use benchmark_russell::performance_table_md;
+use benchmark_russell::{AllResults, MATRICES, MATRICES_COMPLEX, StrError};
 use russell_sparse::Genie;
 
-const RESULTS_DIR: &str = "results/arch";
+const OS: &str = "Arch";
+// const OS: &str = "Ubuntu";
 
-fn print_table<'a>(data: &AllResults<'a>) -> Result<(), StrError> {
-    // get the number of runs from the first matrix (non-oom)
-    let nrun_expected = data
-        .matrices
-        .iter()
-        .find_map(|&m| {
-            data.map
-                .get(&(data.genies[0], m))
-                .filter(|s| !s.main.out_of_memory)
-                .map(|s| s.time_nanoseconds.total_ifs_array.len())
-        })
-        .unwrap_or(0);
-
-    // check if the number of runs is consistent
-    for (_, stats) in &data.map {
-        if !stats.main.out_of_memory {
-            if stats.time_nanoseconds.total_ifs_array.len() != nrun_expected {
-                println!(
-                    "({}, {}): number of runs = {}",
-                    stats.main.solver,
-                    stats.matrix.name,
-                    stats.time_nanoseconds.total_ifs_array.len()
-                );
-                return Err("number of runs is not consistent");
-            }
-        }
-    }
-
-    // generate the table
+fn print_table<'a>(caption: &str, data: &AllResults<'a>) -> Result<(), StrError> {
     let table = performance_table_md(&data)?;
-    println!("{}", table);
+    println!("\n\n### {}\n\n{}", caption, table);
     Ok(())
 }
 
 fn main() -> Result<(), StrError> {
-    // cuDSS and MUMPS
-    let genies = &[Genie::Cudss, Genie::Mumps];
-    let data = AllResults::new(genies, MATRICES, RESULTS_DIR)?;
-    print_table(&data)?;
+    // results dir
+    let results_dir = format!("results/{}", OS.to_lowercase());
 
-    // UMFPACK and MUMPS
-    let genies = &[Genie::Umfpack, Genie::Mumps];
-    let data = AllResults::new(genies, MATRICES_UMFPACK, RESULTS_DIR)?;
-    println!("\n\n");
-    print_table(&data)?;
+    // ---- cuDSS and MUMPS ---
+    let caption1 = format!("Calculations on {}. cuDSS and MUMPS. Real-valued matrices.", OS);
+    let caption2 = format!("Calculations on {}. cuDSS and MUMPS. Complex-valued matrices.", OS);
+    let cudss_mumps_re = AllResults::new(&[Genie::Cudss, Genie::Mumps], MATRICES, &results_dir)?;
+    let cudss_mumps_co = AllResults::new(&[Genie::Cudss, Genie::Mumps], MATRICES_COMPLEX, &results_dir)?;
+    cudss_mumps_re.check_number_of_runs()?;
+    cudss_mumps_co.check_number_of_runs()?;
+    print_table(&caption1, &cudss_mumps_re)?;
+    print_table(&caption2, &cudss_mumps_co)?;
+
+    // ---- UMFPACK and MUMPS ---
+    let caption3 = format!("Calculations on {}. UMFPACK and MUMPS. Real-valued matrices.", OS);
+    let caption4 = format!("Calculations on {}. UMFPACK and MUMPS. Complex-valued matrices.", OS);
+    let umfpack_mumps_re = AllResults::new(&[Genie::Umfpack, Genie::Mumps], MATRICES, &results_dir)?;
+    let umfpack_mumps_co = AllResults::new(&[Genie::Umfpack, Genie::Mumps], MATRICES_COMPLEX, &results_dir)?;
+    umfpack_mumps_re.check_number_of_runs()?;
+    umfpack_mumps_co.check_number_of_runs()?;
+    print_table(&caption3, &umfpack_mumps_re)?;
+    print_table(&caption4, &umfpack_mumps_co)?;
 
     // done
     Ok(())

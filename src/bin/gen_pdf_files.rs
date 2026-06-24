@@ -1,6 +1,5 @@
-use benchmark_russell::{
-    AllResults, MATRICES, MATRICES_COMPLEX, StrError, call_latexmk, get_matrix_list_latex, performance_table,
-};
+use benchmark_russell::{AllResults, MATRICES, MATRICES_COMPLEX, StrError};
+use benchmark_russell::{call_latexmk, get_matrix_list_latex, performance_table};
 use russell_sparse::{Genie, get_library_versions, get_system_info_linux};
 
 const OS: &str = "Arch";

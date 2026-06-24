@@ -310,7 +310,6 @@ mod tests {
                 "fp",
                 "helm2d03",
                 "pre2",
-                "Goodwin_040",
                 "darcy003",
                 "torso1",
             ],
