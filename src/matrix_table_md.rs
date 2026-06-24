@@ -31,7 +31,13 @@ pub fn matrix_table_md(matrices: &[&str]) -> Result<String, StrError> {
             let tmp_nnz = format!("{}", m.pattern_entries);
             let str_nrow = re.replace_all(&tmp_nrow, ",");
             let str_nnz = re.replace_all(&tmp_nnz, ",");
-            let str_sym = if m.symmetric == "No" { "No" } else { "Yes" };
+            let str_sym = if m.symmetric == "No" {
+                "No"
+            } else if m.positive_definite.as_deref() == Some("yes") {
+                "Yes*"
+            } else {
+                "Yes"
+            };
             writeln!(&mut buf, "| {mname} | {str_nrow} | {str_nnz} | {str_sym} |").unwrap();
         } else {
             // matrix not in SuiteSparse (e.g. pres-cylin)
@@ -61,8 +67,8 @@ mod tests {
     }
 
     #[test]
-    fn matrix_table_md_handles_missing() {
+    fn matrix_table_md_handles_pres_cylin() {
         let md = matrix_table_md(&["pres-cylin-3d-tet10-fine"]).unwrap();
-        assert!(md.contains("| pres-cylin | — | — | — |"));
+        assert!(md.contains("| pres-cylin | 1,711,464 | 133,562,188 | Yes* |"));
     }
 }

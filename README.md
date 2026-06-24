@@ -3,9 +3,13 @@
 ## Contents <!-- omit from toc --> 
 
 - [Introduction](#introduction)
-- [Solvers for large sparse linear systems (`russell_sparse`)](#solvers-for-large-sparse-linear-systems-russell_sparse)
-  - [Comparing cuDSS and MUMPS](#comparing-cudss-and-mumps)
-- [Comparing KLU, UMFPACK and MUMPS](#comparing-klu-umfpack-and-mumps)
+- [Solvers for large sparse linear systems](#solvers-for-large-sparse-linear-systems)
+- [Results](#results)
+  - [Information about the tested matrices](#information-about-the-tested-matrices)
+  - [Calculations on Arch. cuDSS and MUMPS. Real-valued matrices.](#calculations-on-arch-cudss-and-mumps-real-valued-matrices)
+  - [Calculations on Arch. cuDSS and MUMPS. Complex-valued matrices.](#calculations-on-arch-cudss-and-mumps-complex-valued-matrices)
+  - [Calculations on Arch. UMFPACK and MUMPS. Real-valued matrices.](#calculations-on-arch-umfpack-and-mumps-real-valued-matrices)
+  - [Calculations on Arch. UMFPACK and MUMPS. Complex-valued matrices.](#calculations-on-arch-umfpack-and-mumps-complex-valued-matrices)
 - [System and libraries information](#system-and-libraries-information)
 
 
@@ -20,7 +24,14 @@ The computations presented here use all features (`intel_mkl`, `local_sparse`, a
 
 
 
-## Solvers for large sparse linear systems (`russell_sparse`)
+## Solvers for large sparse linear systems
+
+Note that [NVIDIA cuDSS](https://developer.nvidia.com/cudss) is in **Preview Mode** 🚧.
+
+The results are available in PDF format and also listed below.
+
+* [Arch Linux. Results PDF file](results/arch-performance-tables.pdf)
+* [Ubuntu Linux. Results PDF file](results/ubuntu-performance-tables.pdf)
 
 We test the linear system **Ax = b** where **A** is the coefficient matrix, **x** is the solution vector, and **b** is the right-hand side vector. The coefficient matrix is set with matrices from the [SuiteSparse Matrix Collection](https://sparse.tamu.edu). The right-hand side vector is filled with ones, i.e., we study the solution of
 
@@ -32,7 +43,7 @@ The relative error is calculated as
 RelativeError = max(|A x - 1|) / max(|A| + 1)
 ```
 
-The tested matrices are:
+The real-valued tested matrices are:
 
  1. **bwm2000** (Bai) -- Brusselator wave model in transport interaction of chemical solutions (1992)
  2. **rdb5000** (Bai) -- Reaction-diffusion brusselator model (1994)
@@ -67,7 +78,20 @@ The tested matrices are:
  31. **Flan_1565** (Janna) -- Structural problem, 3D model of a steel flange (2011)
  32. **pres-cylin** (Pedroso) -- FEM stiffness matrix of a pressurized cylinder (Tet10 with 1,711,464 DOF). Not from the Collection. From [Pedroso DM (2024) Caveats of three direct linear solvers for finite element analyses](https://onlinelibrary.wiley.com/doi/10.1002/nme.7545).
 
-Notes:
+The complex-valued tested matrices are:
+
+1. **mhd1280b** (Bai) -- Alfven spectra in magnetohydrodynamics (1994)
+2. **mplate** (Cote) -- Vibro-acoustic problem (1997)
+3. **RFdevice** (Rost) -- Semiconductor device simulation (2007)
+4. **vfem** (CEMW) -- Electromagnetics, vector finite element (2008)
+5. **fem_filter** (Lee) -- FEM band-pass microwave filter 500MHz (2008)
+6. **Chevron4** (Chevron) -- Temporal freq domain seismic modeling (2012)
+7. **mono_500Hz** (FreeFieldTechnologies) -- 3D vibro-acoustic problem, aircraft engine nacelle (2008)
+8. **kim2** (Kim) -- 2D 676-by-676 complex mesh (2002)
+9. **fem_hifreq_circuit** (Lee) -- FEM Maxwell equations for hi-freq circuit (2009)
+10. **dielFilterV3clx** (Dziekonski) -- High-order vector finite element method in EM (2011)
+
+**Additional notes:**
 
 1. Each problem is solved ten times. The reported error is the maximum among runs. The reported computer time is the average without outliers.
 2. Total time includes initialization (memory allocation + symbolic factorization), numeric factorization, and solve.
@@ -78,78 +102,172 @@ Notes:
 7. The hybrid memory mode is enabled for the pres-cylin matrix and cuDSS.
 
 
+## Results
 
-### Comparing cuDSS and MUMPS
+### Information about the tested matrices
 
-Note that [NVIDIA cuDSS](https://developer.nvidia.com/cudss) is in **Preview Mode** 🚧.
+**Real-valued matrices:**
+| Matrix       |      Nrow |         NNZ |  Sym  |
+| ------------ | --------: | ----------: | :---: |
+| bwm2000      |     2,000 |       7,996 |  No   |
+| rdb5000      |     5,000 |      29,600 |  No   |
+| Goodwin_040  |    17,922 |     561,677 |  No   |
+| fp           |     7,548 |     848,553 |  No   |
+| xenon1       |    48,600 |   1,181,120 |  No   |
+| twotone      |   120,750 |   1,224,224 |  No   |
+| Raj1         |   263,743 |   1,302,464 |  No   |
+| boyd2        |   466,316 |   1,500,397 |  Yes  |
+| Goodwin_071  |    56,021 |   1,797,934 |  No   |
+| darcy003     |   389,874 |   2,101,242 |  Yes  |
+| rma10        |    46,835 |   2,374,001 |  No   |
+| helm2d03     |   392,257 |   2,741,935 |  Yes  |
+| stomach      |   213,360 |   3,021,648 |  No   |
+| oilpan       |    73,752 |   3,597,188 | Yes*  |
+| ASIC_680k    |   682,862 |   3,871,773 |  No   |
+| tmt_unsym    |   917,825 |   4,584,801 |  No   |
+| Goodwin_127  |   178,437 |   5,778,545 |  No   |
+| pre2         |   659,033 |   5,959,282 |  No   |
+| marine1      |   400,320 |   6,226,538 |  No   |
+| torso1       |   116,158 |   8,516,500 |  No   |
+| atmosmodd    | 1,270,432 |   8,814,880 |  No   |
+| atmosmodl    | 1,489,752 |  10,319,760 |  No   |
+| memchip      | 2,707,524 |  14,810,202 |  No   |
+| Freescale1   | 3,428,755 |  18,920,347 |  No   |
+| rajat31      | 4,690,002 |  20,316,253 |  No   |
+| Transport    | 1,602,111 |  23,500,731 |  No   |
+| inline_1     |   503,712 |  36,816,342 | Yes*  |
+| PFlow_742    |   742,793 |  37,138,461 | Yes*  |
+| Emilia_923   |   923,136 |  41,005,206 | Yes*  |
+| dielFilterV2 | 1,157,456 |  48,538,952 |  Yes  |
+| Flan_1565    | 1,564,794 | 117,406,044 | Yes*  |
+| pres-cylin   | 1,711,464 | 133,562,188 | Yes*  |
 
-The [results are available in PDF format](pdfs/performance-table.pdf) and also listed below.
-
-The results are given in the table below.
-
-| Matrix       |      Nrow |         NNZ |  Sym  |      cuDSS MA |   cuDSS Time | cuDSS Error |    MUMPS Time | MUMPS Error |
-| ------------ | --------: | ----------: | :---: | ------------: | -----------: | ----------: | ------------: | ----------: |
-| bwm2000      |     2,000 |       7,996 |  No   |          Auto |      8.633ms |    8.21e-16 |       6.260ms |    7.50e-16 |
-| rdb5000      |     5,000 |      29,600 |  No   |          Auto |     30.087ms |    4.06e-13 |       7.442ms |    5.37e-13 |
-| Goodwin_040  |    17,922 |     561,677 |  No   |    MaxMinDiag |     71.095ms |    2.82e-12 |     106.490ms |    1.65e-11 |
-| fp           |     7,548 |     848,553 |  No   |          Auto |    155.376ms |     4.98e-9 |     164.943ms |    1.16e-20 |
-| xenon1       |    48,600 |   1,181,120 |  No   |          Auto |    194.980ms |    1.32e-39 |     308.937ms |    6.74e-40 |
-| twotone      |   120,750 |   1,224,224 |  No   |          Auto |    772.871ms |    4.73e-13 |     879.251ms |    1.93e-13 |
-| Raj1         |   263,743 |   1,302,464 |  No   |          Auto |    883.834ms |    1.21e-11 |     901.208ms |    3.63e-13 |
-| boyd2        |   466,316 |   1,500,397 |  Yes  |          None |    996.540ms |    3.24e-11 |     755.545ms |    8.98e-11 |
-| Goodwin_071  |    56,021 |   1,797,934 |  No   |    MaxMinDiag |    174.813ms |    8.65e-12 |     258.507ms |    8.38e-11 |
-| darcy003     |   389,874 |   2,101,242 |  Yes  | MaxMinDiagAlt |       2.438s |     5.64e-7 |       10.667s |    1.75e-10 |
-| rma10        |    46,835 |   2,374,001 |  No   |          Auto |    241.711ms |    9.04e-16 |     150.619ms |    1.35e-16 |
-| helm2d03     |   392,257 |   2,741,935 |  Yes  |          None |       1.239s |    1.68e-10 |        1.440s |    3.82e-10 |
-| stomach      |   213,360 |   3,021,648 |  No   |          Auto |       1.280s |    2.71e-15 |        1.579s |    1.49e-15 |
-| oilpan       |    73,752 |   3,597,188 | Yes*  |          None |    102.687ms |    4.65e-15 |     185.724ms |    2.22e-15 |
-| ASIC_680k    |   682,862 |   3,871,773 |  No   |          Auto |       3.458s |    7.33e-11 | **1m17.353s** |    8.09e-11 |
-| tmt_unsym    |   917,825 |   4,584,801 |  No   |          Auto |       2.569s |     4.95e-7 |        3.061s |     1.43e-7 |
-| Goodwin_127  |   178,437 |   5,778,545 |  No   |    MaxMinDiag |    372.312ms |    6.83e-11 |     846.998ms |    6.20e-10 |
-| pre2         |   659,033 |   5,959,282 |  No   |          Auto |       3.428s |    2.15e-14 |        4.383s |    2.60e-14 |
-| marine1      |   400,320 |   6,226,538 |  No   |          Auto |       4.032s |     1.70e-8 |        5.352s |    6.25e-14 |
-| torso1       |   116,158 |   8,516,500 |  No   |  MaxDiagCount |       1.050s |     5.90e-7 |        1.847s | **3.75e-6** |
-| atmosmodd    | 1,270,432 |   8,814,880 |  No   |          Auto |      18.668s |    1.44e-16 |       42.718s |    2.48e-16 |
-| atmosmodl    | 1,489,752 |  10,319,760 |  No   |          Auto |      18.165s |    9.34e-18 |       38.733s |    7.60e-18 |
-| memchip      | 2,707,524 |  14,810,202 |  No   |          Auto |       6.941s |    3.23e-15 |        7.546s |    3.40e-15 |
-| Freescale1   | 3,428,755 |  18,920,347 |  No   |          Auto |       8.076s |    9.39e-10 |        9.580s |    7.05e-10 |
-| rajat31      | 4,690,002 |  20,316,253 |  No   |          Auto |      17.285s |    3.26e-14 |       15.175s |    8.73e-15 |
-| Transport    | 1,602,111 |  23,500,731 |  No   |          Auto |      21.417s |    7.21e-10 |       41.188s |    3.81e-10 |
-| inline_1     |   503,712 |  36,816,342 | Yes*  |          None |       1.762s |    5.86e-15 |        3.261s |    3.38e-15 |
-| PFlow_742    |   742,793 |  37,138,461 | Yes*  |          None |       9.792s |    1.77e-10 |       10.706s |    4.17e-11 |
-| Emilia_923   |   923,136 |  41,005,206 | Yes*  |          None |      15.903s |    1.50e-22 |       37.580s |    5.27e-23 |
-| dielFilterV2 | 1,157,456 |  48,538,952 |  Yes  |          None |       7.007s |    1.38e-11 |       12.388s |    1.49e-11 |
-| Flan_1565    | 1,564,794 | 117,406,044 | Yes*  |          None |      10.212s |    2.24e-15 |       19.735s |    9.98e-16 |
-| pres-cylin   | 1,711,464 | 133,562,188 | Yes*  |          None | **2m4.270s** |    8.89e-13 | **1m18.368s** |    5.09e-13 |
+**Complex-valued matrices:**
+| Matrix             |    Nrow |        NNZ |  Sym  |
+| ------------------ | ------: | ---------: | :---: |
+| mhd1280b           |   1,280 |     22,778 |  No   |
+| mplate             |   5,962 |    142,190 |  Yes  |
+| RFdevice           |  74,104 |    365,580 |  No   |
+| vfem               |  93,476 |  1,434,636 |  No   |
+| fem_filter         |  74,062 |  1,731,206 |  No   |
+| Chevron4           | 711,450 |  6,376,412 |  No   |
+| mono_500Hz         | 169,410 |  5,036,288 |  No   |
+| kim2               | 456,976 | 11,330,020 |  No   |
+| fem_hifreq_circuit | 491,100 | 20,239,237 |  No   |
+| dielFilterV3clx    | 420,408 | 32,886,208 |  Yes  |
 
 
 
-## Comparing KLU, UMFPACK and MUMPS
+### Calculations on Arch. cuDSS and MUMPS. Real-valued matrices.
 
-| Matrix      |      Nrow |        NNZ |  Sym  |      KLU Time |   KLU Error |  UMFPACK Time | UMFPACK Error |    MUMPS Time | MUMPS Error |
-| ----------- | --------: | ---------: | :---: | ------------: | ----------: | ------------: | ------------: | ------------: | ----------: |
-| bwm2000     |     2,000 |      7,996 |  No   |     263.664µs |    6.05e-16 |     713.627µs |      5.30e-16 |       6.260ms |    7.50e-16 |
-| rdb5000     |     5,000 |     29,600 |  No   |       6.484ms |    1.68e-12 |      11.504ms |      1.93e-15 |       7.442ms |    5.37e-13 |
-| Goodwin_040 |    17,922 |    561,677 |  No   |        4.679s |  **3.17e3** |     104.256ms |      6.62e-13 |     106.490ms |    1.65e-11 |
-| fp          |     7,548 |    848,553 |  No   |     228.149ms |    7.32e-20 |     149.956ms |      2.57e-21 |     164.943ms |    1.16e-20 |
-| xenon1      |    48,600 |  1,181,120 |  No   |        4.716s |    4.23e-39 |     582.982ms |      5.55e-40 |     308.937ms |    6.74e-40 |
-| twotone     |   120,750 |  1,224,224 |  No   |       18.129s |     1.32e-6 |     334.710ms |      1.13e-14 |     879.251ms |    1.93e-13 |
-| Raj1        |   263,743 |  1,302,464 |  No   |       21.521s | **1.64e-5** |           oom |           oom |     901.208ms |    3.63e-13 |
-| boyd2       |   466,316 |  1,500,397 |  Yes  | **2m44.974s** |    1.26e-12 | **1m19.604s** |      2.86e-13 |     755.545ms |    8.98e-11 |
-| Goodwin_071 |    56,021 |  1,797,934 |  No   |       36.348s |  **3.79e8** |     418.565ms |      2.77e-12 |     258.507ms |    8.38e-11 |
-| darcy003    |   389,874 |  2,101,242 |  Yes  |        4.868s | **9.15e-4** |        1.072s |      6.95e-12 |       10.667s |    1.75e-10 |
-| rma10       |    46,835 |  2,374,001 |  No   |     453.514ms |    3.13e-17 |     398.716ms |      1.57e-17 |     150.619ms |    1.35e-16 |
-| helm2d03    |   392,257 |  2,741,935 |  Yes  |        6.913s |     2.82e-9 |        1.375s |      2.37e-13 |        1.440s |    3.82e-10 |
-| stomach     |   213,360 |  3,021,648 |  No   |       20.335s |    5.04e-15 |        1.681s |      5.13e-16 |        1.579s |    1.49e-15 |
-| oilpan      |    73,752 |  3,597,188 | Yes*  |        1.816s |    1.82e-14 |     481.117ms |      1.26e-15 |     185.724ms |    2.22e-15 |
-| ASIC_680k   |   682,862 |  3,871,773 |  No   |     537.826ms |    1.99e-11 |        1.242s |      2.20e-11 | **1m17.353s** |    8.09e-11 |
-| tmt_unsym   |   917,825 |  4,584,801 |  No   |       16.892s |     2.37e-6 |        3.655s |       5.96e-8 |        3.061s |     1.43e-7 |
-| Goodwin_127 |   178,437 |  5,778,545 |  No   | **7m39.232s** | **3.06e13** |        1.380s |      6.03e-12 |     846.998ms |    6.20e-10 |
-| marine1     |   400,320 |  6,226,538 |  No   | **8m54.468s** |    2.70e-13 |           oom |           oom |        5.352s |    6.25e-14 |
-| torso1      |   116,158 |  8,516,500 |  No   |        4.876s | **6.01e-6** |        1.314s |       3.82e-8 |        1.847s | **3.75e-6** |
-| memchip     | 2,707,524 | 14,810,202 |  No   | **1m39.551s** |    2.16e-14 |       28.947s |      2.04e-15 |        7.546s |    3.40e-15 |
-| Freescale1  | 3,428,755 | 18,920,347 |  No   |        3.417s |    7.05e-10 |       28.693s |      7.05e-10 |        9.580s |    7.05e-10 |
-| rajat31     | 4,690,002 | 20,316,253 |  No   | **2m16.058s** |    1.22e-14 |           oom |           oom |       15.175s |    8.73e-15 |
+| Matrix       |      cuDSS MA |   cuDSS Time | cuDSS Error |    MUMPS Time | MUMPS Error |
+| ------------ | ------------: | -----------: | ----------: | ------------: | ----------: |
+| bwm2000      |          Auto |      8.633ms |    8.21e-16 |       6.260ms |    7.50e-16 |
+| rdb5000      |          Auto |     30.087ms |    4.06e-13 |       7.442ms |    5.37e-13 |
+| Goodwin_040  |    MaxMinDiag |     71.095ms |    2.82e-12 |     106.490ms |    1.65e-11 |
+| fp           |          Auto |    155.376ms |     4.98e-9 |     164.943ms |    1.16e-20 |
+| xenon1       |          Auto |    194.980ms |    1.32e-39 |     308.937ms |    6.74e-40 |
+| twotone      |          Auto |    772.871ms |    4.73e-13 |     879.251ms |    1.93e-13 |
+| Raj1         |          Auto |    883.834ms |    1.21e-11 |     901.208ms |    3.63e-13 |
+| boyd2        |          None |    996.540ms |    3.24e-11 |     755.545ms |    8.98e-11 |
+| Goodwin_071  |    MaxMinDiag |    174.813ms |    8.65e-12 |     258.507ms |    8.38e-11 |
+| darcy003     | MaxMinDiagAlt |       2.438s |     5.64e-7 |       10.667s |    1.75e-10 |
+| rma10        |          Auto |    241.711ms |    9.04e-16 |     150.619ms |    1.35e-16 |
+| helm2d03     |          None |       1.239s |    1.68e-10 |        1.440s |    3.82e-10 |
+| stomach      |          Auto |       1.280s |    2.71e-15 |        1.579s |    1.49e-15 |
+| oilpan       |          None |    102.687ms |    4.65e-15 |     185.724ms |    2.22e-15 |
+| ASIC_680k    |          Auto |       3.458s |    7.33e-11 | **1m17.353s** |    8.09e-11 |
+| tmt_unsym    |          Auto |       2.569s |     4.95e-7 |        3.061s |     1.43e-7 |
+| Goodwin_127  |    MaxMinDiag |    372.312ms |    6.83e-11 |     846.998ms |    6.20e-10 |
+| pre2         |          Auto |       3.428s |    2.15e-14 |        4.383s |    2.60e-14 |
+| marine1      |          Auto |       4.032s |     1.70e-8 |        5.352s |    6.25e-14 |
+| torso1       |  MaxDiagCount |       1.050s |     5.90e-7 |        1.847s | **3.75e-6** |
+| atmosmodd    |          Auto |      18.668s |    1.44e-16 |       42.718s |    2.48e-16 |
+| atmosmodl    |          Auto |      18.165s |    9.34e-18 |       38.733s |    7.60e-18 |
+| memchip      |          Auto |       6.941s |    3.23e-15 |        7.546s |    3.40e-15 |
+| Freescale1   |          Auto |       8.076s |    9.39e-10 |        9.580s |    7.05e-10 |
+| rajat31      |          Auto |      17.285s |    3.26e-14 |       15.175s |    8.73e-15 |
+| Transport    |          Auto |      21.417s |    7.21e-10 |       41.188s |    3.81e-10 |
+| inline_1     |          None |       1.762s |    5.86e-15 |        3.261s |    3.38e-15 |
+| PFlow_742    |          None |       9.792s |    1.77e-10 |       10.706s |    4.17e-11 |
+| Emilia_923   |          None |      15.903s |    1.50e-22 |       37.580s |    5.27e-23 |
+| dielFilterV2 |          None |       7.007s |    1.38e-11 |       12.388s |    1.49e-11 |
+| Flan_1565    |          None |      10.212s |    2.24e-15 |       19.735s |    9.98e-16 |
+| pres-cylin   |          None | **2m4.270s** |    8.89e-13 | **1m18.368s** |    5.09e-13 |
+
+
+
+### Calculations on Arch. cuDSS and MUMPS. Complex-valued matrices.
+
+| Matrix             |   cuDSS MA | cuDSS Time | cuDSS Error | MUMPS Time | MUMPS Error |
+| ------------------ | ---------: | ---------: | ----------: | ---------: | ----------: |
+| mhd1280b           |       Auto |    7.281ms |    1.57e-15 |    4.551ms |    1.17e-15 |
+| mplate             |       None |   78.587ms |    1.13e-10 |  167.040ms |    6.28e-11 |
+| RFdevice           | MaxDiagSum |  570.478ms | **3.21e-2** |     1.548s |     1.56e-7 |
+| vfem               |       Auto |  865.606ms |     5.29e-8 |     1.403s |     8.74e-8 |
+| fem_filter         |       Auto |  713.189ms |    1.81e-10 |     1.039s |    1.44e-10 |
+| Chevron4           |       Auto |     2.480s |    8.51e-11 |     3.139s |    4.16e-11 |
+| mono_500Hz         |       Auto |     2.735s |    2.23e-10 |     4.830s |     5.99e-9 |
+| kim2               |       Auto |    13.916s |      0.00e0 |     4.346s |    2.73e-18 |
+| fem_hifreq_circuit |       Auto |     4.871s |    1.60e-10 |     9.018s |    1.28e-10 |
+| dielFilterV3clx    |       None |     2.184s |    4.31e-10 |     3.969s |    1.73e-11 |
+
+
+
+### Calculations on Arch. UMFPACK and MUMPS. Real-valued matrices.
+
+| Matrix       |  UMFPACK Time | UMFPACK Error |    MUMPS Time | MUMPS Error |
+| ------------ | ------------: | ------------: | ------------: | ----------: |
+| bwm2000      |     713.627µs |      5.30e-16 |       6.260ms |    7.50e-16 |
+| rdb5000      |      11.504ms |      1.93e-15 |       7.442ms |    5.37e-13 |
+| Goodwin_040  |     104.256ms |      6.62e-13 |     106.490ms |    1.65e-11 |
+| fp           |     149.956ms |      2.57e-21 |     164.943ms |    1.16e-20 |
+| xenon1       |     582.982ms |      5.55e-40 |     308.937ms |    6.74e-40 |
+| twotone      |     334.710ms |      1.13e-14 |     879.251ms |    1.93e-13 |
+| Raj1         |           oom |           oom |     901.208ms |    3.63e-13 |
+| boyd2        | **1m19.604s** |      2.86e-13 |     755.545ms |    8.98e-11 |
+| Goodwin_071  |     418.565ms |      2.77e-12 |     258.507ms |    8.38e-11 |
+| darcy003     |        1.072s |      6.95e-12 |       10.667s |    1.75e-10 |
+| rma10        |     398.716ms |      1.57e-17 |     150.619ms |    1.35e-16 |
+| helm2d03     |        1.375s |      2.37e-13 |        1.440s |    3.82e-10 |
+| stomach      |        1.681s |      5.13e-16 |        1.579s |    1.49e-15 |
+| oilpan       |     481.117ms |      1.26e-15 |     185.724ms |    2.22e-15 |
+| ASIC_680k    |        1.242s |      2.20e-11 | **1m17.353s** |    8.09e-11 |
+| tmt_unsym    |        3.655s |       5.96e-8 |        3.061s |     1.43e-7 |
+| Goodwin_127  |        1.380s |      6.03e-12 |     846.998ms |    6.20e-10 |
+| pre2         |           oom |           oom |        4.383s |    2.60e-14 |
+| marine1      |           oom |           oom |        5.352s |    6.25e-14 |
+| torso1       |        1.314s |       3.82e-8 |        1.847s | **3.75e-6** |
+| atmosmodd    |           oom |           oom |       42.718s |    2.48e-16 |
+| atmosmodl    |           oom |           oom |       38.733s |    7.60e-18 |
+| memchip      |       28.947s |      2.04e-15 |        7.546s |    3.40e-15 |
+| Freescale1   |       28.693s |      7.05e-10 |        9.580s |    7.05e-10 |
+| rajat31      |           oom |           oom |       15.175s |    8.73e-15 |
+| Transport    |           oom |           oom |       41.188s |    3.81e-10 |
+| inline_1     |           oom |           oom |        3.261s |    3.38e-15 |
+| PFlow_742    |           oom |           oom |       10.706s |    4.17e-11 |
+| Emilia_923   |           oom |           oom |       37.580s |    5.27e-23 |
+| dielFilterV2 |           oom |           oom |       12.388s |    1.49e-11 |
+| Flan_1565    |           oom |           oom |       19.735s |    9.98e-16 |
+| pres-cylin   |           oom |           oom | **1m18.368s** |    5.09e-13 |
+
+
+
+### Calculations on Arch. UMFPACK and MUMPS. Complex-valued matrices.
+
+| Matrix             | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
+| ------------------ | -----------: | ------------: | ---------: | ----------: |
+| mhd1280b           |    345.764µs |      7.41e-16 |    4.551ms |    1.17e-15 |
+| mplate             |    412.395ms |      2.32e-11 |  167.040ms |    6.28e-11 |
+| RFdevice           |       3.901s |      9.16e-14 |     1.548s |     1.56e-7 |
+| vfem               |       5.132s |       2.07e-8 |     1.403s |     8.74e-8 |
+| fem_filter         |       2.366s |      6.32e-11 |     1.039s |    1.44e-10 |
+| Chevron4           |       4.528s |      1.45e-11 |     3.139s |    4.16e-11 |
+| mono_500Hz         |          oom |           oom |     4.830s |     5.99e-9 |
+| kim2               |          oom |           oom |     4.346s |    2.73e-18 |
+| fem_hifreq_circuit |          oom |           oom |     9.018s |    1.28e-10 |
+| dielFilterV3clx    |          oom |           oom |     3.969s |    1.73e-11 |
+
 
 
 

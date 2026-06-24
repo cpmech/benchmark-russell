@@ -66,6 +66,7 @@
         "Nonzeros",
         "nrow",
         "NRUN",
+        "NUMA",
         "oilpan",
         "paralist",
         "Pedroso",

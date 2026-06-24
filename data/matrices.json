@@ -544,5 +544,18 @@
     "Positive Definite": "no",
     "Type": "complex",
     "Description": "High-order vector finite element method in EM (2011)"
+  },
+  {
+    "Name": "pres-cylin-3d-tet10-fine",
+    "Group": "Pedroso",
+    "Num Rows": 1711464,
+    "Num Cols": 1711464,
+    "Nonzeros": 67636826,
+    "Pattern Entries": 133562188,
+    "Kind": "Structural Problem",
+    "Symmetric": "Yes",
+    "Positive Definite": "yes",
+    "Type": "real",
+    "Description": "FEM stiffness matrix of a pressurized cylinder (Tet10 with 1,711,464 DOF)"
   }
 ]
