@@ -1,5 +1,5 @@
-use benchmark_russell::performance_table_md;
 use benchmark_russell::{AllResults, MATRICES, MATRICES_COMPLEX, StrError};
+use benchmark_russell::{matrix_table_md, performance_table_md};
 use russell_sparse::Genie;
 
 const OS: &str = "Arch";
@@ -15,7 +15,14 @@ fn main() -> Result<(), StrError> {
     // results dir
     let results_dir = format!("results/{}", OS.to_lowercase());
 
-    // ---- cuDSS and MUMPS ---
+    // ---- matrix table ----
+    let txt_re = matrix_table_md(MATRICES)?;
+    let txt_co = matrix_table_md(MATRICES_COMPLEX)?;
+    println!("### Information about the tested matrices\n");
+    println!("**Real-valued matrices:**\n{}", txt_re);
+    println!("**Complex-valued matrices:**\n{}", txt_co);
+
+    // ---- cuDSS and MUMPS ----
     let caption1 = format!("Calculations on {}. cuDSS and MUMPS. Real-valued matrices.", OS);
     let caption2 = format!("Calculations on {}. cuDSS and MUMPS. Complex-valued matrices.", OS);
     let cudss_mumps_re = AllResults::new(&[Genie::Cudss, Genie::Mumps], MATRICES, &results_dir)?;
@@ -25,7 +32,7 @@ fn main() -> Result<(), StrError> {
     print_table(&caption1, &cudss_mumps_re)?;
     print_table(&caption2, &cudss_mumps_co)?;
 
-    // ---- UMFPACK and MUMPS ---
+    // ---- UMFPACK and MUMPS ----
     let caption3 = format!("Calculations on {}. UMFPACK and MUMPS. Real-valued matrices.", OS);
     let caption4 = format!("Calculations on {}. UMFPACK and MUMPS. Complex-valued matrices.", OS);
     let umfpack_mumps_re = AllResults::new(&[Genie::Umfpack, Genie::Mumps], MATRICES, &results_dir)?;

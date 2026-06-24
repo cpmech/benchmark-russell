@@ -6,6 +6,7 @@ pub mod constants;
 pub mod latex;
 pub mod markdown;
 pub mod matrix_info;
+pub mod matrix_table_md;
 pub mod util;
 
 pub use all_results::*;
@@ -13,4 +14,5 @@ pub use constants::*;
 pub use latex::*;
 pub use markdown::*;
 pub use matrix_info::*;
+pub use matrix_table_md::*;
 pub use util::*;

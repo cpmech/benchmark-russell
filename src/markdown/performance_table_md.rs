@@ -1,6 +1,5 @@
-use crate::{AllResults, StrError};
 use crate::constants::{BIG_REL_ERROR, BIG_TIME_MIN};
-use fancy_regex::Regex;
+use crate::{AllResults, StrError};
 use russell_lab::format_nanoseconds_with_digits as fmt_nano;
 use russell_sparse::Genie;
 use std::fmt::Write;
@@ -15,12 +14,9 @@ pub fn performance_table_md<'a>(data: &AllResults<'a>) -> Result<String, StrErro
         return Err("results map must not be empty");
     }
 
-    // ----- setup: regex for thousand-separator insertion -----
-    let re = Regex::new(r"\B(?=(\d{3})+(?!\d))").unwrap();
-
     // ----- build header row: solver names spanning columns -----
     let mut buf = String::new();
-    write!(&mut buf, "| Matrix | Nrow | NNZ | Sym |").unwrap();
+    write!(&mut buf, "| Matrix |").unwrap();
     for genie in data.genies {
         let name = genie.to_string();
         let display: String = if name == "cudss" {
@@ -39,7 +35,7 @@ pub fn performance_table_md<'a>(data: &AllResults<'a>) -> Result<String, StrErro
     writeln!(&mut buf).unwrap();
 
     // ----- separator row with alignment -----
-    write!(&mut buf, "| --- | ---: | ---: | :-: |").unwrap();
+    write!(&mut buf, "| --- |").unwrap();
     for genie in data.genies {
         if *genie == Genie::Cudss {
             write!(&mut buf, " ---: | ---: | ---: |").unwrap();
@@ -62,22 +58,8 @@ pub fn performance_table_md<'a>(data: &AllResults<'a>) -> Result<String, StrErro
             matrix
         };
 
-        // ndim, nnz, sym from first genie
-        let d0 = data.map.get(&(data.genies[0], matrix)).unwrap();
-        let tmp_ndim = format!("{}", d0.matrix.nrow);
-        let tmp_nnz = format!("{}", d0.matrix.nnz_actual);
-        let str_ndim = re.replace_all(&tmp_ndim, ",");
-        let str_nnz = re.replace_all(&tmp_nnz, ",");
-        let str_sym = if d0.matrix.symmetric == "No" {
-            "No"
-        } else if d0.requests.positive_definite {
-            "Yes*"
-        } else {
-            "Yes"
-        };
-
         // write row start
-        write!(&mut buf, "| {mname} | {str_ndim} | {str_nnz} | {str_sym} |").unwrap();
+        write!(&mut buf, "| {mname} |").unwrap();
 
         // fill solver columns
         for genie in data.genies {
@@ -125,25 +107,26 @@ mod tests {
 
     #[test]
     fn performance_table_md_works() {
-    let data = AllResults::new(
-        &[Genie::Cudss, Genie::Mumps, Genie::Umfpack],
-        &["bwm2000", "rdb5000", "Goodwin_040", "fp", "helm2d03", "pre2"],
-        "results/arch",
-    )
+        let data = AllResults::new(
+            &[Genie::Cudss, Genie::Mumps, Genie::Umfpack],
+            &["bwm2000", "rdb5000", "Goodwin_040", "fp", "helm2d03", "pre2"],
+            "results/arch",
+        )
         .unwrap();
         let md = performance_table_md(&data).unwrap();
-        // verify header structure
-        assert!(md.contains("| Matrix | Nrow | NNZ | Sym |"));
+        // verify header structure (no Nrow/NNZ/Sym columns)
+        assert!(md.contains("| Matrix |"));
+        assert!(!md.contains("| Nrow |"));
+        assert!(!md.contains("| NNZ |"));
+        assert!(!md.contains("| Sym |"));
         assert!(md.contains("cuDSS MA | cuDSS Time | cuDSS Error |"));
         assert!(md.contains("MUMPS Time | MUMPS Error |"));
         assert!(md.contains("UMFPACK Time | UMFPACK Error |"));
         // verify separator row
-        assert!(md.contains("| --- | ---: | ---: | :-: |"));
+        assert!(md.contains("| --- | ---: | ---: | ---: |"));
         // verify matrix entries appear
         for mat in &["bwm2000", "rdb5000", "Goodwin_040", "fp"] {
             assert!(md.contains(mat), "missing matrix {}", mat);
         }
-        // verify ndim/nnz present (header col)
-        assert!(md.contains("Nrow") && md.contains("NNZ"));
     }
 }
