@@ -3,7 +3,8 @@ use benchmark_russell::{
 };
 use russell_sparse::{Genie, get_library_versions, get_system_info_linux};
 
-const OS: &str = "Ubuntu";
+const OS: &str = "Arch";
+// const OS: &str = "Ubuntu";
 
 fn main() -> Result<(), StrError> {
     // results dir
