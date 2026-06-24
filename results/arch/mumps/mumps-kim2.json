@@ -1,0 +1,99 @@
+{
+  "main": {
+    "platform": "Russell",
+    "blas_lib": "Intel MKL",
+    "solver": "MUMPS",
+    "local_sparse": true,
+    "out_of_memory": false
+  },
+  "matrix": {
+    "name": "kim2",
+    "nrow": 456976,
+    "ncol": 456976,
+    "nnz": 11330020,
+    "nnz_actual": 11330020,
+    "complex": true,
+    "symmetric": "No"
+  },
+  "requests": {
+    "ordering": "Auto",
+    "scaling": "Auto",
+    "matching": "None",
+    "pivoting": "Unknown",
+    "mumps_num_threads": 0,
+    "positive_definite": false,
+    "hybrid_memory_factor": null
+  },
+  "output": {
+    "effective_ordering": "Metis",
+    "effective_scaling": "RowColIter",
+    "effective_matching": "Unknown",
+    "effective_pivoting": "Unknown",
+    "effective_mumps_num_threads": 0,
+    "openmp_num_threads": 24,
+    "umfpack_strategy": "Unknown",
+    "umfpack_rcond_estimate": 0.0
+  },
+  "determinant": {
+    "mantissa_real": 0.0,
+    "mantissa_imag": 0.0,
+    "base": 2.0,
+    "exponent": 0.0
+  },
+  "verify": {
+    "max_abs_a": 643252.7575779529,
+    "max_abs_ax": 1.4142135623742456,
+    "max_abs_diff": 1.9057386696477137e-12,
+    "relative_error": 2.962654546820531e-18
+  },
+  "time_human": {
+    "read_matrix": "1.154504889s",
+    "initialize_array": [
+      "2.451201334s"
+    ],
+    "initialize": "2.451201334s",
+    "factorize_array": [
+      "1.429778498s"
+    ],
+    "factorize": "1.429778498s",
+    "solve_array": [
+      "55.490819ms"
+    ],
+    "solve": "55.490819ms",
+    "total_ifs_array": [
+      "3.936470651s"
+    ],
+    "total_ifs": "3.936470651s",
+    "verify": "62.06937ms"
+  },
+  "time_nanoseconds": {
+    "read_matrix": 1154504889,
+    "initialize_array": [
+      2451201334
+    ],
+    "initialize": 2451201334,
+    "factorize_array": [
+      1429778498
+    ],
+    "factorize": 1429778498,
+    "solve_array": [
+      55490819
+    ],
+    "solve": 55490819,
+    "total_ifs_array": [
+      3936470651
+    ],
+    "total_ifs": 3936470651,
+    "verify": 62069370
+  },
+  "mumps_stats": {
+    "inf_norm_a": 0.0,
+    "inf_norm_x": 0.0,
+    "scaled_residual": 0.0,
+    "backward_error_omega1": 0.0,
+    "backward_error_omega2": 0.0,
+    "normalized_delta_x": 0.0,
+    "condition_number1": 0.0,
+    "condition_number2": 0.0
+  }
+}

@@ -1,0 +1,17 @@
+[package]
+name = "benchmark-russell"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+fancy-regex = "0.18"
+russell_lab = { version = "2.7", features = ["intel_mkl"] }
+russell_sparse = { version = "2.7", features = [
+  "cudss",
+  "intel_mkl",
+  "local_sparse",
+] }
+russell_stat = "2.7"
+plotpy = "1.23"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
