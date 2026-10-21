@@ -19,16 +19,16 @@ set -euo pipefail
 #   SYSTEM               results subdirectory    (default: arch)
 #   NRUN                 UMFPACK/MUMPS runs      (default: 5)
 #   NATIVE_MAX_RUNS      Native run ceiling      (default: 5)
-#   NATIVE_PROBE_TIMEOUT Native probe time, s    (default: 300)
+#   NATIVE_PROBE_TIMEOUT Native probe time, s    (default: 180)
 #   NATIVE_MEMORY_KB     Native memory cap, KiB  (default: 20000000, ~20 GB)
-#   NATIVE_MAX_NNZ       Skip Native above this pattern size (default: 2000000)
+#   NATIVE_MAX_NNZ       Skip Native above this pattern size; 0 disables it (default: 0)
 #   STAGES               all | external | native (default: all)
 
 NRUN=${NRUN:-5}
 NATIVE_MAX_RUNS=${NATIVE_MAX_RUNS:-5}
-NATIVE_PROBE_TIMEOUT=${NATIVE_PROBE_TIMEOUT:-300}
+NATIVE_PROBE_TIMEOUT=${NATIVE_PROBE_TIMEOUT:-180}
 NATIVE_MEMORY_KB=${NATIVE_MEMORY_KB:-20000000}
-NATIVE_MAX_NNZ=${NATIVE_MAX_NNZ:-2000000}
+NATIVE_MAX_NNZ=${NATIVE_MAX_NNZ:-0}
 STAGES=${STAGES:-all}
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -157,7 +157,7 @@ run_native_matrix() {
 
     local nnz
     nnz=$(get_pattern_entries "$mat")
-    if [ "$nnz" -gt "$NATIVE_MAX_NNZ" ]; then
+    if [ "$NATIVE_MAX_NNZ" -gt 0 ] && [ "$nnz" -gt "$NATIVE_MAX_NNZ" ]; then
         echo "... native / $mat ... skipping (pattern entries $nnz > $NATIVE_MAX_NNZ)"
         rm -f "$outdir/native-$mat.json"
         return

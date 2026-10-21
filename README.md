@@ -100,7 +100,7 @@ The complex-valued tested matrices are:
 3. Column NNZ (number of non-zeros) corresponds to Pattern Entries reported by the [SuiteSparse Matrix Collection](https://sparse.tamu.edu).
 4. Column Sym shows if symmetry information was provided to the solver. An asterisk means positive definite information was also given.
 5. oom (out-of-memory) indicates that the symbolic factorization was terminated due to insufficient memory.
-6. n/a indicates that the run was not attempted, or that the Native solver exceeded its five-minute probe budget or the two-million-entry ceiling.
+6. n/a indicates that the run was not attempted, or that the Native solver exceeded its probe budget. The results shown here used a five-minute budget; the runner now defaults to three minutes.
 7. Bold values highlight significant results, such as large errors or high computation times.
 8. The Native solver is pure Rust; it does not compute determinants, error estimates or condition numbers.
 
