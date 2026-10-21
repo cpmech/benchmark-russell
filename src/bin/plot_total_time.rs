@@ -4,7 +4,7 @@ use russell_sparse::Genie;
 
 const RESULTS_DIR: &str = "results/arch";
 
-/// Matrices shown in the figure.
+/// Matrices shown in the figures.
 const SELECTED: &[&str] = &[
     "mhd1280b",
     "bwm2000",
@@ -52,10 +52,10 @@ fn main() -> Result<(), StrError> {
         })
         .collect();
 
-    let mut plot = Plot::new();
+    std::fs::create_dir_all("results").map_err(|_| "cannot create results")?;
 
-    // ---- panel 1: absolute total time ----
-    plot.set_subplot(1, 2, 1);
+    // ---- figure 1: absolute total time ----
+    let mut plot_time = Plot::new();
     for (i, times) in rows.iter().enumerate() {
         let mut values: Vec<f64> = times.iter().flatten().copied().collect();
         if values.len() < 2 {
@@ -65,7 +65,7 @@ fn main() -> Result<(), StrError> {
         let mut line = Curve::new();
         line.set_line_color("#d9d9d9").set_line_width(2.0).set_line_style("-");
         line.draw(&[values[0], values[values.len() - 1]], &[i as f64, i as f64]);
-        plot.add(&line);
+        plot_time.add(&line);
     }
     for (gi, genie) in GENIES.iter().enumerate() {
         let mut x = Vec::new();
@@ -90,19 +90,24 @@ fn main() -> Result<(), StrError> {
             .set_marker_size(9.0)
             .set_line_style("None");
         curve.draw(&x, &y);
-        plot.add(&curve);
+        plot_time.add(&curve);
     }
-    plot.set_ticks_y_labels(&ticks, &labels);
+    plot_time.set_ticks_y_labels(&ticks, &labels);
     let mut legend1 = Legend::new();
     legend1.set_location("lower right").draw();
-    plot.add(&legend1)
+    plot_time
+        .add(&legend1)
         .extra("plt.xscale('log')\n")
         .extra("plt.grid(True, which='major', axis='x', linestyle=':', alpha=0.5)\n")
         .set_labels("Total time (seconds)", "")
-        .set_title("Total time");
+        .set_title("Total time")
+        .set_figure_size_points(1.618 * 380.0, 340.0)
+        .extra("plt.tight_layout()\n")
+        .save("results/plot_time.svg")?;
+    plot_time.save("results/plot_time.png")?;
 
-    // ---- panel 2: speed-up over Native ----
-    plot.set_subplot(1, 2, 2);
+    // ---- figure 2: speed-up over Native ----
+    let mut plot_speed = Plot::new();
 
     // Parity line: 1x means the same time as Native.
     let mut parity = Curve::new();
@@ -112,7 +117,7 @@ fn main() -> Result<(), StrError> {
         .set_line_style("--")
         .set_line_width(1.0);
     parity.draw(&[1.0, 1.0], &[-0.5, n as f64 - 0.5]);
-    plot.add(&parity);
+    plot_speed.add(&parity);
 
     // Light span from the smallest to the largest speed-up per matrix.
     for (i, times) in rows.iter().enumerate() {
@@ -129,7 +134,7 @@ fn main() -> Result<(), StrError> {
         let mut line = Curve::new();
         line.set_line_color("#d9d9d9").set_line_width(2.0).set_line_style("-");
         line.draw(&[factors[0], factors[factors.len() - 1]], &[i as f64, i as f64]);
-        plot.add(&line);
+        plot_speed.add(&line);
     }
 
     // One marker series per external solver.
@@ -152,23 +157,21 @@ fn main() -> Result<(), StrError> {
             .set_marker_size(9.0)
             .set_line_style("None");
         curve.draw(&x, &y);
-        plot.add(&curve);
+        plot_speed.add(&curve);
     }
-    plot.set_ticks_y_labels(&ticks, &labels);
+    plot_speed.set_ticks_y_labels(&ticks, &labels);
     let mut legend2 = Legend::new();
     legend2.set_location("lower right").draw();
-    plot.add(&legend2)
+    plot_speed
+        .add(&legend2)
         .extra("plt.xscale('log')\n")
         .extra("plt.grid(True, which='major', axis='x', linestyle=':', alpha=0.5)\n")
         .set_labels("Speed-up over Native (×)", "")
-        .set_title("Speed-up over Native");
-
-    // ---- finish ----
-    std::fs::create_dir_all("results").map_err(|_| "cannot create results")?;
-    plot.set_figure_size_points(1.618 * 720.0, 360.0)
+        .set_title("Speed-up over Native")
+        .set_figure_size_points(1.618 * 380.0, 340.0)
         .extra("plt.tight_layout()\n")
-        .save("results/plot_native_comparison.svg")?;
-    plot.save("results/plot_native_comparison.png")?;
+        .save("results/plot_speedup.svg")?;
+    plot_speed.save("results/plot_speedup.png")?;
 
     Ok(())
 }
