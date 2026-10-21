@@ -22,6 +22,7 @@ set -euo pipefail
 #   NATIVE_PROBE_TIMEOUT Native probe time, s    (default: 180)
 #   NATIVE_MEMORY_KB     Native memory cap, KiB  (default: 20000000, ~20 GB)
 #   NATIVE_MAX_NNZ       Skip Native above this pattern size; 0 disables it (default: 0)
+#   NATIVE_SUPERNODAL    1 selects the experimental supernodal LU (default: 0)
 #   STAGES               all | external | native (default: all)
 
 NRUN=${NRUN:-5}
@@ -29,6 +30,7 @@ NATIVE_MAX_RUNS=${NATIVE_MAX_RUNS:-5}
 NATIVE_PROBE_TIMEOUT=${NATIVE_PROBE_TIMEOUT:-180}
 NATIVE_MEMORY_KB=${NATIVE_MEMORY_KB:-20000000}
 NATIVE_MAX_NNZ=${NATIVE_MAX_NNZ:-0}
+NATIVE_SUPERNODAL=${NATIVE_SUPERNODAL:-0}
 STAGES=${STAGES:-all}
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -152,6 +154,11 @@ run_native_matrix() {
     local extra
     extra=$(extra_args "$mat")
     local outdir="$OUTPUT_DIR/native"
+    local native_flag=""
+    if [ "$NATIVE_SUPERNODAL" = "1" ]; then
+        outdir="$OUTPUT_DIR/native-supernodal"
+        native_flag="--native-supernodal"
+    fi
     local probe="/tmp/benchmark-russell/native-probe-$mat.json"
     mkdir -p "$outdir" /tmp/benchmark-russell
 
@@ -168,7 +175,7 @@ run_native_matrix() {
     t0=$(date +%s%N)
     if (
         ulimit -v "$NATIVE_MEMORY_KB"
-        exec timeout "$NATIVE_PROBE_TIMEOUT" "$COMMAND" -g native -r 1 $extra "$INPUT_DIR/$mat.mtx"
+        exec timeout "$NATIVE_PROBE_TIMEOUT" "$COMMAND" -g native -r 1 $native_flag $extra "$INPUT_DIR/$mat.mtx"
     ) > "$probe" 2> /dev/null; then
         t1=$(date +%s%N)
         elapsed=$(((t1 - t0) / 1000000000))
@@ -189,7 +196,7 @@ run_native_matrix() {
             echo "    probe took ${elapsed}s; running $nrun times"
             if ! (
                 ulimit -v "$NATIVE_MEMORY_KB"
-                exec timeout $((elapsed * nrun * 3 + 600)) "$COMMAND" -g native -r "$nrun" $extra "$INPUT_DIR/$mat.mtx"
+                exec timeout $((elapsed * nrun * 3 + 600)) "$COMMAND" -g native -r "$nrun" $native_flag $extra "$INPUT_DIR/$mat.mtx"
             ) > "$outdir/native-$mat.json" 2> /dev/null; then
                 echo "    full run failed or timed out; keeping the probe result"
                 mv "$probe" "$outdir/native-$mat.json"

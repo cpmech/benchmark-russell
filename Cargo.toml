@@ -15,3 +15,10 @@ russell_stat = "4.0"
 plotpy = "1.23"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+# Use the local checkouts while developing the solver. These replace the
+# crates.io packages of the same version in the whole dependency graph.
+[patch.crates-io]
+algebra_linear = { path = "../algebra_linear" }
+russell_lab = { path = "../russell/russell_lab" }
+russell_sparse = { path = "../russell/russell_sparse" }
