@@ -19,7 +19,7 @@
     "ordering": "Auto",
     "scaling": "Auto",
     "mumps_num_threads": 0,
-    "positive_definite": false
+    "positive_definite": true
   },
   "output": {
     "effective_ordering": "Unknown",
@@ -42,7 +42,7 @@
     "relative_error": 0.0
   },
   "time_human": {
-    "read_matrix": "6.350139977s",
+    "read_matrix": "6.269459327s",
     "initialize_array": [],
     "initialize": "0ns",
     "factorize_array": [],
@@ -54,7 +54,7 @@
     "verify": "0ns"
   },
   "time_nanoseconds": {
-    "read_matrix": 6350139977,
+    "read_matrix": 6269459327,
     "initialize_array": [],
     "initialize": 0,
     "factorize_array": [],

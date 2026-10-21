@@ -119,7 +119,7 @@ done
 # Extra arguments for a given matrix
 extra_args() {
     case "$1" in
-        oilpan | inline_1 | PFlow_742 | Emilia_923 | Flan_1565) echo "-p" ;;
+        oilpan | inline_1 | PFlow_742 | Emilia_923 | Flan_1565 | pres-cylin-3d-tet10-fine) echo "-p" ;;
         *) echo "" ;;
     esac
 }
