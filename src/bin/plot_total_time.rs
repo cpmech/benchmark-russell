@@ -1,5 +1,5 @@
-use benchmark_russell::{AllResults, GENIES, MatricesInfo, StrError, genie_display_name};
-use plotpy::{Curve, Legend, Plot};
+use benchmark_russell::{AllResults, GENIES, MATRICES, MATRICES_COMPLEX, MatricesInfo, StrError, genie_display_name};
+use plotpy::{Curve, Legend, Plot, Text};
 use russell_sparse::Genie;
 
 const RESULTS_DIR: &str = "results/arch";
@@ -216,6 +216,97 @@ fn main() -> Result<(), StrError> {
         .extra("plt.tight_layout()\n")
         .save("results/plot_speedup_umfpack.svg")?;
     plot_umfpack.save("results/plot_speedup_umfpack.png")?;
+
+    // ---- figure 4: UMFPACK / MUMPS speed-up for every matrix with both results ----
+    let all: Vec<&str> = MATRICES.iter().chain(MATRICES_COMPLEX.iter()).copied().collect();
+    let data_all = AllResults::new(&[Genie::Umfpack, Genie::Mumps], &all, RESULTS_DIR)?;
+    let mut real_x = Vec::new();
+    let mut real_y = Vec::new();
+    let mut complex_x = Vec::new();
+    let mut complex_y = Vec::new();
+    let mut labels_to_add: Vec<(&str, f64, f64)> = Vec::new();
+    let mut xmin = f64::INFINITY;
+    let mut xmax = 0.0f64;
+    for name in &all {
+        let (Some(umfpack), Some(mumps)) = (data_all.get(Genie::Umfpack, name), data_all.get(Genie::Mumps, name))
+        else {
+            continue;
+        };
+        if umfpack.main.out_of_memory || mumps.main.out_of_memory {
+            continue;
+        }
+        let t_umfpack = umfpack.time_nanoseconds.total_ifs as f64;
+        let t_mumps = mumps.time_nanoseconds.total_ifs as f64;
+        if t_umfpack == 0.0 || t_mumps == 0.0 {
+            continue;
+        }
+        let Some(meta) = info.all.get(*name) else { continue };
+        let x = meta.pattern_entries as f64;
+        let y = t_mumps / t_umfpack;
+        xmin = xmin.min(x);
+        xmax = xmax.max(x);
+        if umfpack.matrix.complex {
+            complex_x.push(x);
+            complex_y.push(y);
+        } else {
+            real_x.push(x);
+            real_y.push(y);
+        }
+        if matches!(*name, "boyd2" | "ASIC_680k" | "bwm2000" | "mplate") {
+            labels_to_add.push((*name, x, y));
+        }
+    }
+
+    let mut plot_all = Plot::new();
+    let mut parity = Curve::new();
+    parity
+        .set_label("1×")
+        .set_line_color("#888888")
+        .set_line_style("--")
+        .set_line_width(1.0);
+    parity.draw(&[xmin * 0.7, xmax * 1.4], &[1.0, 1.0]);
+    plot_all.add(&parity);
+
+    for (x, y, label, color, marker) in [
+        (&real_x, &real_y, "real", "#1f77b4", "o"),
+        (&complex_x, &complex_y, "complex", "#ff7f0e", "s"),
+    ] {
+        let mut curve = Curve::new();
+        curve
+            .set_label(label)
+            .set_line_color(color)
+            .set_marker_style(marker)
+            .set_marker_color(color)
+            .set_marker_size(8.0)
+            .set_line_style("None");
+        curve.draw(x, y);
+        plot_all.add(&curve);
+    }
+
+    for (name, x, y) in labels_to_add {
+        let mut text = Text::new();
+        text.set_fontsize(8.0)
+            .set_color("#333333")
+            .set_align_horizontal("left")
+            .set_align_vertical("center");
+        let ty = if y >= 1.0 { y * 1.15 } else { y * 0.85 };
+        text.draw(x * 1.06, ty, name);
+        plot_all.add(&text);
+    }
+
+    let mut legend4 = Legend::new();
+    legend4.set_location("lower left").draw();
+    plot_all
+        .add(&legend4)
+        .extra("plt.xscale('log')\n")
+        .extra("plt.yscale('log')\n")
+        .extra("plt.grid(True, which='major', linestyle=':', alpha=0.5)\n")
+        .set_labels("NNZ", "UMFPACK / MUMPS (×, >1 = UMFPACK faster)")
+        .set_title("UMFPACK / MUMPS")
+        .set_figure_size_points(1.618 * 420.0, 360.0)
+        .extra("plt.tight_layout()\n")
+        .save("results/plot_speedup_umfpack_mumps.svg")?;
+    plot_all.save("results/plot_speedup_umfpack_mumps.png")?;
 
     Ok(())
 }

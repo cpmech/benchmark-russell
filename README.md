@@ -132,6 +132,10 @@ Speed-up over Native (`>1` means faster than Native; the dashed line is parity):
 
 ![Speed-up over Native for UMFPACK and MUMPS](results/plot_speedup.png)
 
+UMFPACK / MUMPS speed-up for every matrix where both solvers completed (25 of 42; UMFPACK runs out of memory on the remaining matrices). Values above 1 mean UMFPACK is faster; below 1, MUMPS is faster:
+
+![UMFPACK / MUMPS speed-up across all matrices](results/plot_speedup_umfpack_mumps.png)
+
 The Native solver is fast on small systems: up to about 30,000 non-zeros it takes at most a few tens of milliseconds. It becomes very slow for matrices with more than **1 million** non-zeros: the `xenon1` case (NROW=48,600, 1,181,120 non-zeros) takes **55 s**, and the next real case (`twotone`, NROW=120,750, 1,224,224 non-zeros) did not finish within the 3-minute probe. For matrices with more than **1 million** non-zeros, expect **nearly a minute** or more.
 
 The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 142,190 non-zeros) takes **3.13 s**, and `RFdevice` (NROW=74,104, 365,580 non-zeros) did not finish in **15 minutes**; sparsity structure and numerical type matter as much as the non-zero count.
