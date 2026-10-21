@@ -5,6 +5,7 @@
 - [Introduction](#introduction)
 - [Solvers for large sparse linear systems](#solvers-for-large-sparse-linear-systems)
 - [Results](#results)
+  - [Native at a glance](#native-at-a-glance)
   - [Information about the tested matrices](#information-about-the-tested-matrices)
   - [Calculations on Arch. Native, UMFPACK and MUMPS. Real-valued matrices.](#calculations-on-arch-native-umfpack-and-mumps-real-valued-matrices)
   - [Calculations on Arch. Native, UMFPACK and MUMPS. Complex-valued matrices.](#calculations-on-arch-native-umfpack-and-mumps-complex-valued-matrices)
@@ -106,6 +107,19 @@ The complex-valued tested matrices are:
 
 
 ## Results
+
+### Native at a glance
+
+The pure-Rust Native solver completed on the smallest matrices of the suite. On those, it is 13× to 1,395× slower than UMFPACK:
+
+| Matrix | Native | UMFPACK | MUMPS | Native / UMFPACK |
+| --- | ---: | ---: | ---: | ---: |
+| bwm2000 | 21.2 ms | 750 µs | 6.05 ms | 28× |
+| rdb5000 | 18.9 s | 13.6 ms | 9.9 ms | 1,395× |
+| fp | 49.9 s | 154 ms | 169 ms | 323× |
+| mhd1280b | 4.99 ms | 383 µs | 5.76 ms | 13× |
+
+The remaining matrices exceeded the Native probe budget (see the notes above).
 
 ### Information about the tested matrices
 
