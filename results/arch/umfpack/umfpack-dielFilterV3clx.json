@@ -3,7 +3,7 @@
     "platform": "Russell",
     "blas_lib": "Intel MKL",
     "solver": "umfpack",
-    "local_sparse": true,
+    "mumps": true,
     "out_of_memory": true
   },
   "matrix": {
@@ -18,17 +18,12 @@
   "requests": {
     "ordering": "Auto",
     "scaling": "Auto",
-    "matching": "None",
-    "pivoting": "Unknown",
     "mumps_num_threads": 0,
-    "positive_definite": false,
-    "hybrid_memory_factor": null
+    "positive_definite": false
   },
   "output": {
     "effective_ordering": "Unknown",
     "effective_scaling": "Unknown",
-    "effective_matching": "Unknown",
-    "effective_pivoting": "Unknown",
     "effective_mumps_num_threads": 0,
     "openmp_num_threads": 24,
     "umfpack_strategy": "Unknown",
@@ -47,7 +42,7 @@
     "relative_error": 0.0
   },
   "time_human": {
-    "read_matrix": "1.948942688s",
+    "read_matrix": "1.907757916s",
     "initialize_array": [],
     "initialize": "0ns",
     "factorize_array": [],
@@ -59,7 +54,7 @@
     "verify": "0ns"
   },
   "time_nanoseconds": {
-    "read_matrix": 1948942688,
+    "read_matrix": 1907757916,
     "initialize_array": [],
     "initialize": 0,
     "factorize_array": [],

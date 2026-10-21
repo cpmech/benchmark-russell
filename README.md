@@ -6,32 +6,34 @@
 - [Solvers for large sparse linear systems](#solvers-for-large-sparse-linear-systems)
 - [Results](#results)
   - [Information about the tested matrices](#information-about-the-tested-matrices)
-  - [Calculations on Arch. cuDSS and MUMPS. Real-valued matrices.](#calculations-on-arch-cudss-and-mumps-real-valued-matrices)
-  - [Calculations on Arch. cuDSS and MUMPS. Complex-valued matrices.](#calculations-on-arch-cudss-and-mumps-complex-valued-matrices)
-  - [Calculations on Arch. UMFPACK and MUMPS. Real-valued matrices.](#calculations-on-arch-umfpack-and-mumps-real-valued-matrices)
-  - [Calculations on Arch. UMFPACK and MUMPS. Complex-valued matrices.](#calculations-on-arch-umfpack-and-mumps-complex-valued-matrices)
+  - [Calculations on Arch. Native, UMFPACK and MUMPS. Real-valued matrices.](#calculations-on-arch-native-umfpack-and-mumps-real-valued-matrices)
+  - [Calculations on Arch. Native, UMFPACK and MUMPS. Complex-valued matrices.](#calculations-on-arch-native-umfpack-and-mumps-complex-valued-matrices)
+  - [Legacy results](#legacy-results)
 - [System and libraries information](#system-and-libraries-information)
 
 
 
 ## Introduction
 
-This project contains some performance benchmarks using the [Rust Scientific Library (Russell)](https://github.com/cpmech/russell).
+This project contains performance benchmarks using the [Rust Scientific Library (Russell)](https://github.com/cpmech/russell).
 
-Currently, we present some results involving the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse).
+We compare the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse): the pure-Rust **Native** solver (the default in Russell 4.0), **UMFPACK**, and **MUMPS**.
 
-The computations presented here use all features (`intel_mkl`, `local_sparse`, and `cudss`). Thus, UMFPACK and MUMPS are compiled locally with Intel MKL. On the other hand, the Linux binary from [NVIDIA cuDSS](https://developer.nvidia.com/cudss) is employed for the calculations with cuDSS. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
+The computations presented here use the `intel_mkl`, `umfpack`, and `mumps` features of Russell 4.0. Thus, UMFPACK and MUMPS are compiled locally with Intel MKL. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
+
+The cuDSS and KLU results from the earlier Russell 2.8 benchmark are kept under [`results/legacy-2.8/`](results/legacy-2.8) for reference; they are not part of the current comparison.
 
 
 
 ## Solvers for large sparse linear systems
 
-Note that [NVIDIA cuDSS](https://developer.nvidia.com/cudss) is in **Preview Mode** 🚧.
+- **Native** — the pure-Rust LU factorization from [`algebra_linear`](https://github.com/cpmech/algebra_linear), with COLAMD ordering, partial pivoting, and a simplicial/supernodal choice made by a flop proxy. It requires no external library.
+- **UMFPACK** — the unsymmetric multifrontal solver from [SuiteSparse](https://github.com/DrTimothyAldenDavis/SuiteSparse).
+- **MUMPS** — the multifrontal massively parallel sparse direct solver ([mumps-solver.org](https://mumps-solver.org/index.php)).
 
 The results are available in PDF format and also listed below.
 
 * [Arch Linux. Results PDF file](results/arch-performance-tables.pdf)
-* [Ubuntu Linux. Results PDF file](results/ubuntu-performance-tables.pdf)
 
 We test the linear system **Ax = b** where **A** is the coefficient matrix, **x** is the solution vector, and **b** is the right-hand side vector. The coefficient matrix is set with matrices from the [SuiteSparse Matrix Collection](https://sparse.tamu.edu). The right-hand side vector is filled with ones, i.e., we study the solution of
 
@@ -93,13 +95,14 @@ The complex-valued tested matrices are:
 
 **Additional notes:**
 
-1. Each problem is solved ten times. The reported error is the maximum among runs. The reported computer time is the average without outliers.
+1. Each problem is solved five times. The reported error is the maximum among runs. The reported computer time is the average without outliers. The Native solver uses five runs for fast matrices, three for slower ones, and a single probe run for the rest.
 2. Total time includes initialization (memory allocation + symbolic factorization), numeric factorization, and solve.
 3. Column NNZ (number of non-zeros) corresponds to Pattern Entries reported by the [SuiteSparse Matrix Collection](https://sparse.tamu.edu).
 4. Column Sym shows if symmetry information was provided to the solver. An asterisk means positive definite information was also given.
 5. oom (out-of-memory) indicates that the symbolic factorization was terminated due to insufficient memory.
-6. Bold values highlight significant results, such as large errors or high computation times.
-7. The hybrid memory mode is enabled for the pres-cylin matrix and cuDSS.
+6. n/a indicates that the run was not attempted, or that the Native solver exceeded its five-minute probe budget or the two-million-entry ceiling.
+7. Bold values highlight significant results, such as large errors or high computation times.
+8. The Native solver is pure Rust; it does not compute determinants, error estimates or condition numbers.
 
 
 ## Results
@@ -158,118 +161,64 @@ The complex-valued tested matrices are:
 
 
 
-### Calculations on Arch. cuDSS and MUMPS. Real-valued matrices.
+### Calculations on Arch. Native, UMFPACK and MUMPS. Real-valued matrices.
 
-| Matrix       |      cuDSS MA |   cuDSS Time | cuDSS Error |    MUMPS Time | MUMPS Error |
-| ------------ | ------------: | -----------: | ----------: | ------------: | ----------: |
-| bwm2000      |          Auto |      8.633ms |    8.21e-16 |       6.260ms |    7.50e-16 |
-| rdb5000      |          Auto |     30.087ms |    4.06e-13 |       7.442ms |    5.37e-13 |
-| Goodwin_040  |    MaxMinDiag |     71.095ms |    2.82e-12 |     106.490ms |    1.65e-11 |
-| fp           |          Auto |    155.376ms |     4.98e-9 |     164.943ms |    1.16e-20 |
-| xenon1       |          Auto |    194.980ms |    1.32e-39 |     308.937ms |    6.74e-40 |
-| twotone      |          Auto |    772.871ms |    4.73e-13 |     879.251ms |    1.93e-13 |
-| Raj1         |          Auto |    883.834ms |    1.21e-11 |     901.208ms |    3.63e-13 |
-| boyd2        |          None |    996.540ms |    3.24e-11 |     755.545ms |    8.98e-11 |
-| Goodwin_071  |    MaxMinDiag |    174.813ms |    8.65e-12 |     258.507ms |    8.38e-11 |
-| darcy003     | MaxMinDiagAlt |       2.438s |     5.64e-7 |       10.667s |    1.75e-10 |
-| rma10        |          Auto |    241.711ms |    9.04e-16 |     150.619ms |    1.35e-16 |
-| helm2d03     |          None |       1.239s |    1.68e-10 |        1.440s |    3.82e-10 |
-| stomach      |          Auto |       1.280s |    2.71e-15 |        1.579s |    1.49e-15 |
-| oilpan       |          None |    102.687ms |    4.65e-15 |     185.724ms |    2.22e-15 |
-| ASIC_680k    |          Auto |       3.458s |    7.33e-11 | **1m17.353s** |    8.09e-11 |
-| tmt_unsym    |          Auto |       2.569s |     4.95e-7 |        3.061s |     1.43e-7 |
-| Goodwin_127  |    MaxMinDiag |    372.312ms |    6.83e-11 |     846.998ms |    6.20e-10 |
-| pre2         |          Auto |       3.428s |    2.15e-14 |        4.383s |    2.60e-14 |
-| marine1      |          Auto |       4.032s |     1.70e-8 |        5.352s |    6.25e-14 |
-| torso1       |  MaxDiagCount |       1.050s |     5.90e-7 |        1.847s | **3.75e-6** |
-| atmosmodd    |          Auto |      18.668s |    1.44e-16 |       42.718s |    2.48e-16 |
-| atmosmodl    |          Auto |      18.165s |    9.34e-18 |       38.733s |    7.60e-18 |
-| memchip      |          Auto |       6.941s |    3.23e-15 |        7.546s |    3.40e-15 |
-| Freescale1   |          Auto |       8.076s |    9.39e-10 |        9.580s |    7.05e-10 |
-| rajat31      |          Auto |      17.285s |    3.26e-14 |       15.175s |    8.73e-15 |
-| Transport    |          Auto |      21.417s |    7.21e-10 |       41.188s |    3.81e-10 |
-| inline_1     |          None |       1.762s |    5.86e-15 |        3.261s |    3.38e-15 |
-| PFlow_742    |          None |       9.792s |    1.77e-10 |       10.706s |    4.17e-11 |
-| Emilia_923   |          None |      15.903s |    1.50e-22 |       37.580s |    5.27e-23 |
-| dielFilterV2 |          None |       7.007s |    1.38e-11 |       12.388s |    1.49e-11 |
-| Flan_1565    |          None |      10.212s |    2.24e-15 |       19.735s |    9.98e-16 |
-| pres-cylin   |          None | **2m4.270s** |    8.89e-13 | **1m18.368s** |    5.09e-13 |
-
-
-
-### Calculations on Arch. cuDSS and MUMPS. Complex-valued matrices.
-
-| Matrix             |   cuDSS MA | cuDSS Time | cuDSS Error | MUMPS Time | MUMPS Error |
-| ------------------ | ---------: | ---------: | ----------: | ---------: | ----------: |
-| mhd1280b           |       Auto |    7.281ms |    1.57e-15 |    4.551ms |    1.17e-15 |
-| mplate             |       None |   78.587ms |    1.13e-10 |  167.040ms |    6.28e-11 |
-| RFdevice           | MaxDiagSum |  570.478ms | **3.21e-2** |     1.548s |     1.56e-7 |
-| vfem               |       Auto |  865.606ms |     5.29e-8 |     1.403s |     8.74e-8 |
-| fem_filter         |       Auto |  713.189ms |    1.81e-10 |     1.039s |    1.44e-10 |
-| Chevron4           |       Auto |     2.480s |    8.51e-11 |     3.139s |    4.16e-11 |
-| mono_500Hz         |       Auto |     2.735s |    2.23e-10 |     4.830s |     5.99e-9 |
-| kim2               |       Auto |    13.916s |      0.00e0 |     4.346s |    2.73e-18 |
-| fem_hifreq_circuit |       Auto |     4.871s |    1.60e-10 |     9.018s |    1.28e-10 |
-| dielFilterV3clx    |       None |     2.184s |    4.31e-10 |     3.969s |    1.73e-11 |
+| Matrix | Native Time | Native Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| bwm2000 | 21.156ms | 1.90e-15 | 750.259µs | 5.30e-16 | 6.054ms | 7.50e-16 |
+| rdb5000 | 18.931s | 1.03e-14 | 13.569ms | 1.93e-15 | 9.946ms | 9.40e-13 |
+| Goodwin_040 | n/a | n/a | 107.091ms | 6.62e-13 | 104.564ms | 1.65e-11 |
+| fp | 49.891s | 4.88e-20 | 154.476ms | 2.57e-21 | 168.911ms | 1.16e-20 |
+| xenon1 | n/a | n/a | 598.244ms | 5.55e-40 | 365.443ms | 5.86e-40 |
+| twotone | n/a | n/a | 337.133ms | 1.13e-14 | 983.724ms | 1.99e-13 |
+| Raj1 | n/a | n/a | oom | oom | 947.420ms | 3.63e-13 |
+| boyd2 | n/a | n/a | **1m18.248s** | 2.86e-13 | 844.848ms | 8.98e-11 |
+| Goodwin_071 | n/a | n/a | 426.060ms | 2.77e-12 | 290.877ms | 4.87e-11 |
+| darcy003 | n/a | n/a | 1.385s | 6.95e-12 | 11.601s | 1.88e-10 |
+| rma10 | n/a | n/a | 410.052ms | 1.57e-17 | 169.806ms | 1.35e-16 |
+| helm2d03 | n/a | n/a | 1.683s | 2.37e-13 | 1.573s | 2.75e-10 |
+| stomach | n/a | n/a | 1.781s | 5.13e-16 | 1.720s | 1.49e-15 |
+| oilpan | n/a | n/a | 494.931ms | 1.26e-15 | 305.492ms | 2.05e-15 |
+| ASIC_680k | n/a | n/a | 1.318s | 2.20e-11 | **1m19.532s** | 8.09e-11 |
+| tmt_unsym | n/a | n/a | 3.747s | 5.96e-8 | 3.289s | 1.43e-7 |
+| Goodwin_127 | n/a | n/a | 1.173s | 6.03e-12 | 884.040ms | 8.89e-10 |
+| pre2 | n/a | n/a | oom | oom | 5.102s | 2.85e-14 |
+| marine1 | n/a | n/a | oom | oom | 5.627s | 6.25e-14 |
+| torso1 | n/a | n/a | 952.952ms | 3.82e-8 | 2.018s | **3.75e-6** |
+| atmosmodd | n/a | n/a | oom | oom | 46.011s | 2.48e-16 |
+| atmosmodl | n/a | n/a | oom | oom | 40.869s | 7.60e-18 |
+| memchip | n/a | n/a | 26.259s | 2.04e-15 | 8.046s | 3.40e-15 |
+| Freescale1 | n/a | n/a | 30.025s | 7.05e-10 | 10.174s | 7.05e-10 |
+| rajat31 | n/a | n/a | oom | oom | 16.019s | 9.31e-15 |
+| Transport | n/a | n/a | oom | oom | 43.495s | 3.81e-10 |
+| inline_1 | n/a | n/a | oom | oom | 3.584s | 2.77e-15 |
+| PFlow_742 | n/a | n/a | oom | oom | 12.287s | 4.17e-11 |
+| Emilia_923 | n/a | n/a | oom | oom | 39.852s | 5.27e-23 |
+| dielFilterV2 | n/a | n/a | oom | oom | 13.788s | 1.45e-11 |
+| Flan_1565 | n/a | n/a | oom | oom | 23.996s | 9.85e-16 |
+| pres-cylin | n/a | n/a | oom | oom | **2m19.448s** | 4.90e-13 |
 
 
 
-### Calculations on Arch. UMFPACK and MUMPS. Real-valued matrices.
+### Calculations on Arch. Native, UMFPACK and MUMPS. Complex-valued matrices.
 
-| Matrix       |  UMFPACK Time | UMFPACK Error |    MUMPS Time | MUMPS Error |
-| ------------ | ------------: | ------------: | ------------: | ----------: |
-| bwm2000      |     713.627µs |      5.30e-16 |       6.260ms |    7.50e-16 |
-| rdb5000      |      11.504ms |      1.93e-15 |       7.442ms |    5.37e-13 |
-| Goodwin_040  |     104.256ms |      6.62e-13 |     106.490ms |    1.65e-11 |
-| fp           |     149.956ms |      2.57e-21 |     164.943ms |    1.16e-20 |
-| xenon1       |     582.982ms |      5.55e-40 |     308.937ms |    6.74e-40 |
-| twotone      |     334.710ms |      1.13e-14 |     879.251ms |    1.93e-13 |
-| Raj1         |           oom |           oom |     901.208ms |    3.63e-13 |
-| boyd2        | **1m19.604s** |      2.86e-13 |     755.545ms |    8.98e-11 |
-| Goodwin_071  |     418.565ms |      2.77e-12 |     258.507ms |    8.38e-11 |
-| darcy003     |        1.072s |      6.95e-12 |       10.667s |    1.75e-10 |
-| rma10        |     398.716ms |      1.57e-17 |     150.619ms |    1.35e-16 |
-| helm2d03     |        1.375s |      2.37e-13 |        1.440s |    3.82e-10 |
-| stomach      |        1.681s |      5.13e-16 |        1.579s |    1.49e-15 |
-| oilpan       |     481.117ms |      1.26e-15 |     185.724ms |    2.22e-15 |
-| ASIC_680k    |        1.242s |      2.20e-11 | **1m17.353s** |    8.09e-11 |
-| tmt_unsym    |        3.655s |       5.96e-8 |        3.061s |     1.43e-7 |
-| Goodwin_127  |        1.380s |      6.03e-12 |     846.998ms |    6.20e-10 |
-| pre2         |           oom |           oom |        4.383s |    2.60e-14 |
-| marine1      |           oom |           oom |        5.352s |    6.25e-14 |
-| torso1       |        1.314s |       3.82e-8 |        1.847s | **3.75e-6** |
-| atmosmodd    |           oom |           oom |       42.718s |    2.48e-16 |
-| atmosmodl    |           oom |           oom |       38.733s |    7.60e-18 |
-| memchip      |       28.947s |      2.04e-15 |        7.546s |    3.40e-15 |
-| Freescale1   |       28.693s |      7.05e-10 |        9.580s |    7.05e-10 |
-| rajat31      |           oom |           oom |       15.175s |    8.73e-15 |
-| Transport    |           oom |           oom |       41.188s |    3.81e-10 |
-| inline_1     |           oom |           oom |        3.261s |    3.38e-15 |
-| PFlow_742    |           oom |           oom |       10.706s |    4.17e-11 |
-| Emilia_923   |           oom |           oom |       37.580s |    5.27e-23 |
-| dielFilterV2 |           oom |           oom |       12.388s |    1.49e-11 |
-| Flan_1565    |           oom |           oom |       19.735s |    9.98e-16 |
-| pres-cylin   |           oom |           oom | **1m18.368s** |    5.09e-13 |
+| Matrix | Native Time | Native Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| mhd1280b | 4.989ms | 1.17e-15 | 382.531µs | 7.41e-16 | 5.759ms | 1.17e-15 |
+| mplate | n/a | n/a | 627.467ms | 1.86e-11 | 109.002ms | 6.28e-11 |
+| RFdevice | n/a | n/a | 4.342s | 1.22e-13 | 1.803s | 1.52e-7 |
+| vfem | n/a | n/a | 4.088s | 4.70e-8 | 1.638s | 6.54e-8 |
+| fem_filter | n/a | n/a | 2.627s | 6.61e-11 | 1.185s | 1.40e-10 |
+| Chevron4 | n/a | n/a | 5.729s | 1.60e-11 | 3.398s | 4.16e-11 |
+| mono_500Hz | n/a | n/a | oom | oom | 6.379s | 5.64e-9 |
+| kim2 | n/a | n/a | oom | oom | 4.745s | 2.73e-18 |
+| fem_hifreq_circuit | n/a | n/a | oom | oom | 11.608s | 1.00e-10 |
+| dielFilterV3clx | n/a | n/a | oom | oom | 4.824s | 1.68e-11 |
 
 
+### Legacy results
 
-### Calculations on Arch. UMFPACK and MUMPS. Complex-valued matrices.
-
-| Matrix             | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
-| ------------------ | -----------: | ------------: | ---------: | ----------: |
-| mhd1280b           |    345.764µs |      7.41e-16 |    4.551ms |    1.17e-15 |
-| mplate             |    412.395ms |      2.32e-11 |  167.040ms |    6.28e-11 |
-| RFdevice           |       3.901s |      9.16e-14 |     1.548s |     1.56e-7 |
-| vfem               |       5.132s |       2.07e-8 |     1.403s |     8.74e-8 |
-| fem_filter         |       2.366s |      6.32e-11 |     1.039s |    1.44e-10 |
-| Chevron4           |       4.528s |      1.45e-11 |     3.139s |    4.16e-11 |
-| mono_500Hz         |          oom |           oom |     4.830s |     5.99e-9 |
-| kim2               |          oom |           oom |     4.346s |    2.73e-18 |
-| fem_hifreq_circuit |          oom |           oom |     9.018s |    1.28e-10 |
-| dielFilterV3clx    |          oom |           oom |     3.969s |    1.73e-11 |
-
-
-
+The results of the earlier Russell 2.8 benchmark are kept under [`results/legacy-2.8/`](results/legacy-2.8): the cuDSS, KLU, UMFPACK and MUMPS JSON files, and the two PDF files produced at the time. cuDSS and KLU are not part of Russell 4.0, so they are not compared here.
 
 ## System and libraries information
 
@@ -277,42 +226,43 @@ System information:
 
 ```
 --- OS ---
-NAME="Arch Linux"
-KERNEL=7.0.9-arch2-1
+NAME="Omarchy"
+VERSION_ID="4.0.0.r7195.g3ac4365"
+KERNEL=7.2.8-9-omarchy
 
 --- GPU ---
-GPU[0]: NVIDIA GeForce RTX 4090, 595.71.05, 24564 MiB
+03:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Navi 48 [Radeon RX 9070/9070 XT/9070 GRE] (rev c0)
 
 --- CPU ---
-Architecture:        x86_64
-CPU(s):              32
+Architecture       : x86_64
+CPU(s)             : 32
 On-line CPU(s) list: 0-31
-Model name:          13th Gen Intel(R) Core(TM) i9-13900KF
-Thread(s) per core:  2
-Core(s) per socket:  24
-Socket(s):           1
-CPU(s) scaling MHz:  32%
-CPU max MHz:         5800.0000
-CPU min MHz:         800.0000
-BogoMIPS:            5990.40
-L1d cache:           896 KiB (24 instances)
-L1i cache:           1.3 MiB (24 instances)
-L2 cache:            32 MiB (12 instances)
-L3 cache:            36 MiB (1 instance)
-NUMA node0 CPU(s):   0-31
-Vulnerability L1tf:  Not affected
+Model name         : 13th Gen Intel(R) Core(TM) i9-13900KF
+Thread(s) per core : 2
+Core(s) per socket : 24
+Socket(s)          : 1
+CPU(s) scaling MHz : 44%
+CPU max MHz        : 5800.0000
+CPU min MHz        : 800.0000
+BogoMIPS           : 5990.40
+L1d cache          : 896 KiB (24 instances)
+L1i cache          : 1.3 MiB (24 instances)
+L2 cache           : 32 MiB (12 instances)
+L3 cache           : 36 MiB (1 instance)
+NUMA node0 CPU(s)  : 0-31
+Vulnerability L1tf : Not affected
 
 --- Memory ---
-MemTotal:       32616244 kB
-MemFree:         5895504 kB
-MemAvailable:   23187532 kB
-SwapTotal:      36806824 kB
+MemTotal:       32608344 kB
+MemFree:        18586476 kB
+MemAvailable:   24677040 kB
+SwapTotal:      65224484 kB
 ```
 
 Libraries information:
 
 ```
-cuDSS: 0.8.0.10 (CUDA 13)
+UMFPACK: local (/usr/local/lib/umfpack)
 MUMPS: 5.9.0
 SuiteSparse: latest (from GitHub)
 ```

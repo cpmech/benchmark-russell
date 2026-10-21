@@ -3,7 +3,7 @@
     "platform": "Russell",
     "blas_lib": "Intel MKL",
     "solver": "MUMPS",
-    "local_sparse": true,
+    "mumps": true,
     "out_of_memory": false
   },
   "matrix": {
@@ -18,17 +18,12 @@
   "requests": {
     "ordering": "Auto",
     "scaling": "Auto",
-    "matching": "None",
-    "pivoting": "Unknown",
     "mumps_num_threads": 0,
-    "positive_definite": false,
-    "hybrid_memory_factor": null
+    "positive_definite": false
   },
   "output": {
     "effective_ordering": "Metis",
     "effective_scaling": "RowColIter",
-    "effective_matching": "Unknown",
-    "effective_pivoting": "Unknown",
     "effective_mumps_num_threads": 0,
     "openmp_num_threads": 24,
     "umfpack_strategy": "Unknown",
@@ -42,121 +37,81 @@
   },
   "verify": {
     "max_abs_a": 1.0,
-    "max_abs_ax": 1.0000000001675662,
-    "max_abs_diff": 1.675661831512798e-10,
-    "relative_error": 8.37830915756399e-11
+    "max_abs_ax": 1.0000000000973335,
+    "max_abs_diff": 9.73334746134924e-11,
+    "relative_error": 4.86667373067462e-11
   },
   "time_human": {
-    "read_matrix": "167.133293ms",
+    "read_matrix": "178.510342ms",
     "initialize_array": [
-      "192.142078ms",
-      "221.710318ms",
-      "218.413911ms",
-      "221.136791ms",
-      "221.214611ms",
-      "219.902815ms",
-      "255.273613ms",
-      "218.953937ms",
-      "218.884922ms",
-      "220.154863ms"
+      "206.766531ms",
+      "258.836647ms",
+      "260.279438ms",
+      "223.584385ms",
+      "223.400804ms"
     ],
-    "initialize": "220.778785ms",
+    "initialize": "234.573561ms",
     "factorize_array": [
-      "53.481648ms",
-      "35.282218ms",
-      "36.936415ms",
-      "28.031878ms",
-      "37.271575ms",
-      "38.206485ms",
-      "32.822052ms",
-      "39.541124ms",
-      "32.832348ms",
-      "46.233639ms"
+      "71.513876ms",
+      "49.607859ms",
+      "38.831895ms",
+      "58.807885ms",
+      "41.700939ms"
     ],
-    "factorize": "38.063938ms",
+    "factorize": "52.09249ms",
     "solve_array": [
-      "4.064983ms",
-      "2.894323ms",
-      "2.758598ms",
-      "2.395172ms",
-      "2.647606ms",
-      "2.995063ms",
-      "2.390619ms",
-      "2.67608ms",
-      "2.404626ms",
-      "3.394895ms"
+      "8.190272ms",
+      "3.600546ms",
+      "3.171568ms",
+      "3.255326ms",
+      "2.837523ms"
     ],
-    "solve": "2.862196ms",
+    "solve": "4.211047ms",
     "total_ifs_array": [
-      "249.688709ms",
-      "259.886859ms",
-      "258.108924ms",
-      "251.563841ms",
-      "261.133792ms",
-      "261.104363ms",
-      "290.486284ms",
-      "261.171141ms",
-      "254.121896ms",
-      "269.783397ms"
+      "286.470679ms",
+      "312.045052ms",
+      "302.282901ms",
+      "285.647596ms",
+      "267.939266ms"
     ],
-    "total_ifs": "261.70492ms",
-    "verify": "2.404558ms"
+    "total_ifs": "290.877098ms",
+    "verify": "1.790175ms"
   },
   "time_nanoseconds": {
-    "read_matrix": 167133293,
+    "read_matrix": 178510342,
     "initialize_array": [
-      192142078,
-      221710318,
-      218413911,
-      221136791,
-      221214611,
-      219902815,
-      255273613,
-      218953937,
-      218884922,
-      220154863
+      206766531,
+      258836647,
+      260279438,
+      223584385,
+      223400804
     ],
-    "initialize": 220778785,
+    "initialize": 234573561,
     "factorize_array": [
-      53481648,
-      35282218,
-      36936415,
-      28031878,
-      37271575,
-      38206485,
-      32822052,
-      39541124,
-      32832348,
-      46233639
+      71513876,
+      49607859,
+      38831895,
+      58807885,
+      41700939
     ],
-    "factorize": 38063938,
+    "factorize": 52092490,
     "solve_array": [
-      4064983,
-      2894323,
-      2758598,
-      2395172,
-      2647606,
-      2995063,
-      2390619,
-      2676080,
-      2404626,
-      3394895
+      8190272,
+      3600546,
+      3171568,
+      3255326,
+      2837523
     ],
-    "solve": 2862196,
+    "solve": 4211047,
     "total_ifs_array": [
-      249688709,
-      259886859,
-      258108924,
-      251563841,
-      261133792,
-      261104363,
-      290486284,
-      261171141,
-      254121896,
-      269783397
+      286470679,
+      312045052,
+      302282901,
+      285647596,
+      267939266
     ],
-    "total_ifs": 261704920,
-    "verify": 2404558
+    "total_ifs": 290877098,
+    "verify": 1790175
   },
   "mumps_stats": {
     "inf_norm_a": 0.0,

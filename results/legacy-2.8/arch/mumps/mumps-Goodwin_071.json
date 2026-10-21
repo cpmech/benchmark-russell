@@ -1,0 +1,171 @@
+{
+  "main": {
+    "platform": "Russell",
+    "blas_lib": "Intel MKL",
+    "solver": "MUMPS",
+    "local_sparse": true,
+    "out_of_memory": false
+  },
+  "matrix": {
+    "name": "Goodwin_071",
+    "nrow": 56021,
+    "ncol": 56021,
+    "nnz": 1797934,
+    "nnz_actual": 1797934,
+    "complex": false,
+    "symmetric": "No"
+  },
+  "requests": {
+    "ordering": "Auto",
+    "scaling": "Auto",
+    "matching": "None",
+    "pivoting": "Unknown",
+    "mumps_num_threads": 0,
+    "positive_definite": false,
+    "hybrid_memory_factor": null
+  },
+  "output": {
+    "effective_ordering": "Metis",
+    "effective_scaling": "RowColIter",
+    "effective_matching": "Unknown",
+    "effective_pivoting": "Unknown",
+    "effective_mumps_num_threads": 0,
+    "openmp_num_threads": 24,
+    "umfpack_strategy": "Unknown",
+    "umfpack_rcond_estimate": 0.0
+  },
+  "determinant": {
+    "mantissa_real": 0.0,
+    "mantissa_imag": 0.0,
+    "base": 2.0,
+    "exponent": 0.0
+  },
+  "verify": {
+    "max_abs_a": 1.0,
+    "max_abs_ax": 1.0000000001675662,
+    "max_abs_diff": 1.675661831512798e-10,
+    "relative_error": 8.37830915756399e-11
+  },
+  "time_human": {
+    "read_matrix": "167.133293ms",
+    "initialize_array": [
+      "192.142078ms",
+      "221.710318ms",
+      "218.413911ms",
+      "221.136791ms",
+      "221.214611ms",
+      "219.902815ms",
+      "255.273613ms",
+      "218.953937ms",
+      "218.884922ms",
+      "220.154863ms"
+    ],
+    "initialize": "220.778785ms",
+    "factorize_array": [
+      "53.481648ms",
+      "35.282218ms",
+      "36.936415ms",
+      "28.031878ms",
+      "37.271575ms",
+      "38.206485ms",
+      "32.822052ms",
+      "39.541124ms",
+      "32.832348ms",
+      "46.233639ms"
+    ],
+    "factorize": "38.063938ms",
+    "solve_array": [
+      "4.064983ms",
+      "2.894323ms",
+      "2.758598ms",
+      "2.395172ms",
+      "2.647606ms",
+      "2.995063ms",
+      "2.390619ms",
+      "2.67608ms",
+      "2.404626ms",
+      "3.394895ms"
+    ],
+    "solve": "2.862196ms",
+    "total_ifs_array": [
+      "249.688709ms",
+      "259.886859ms",
+      "258.108924ms",
+      "251.563841ms",
+      "261.133792ms",
+      "261.104363ms",
+      "290.486284ms",
+      "261.171141ms",
+      "254.121896ms",
+      "269.783397ms"
+    ],
+    "total_ifs": "261.70492ms",
+    "verify": "2.404558ms"
+  },
+  "time_nanoseconds": {
+    "read_matrix": 167133293,
+    "initialize_array": [
+      192142078,
+      221710318,
+      218413911,
+      221136791,
+      221214611,
+      219902815,
+      255273613,
+      218953937,
+      218884922,
+      220154863
+    ],
+    "initialize": 220778785,
+    "factorize_array": [
+      53481648,
+      35282218,
+      36936415,
+      28031878,
+      37271575,
+      38206485,
+      32822052,
+      39541124,
+      32832348,
+      46233639
+    ],
+    "factorize": 38063938,
+    "solve_array": [
+      4064983,
+      2894323,
+      2758598,
+      2395172,
+      2647606,
+      2995063,
+      2390619,
+      2676080,
+      2404626,
+      3394895
+    ],
+    "solve": 2862196,
+    "total_ifs_array": [
+      249688709,
+      259886859,
+      258108924,
+      251563841,
+      261133792,
+      261104363,
+      290486284,
+      261171141,
+      254121896,
+      269783397
+    ],
+    "total_ifs": 261704920,
+    "verify": 2404558
+  },
+  "mumps_stats": {
+    "inf_norm_a": 0.0,
+    "inf_norm_x": 0.0,
+    "scaled_residual": 0.0,
+    "backward_error_omega1": 0.0,
+    "backward_error_omega2": 0.0,
+    "normalized_delta_x": 0.0,
+    "condition_number1": 0.0,
+    "condition_number2": 0.0
+  }
+}

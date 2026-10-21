@@ -1,0 +1,94 @@
+{
+  "main": {
+    "platform": "Russell",
+    "blas_lib": "Intel MKL",
+    "solver": "Native",
+    "mumps": true,
+    "out_of_memory": false
+  },
+  "matrix": {
+    "name": "fp",
+    "nrow": 7548,
+    "ncol": 7548,
+    "nnz": 848553,
+    "nnz_actual": 848553,
+    "complex": false,
+    "symmetric": "No"
+  },
+  "requests": {
+    "ordering": "Auto",
+    "scaling": "Auto",
+    "mumps_num_threads": 0,
+    "positive_definite": false
+  },
+  "output": {
+    "effective_ordering": "Colamd",
+    "effective_scaling": "No",
+    "effective_mumps_num_threads": 0,
+    "openmp_num_threads": 24,
+    "umfpack_strategy": "Unknown",
+    "umfpack_rcond_estimate": 0.0
+  },
+  "determinant": {
+    "mantissa_real": 0.0,
+    "mantissa_imag": 0.0,
+    "base": 0.0,
+    "exponent": 0.0
+  },
+  "verify": {
+    "max_abs_a": 2832902219.6259503,
+    "max_abs_ax": 1.0000000001236913,
+    "max_abs_diff": 1.382431946694851e-10,
+    "relative_error": 4.8799140917380215e-20
+  },
+  "time_human": {
+    "read_matrix": "60.126667ms",
+    "initialize_array": [
+      "74.445789ms"
+    ],
+    "initialize": "74.445789ms",
+    "factorize_array": [
+      "49.805978046s"
+    ],
+    "factorize": "49.805978046s",
+    "solve_array": [
+      "10.604701ms"
+    ],
+    "solve": "10.604701ms",
+    "total_ifs_array": [
+      "49.891028536s"
+    ],
+    "total_ifs": "49.891028536s",
+    "verify": "7.682819ms"
+  },
+  "time_nanoseconds": {
+    "read_matrix": 60126667,
+    "initialize_array": [
+      74445789
+    ],
+    "initialize": 74445789,
+    "factorize_array": [
+      49805978046
+    ],
+    "factorize": 49805978046,
+    "solve_array": [
+      10604701
+    ],
+    "solve": 10604701,
+    "total_ifs_array": [
+      49891028536
+    ],
+    "total_ifs": 49891028536,
+    "verify": 7682819
+  },
+  "mumps_stats": {
+    "inf_norm_a": 0.0,
+    "inf_norm_x": 0.0,
+    "scaled_residual": 0.0,
+    "backward_error_omega1": 0.0,
+    "backward_error_omega2": 0.0,
+    "normalized_delta_x": 0.0,
+    "condition_number1": 0.0,
+    "condition_number2": 0.0
+  }
+}

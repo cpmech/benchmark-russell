@@ -3,7 +3,7 @@
     "platform": "Russell",
     "blas_lib": "Intel MKL",
     "solver": "MUMPS",
-    "local_sparse": true,
+    "mumps": true,
     "out_of_memory": false
   },
   "matrix": {
@@ -18,17 +18,12 @@
   "requests": {
     "ordering": "Auto",
     "scaling": "Auto",
-    "matching": "None",
-    "pivoting": "Unknown",
     "mumps_num_threads": 0,
-    "positive_definite": false,
-    "hybrid_memory_factor": null
+    "positive_definite": false
   },
   "output": {
     "effective_ordering": "Amf",
     "effective_scaling": "RowColIter",
-    "effective_matching": "Unknown",
-    "effective_pivoting": "Unknown",
     "effective_mumps_num_threads": 0,
     "openmp_num_threads": 24,
     "umfpack_strategy": "Unknown",
@@ -42,121 +37,81 @@
   },
   "verify": {
     "max_abs_a": 87.232,
-    "max_abs_ax": 1.0000000000473435,
-    "max_abs_diff": 4.7343462483695475e-11,
-    "relative_error": 5.365792737747696e-13
+    "max_abs_ax": 1.0000000000829772,
+    "max_abs_diff": 8.29771806820645e-11,
+    "relative_error": 9.404431576079484e-13
   },
   "time_human": {
-    "read_matrix": "3.648221ms",
+    "read_matrix": "2.261622ms",
     "initialize_array": [
-      "4.705643ms",
-      "2.490453ms",
-      "2.442118ms",
-      "2.439941ms",
-      "2.42248ms",
-      "2.44016ms",
-      "2.431203ms",
-      "2.432083ms",
-      "2.434159ms",
-      "2.441463ms"
+      "4.808957ms",
+      "2.484961ms",
+      "2.458312ms",
+      "2.448283ms",
+      "2.441461ms"
     ],
-    "initialize": "2.66797ms",
+    "initialize": "2.928394ms",
     "factorize_array": [
-      "20.312235ms",
-      "5.110906ms",
-      "4.862919ms",
-      "4.618991ms",
-      "4.863355ms",
-      "4.681445ms",
-      "4.833452ms",
-      "4.847242ms",
-      "4.757796ms",
-      "4.695497ms"
+      "27.344881ms",
+      "5.253371ms",
+      "7.351402ms",
+      "6.935009ms",
+      "7.287808ms"
     ],
-    "factorize": "6.358383ms",
+    "factorize": "10.834494ms",
     "solve_array": [
-      "663.812µs",
-      "242.206µs",
-      "235.859µs",
-      "235.158µs",
-      "235.237µs",
-      "238.379µs",
-      "234.966µs",
-      "234.295µs",
-      "239.872µs",
-      "237.69µs"
+      "764.355µs",
+      "256.658µs",
+      "261.203µs",
+      "420.332µs",
+      "235.084µs"
     ],
-    "solve": "279.747µs",
+    "solve": "387.526µs",
     "total_ifs_array": [
-      "25.68169ms",
-      "7.843565ms",
-      "7.540896ms",
-      "7.29409ms",
-      "7.521072ms",
-      "7.359984ms",
-      "7.499621ms",
-      "7.51362ms",
-      "7.431827ms",
-      "7.37465ms"
+      "32.918193ms",
+      "7.99499ms",
+      "10.070917ms",
+      "9.803624ms",
+      "9.964353ms"
     ],
-    "total_ifs": "9.306101ms",
-    "verify": "35.768µs"
+    "total_ifs": "14.150415ms",
+    "verify": "36.728µs"
   },
   "time_nanoseconds": {
-    "read_matrix": 3648221,
+    "read_matrix": 2261622,
     "initialize_array": [
-      4705643,
-      2490453,
-      2442118,
-      2439941,
-      2422480,
-      2440160,
-      2431203,
-      2432083,
-      2434159,
-      2441463
+      4808957,
+      2484961,
+      2458312,
+      2448283,
+      2441461
     ],
-    "initialize": 2667970,
+    "initialize": 2928394,
     "factorize_array": [
-      20312235,
-      5110906,
-      4862919,
-      4618991,
-      4863355,
-      4681445,
-      4833452,
-      4847242,
-      4757796,
-      4695497
+      27344881,
+      5253371,
+      7351402,
+      6935009,
+      7287808
     ],
-    "factorize": 6358383,
+    "factorize": 10834494,
     "solve_array": [
-      663812,
-      242206,
-      235859,
-      235158,
-      235237,
-      238379,
-      234966,
-      234295,
-      239872,
-      237690
+      764355,
+      256658,
+      261203,
+      420332,
+      235084
     ],
-    "solve": 279747,
+    "solve": 387526,
     "total_ifs_array": [
-      25681690,
-      7843565,
-      7540896,
-      7294090,
-      7521072,
-      7359984,
-      7499621,
-      7513620,
-      7431827,
-      7374650
+      32918193,
+      7994990,
+      10070917,
+      9803624,
+      9964353
     ],
-    "total_ifs": 9306101,
-    "verify": 35768
+    "total_ifs": 14150415,
+    "verify": 36728
   },
   "mumps_stats": {
     "inf_norm_a": 0.0,
