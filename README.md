@@ -124,6 +124,10 @@ The pure-Rust Native solver completed on the following matrices. The last two co
 
 The remaining matrices, including `RFdevice`, exceeded the Native probe budget (see the notes above). The Native rows use the simplicial path; the experimental supernodal path can be selected with `--native-supernodal`, and its four-matrix results are kept under [`results/arch/native-supernodal/`](results/arch/native-supernodal).
 
+Total time per matrix on a log scale, sorted by NNZ (`(c)` marks a complex-valued matrix):
+
+![Total time for Native, UMFPACK and MUMPS on the selected matrices](results/plot_total_time.png)
+
 ### Information about the tested matrices
 
 **Real-valued matrices:**
