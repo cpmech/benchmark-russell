@@ -1,4 +1,4 @@
 /target
 Cargo.lock
 sparse_index.html
-results/plot_total_time.py
+results/plot_*.py

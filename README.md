@@ -126,7 +126,7 @@ The remaining matrices, including `RFdevice`, exceeded the Native probe budget (
 
 Left: total time per matrix on a log scale. Right: speed-up over Native (`>1` means faster than Native; the dashed line is parity). Rows are sorted by NNZ and `(c)` marks a complex-valued matrix:
 
-![Total time and speed-up over Native for the selected matrices](results/plot_total_time.png)
+![Total time and speed-up over Native for the selected matrices](results/plot_native_comparison.png)
 
 ### Information about the tested matrices
 

@@ -167,8 +167,8 @@ fn main() -> Result<(), StrError> {
     std::fs::create_dir_all("results").map_err(|_| "cannot create results")?;
     plot.set_figure_size_points(1.618 * 720.0, 360.0)
         .extra("plt.tight_layout()\n")
-        .save("results/plot_total_time.svg")?;
-    plot.save("results/plot_total_time.png")?;
+        .save("results/plot_native_comparison.svg")?;
+    plot.save("results/plot_native_comparison.png")?;
 
     Ok(())
 }
