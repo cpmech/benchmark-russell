@@ -3,16 +3,30 @@ use plotpy::{Curve, Legend, Plot};
 use russell_sparse::Genie;
 
 const RESULTS_DIR: &str = "results/arch";
+const ALL_MATRICES: bool = false;
 
 fn main() -> Result<(), StrError> {
-    let data = AllResults::new(GENIES, MATRICES, RESULTS_DIR)?;
+    let matrices = if ALL_MATRICES {
+        MATRICES
+    } else {
+        &[
+            "mhd1280b",
+            "bwm2000",
+            "rdb5000",
+            "Goodwin_040",
+            "fp",
+            "xenon1",
+            "mplate",
+        ]
+    };
+    let data = AllResults::new(GENIES, matrices, RESULTS_DIR)?;
 
     // generate one curve per solver
     let mut plot = Plot::new();
     for genie in GENIES {
         let mut x = Vec::new();
         let mut y = Vec::new();
-        for matrix in MATRICES.iter() {
+        for matrix in matrices.iter() {
             if let Some(dat) = data.get(*genie, *matrix) {
                 if dat.main.out_of_memory || dat.time_nanoseconds.total_ifs == 0 {
                     continue;
