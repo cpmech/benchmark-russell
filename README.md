@@ -110,16 +110,16 @@ The complex-valued tested matrices are:
 
 ### Native at a glance
 
-The pure-Rust Native solver completed on the smallest matrices of the suite. On those, it is 13× to 1,395× slower than UMFPACK:
+The pure-Rust Native solver completed on the smallest matrices of the suite. On those, it ranges from 0.8× (faster than UMFPACK) to 6× slower:
 
 | Matrix | Native | UMFPACK | MUMPS | Native / UMFPACK |
 | --- | ---: | ---: | ---: | ---: |
-| bwm2000 | 21.2 ms | 750 µs | 6.05 ms | 28× |
-| rdb5000 | 18.9 s | 13.6 ms | 9.9 ms | 1,395× |
-| fp | 49.9 s | 154 ms | 169 ms | 323× |
-| mhd1280b | 4.99 ms | 383 µs | 5.76 ms | 13× |
+| bwm2000 | 0.575 ms | 0.750 ms | 6.05 ms | 0.77× |
+| rdb5000 | 30.3 ms | 13.6 ms | 9.95 ms | 2.23× |
+| fp | 929 ms | 154 ms | 169 ms | 6.01× |
+| mhd1280b | 0.659 ms | 0.383 ms | 5.76 ms | 1.72× |
 
-The remaining matrices exceeded the Native probe budget (see the notes above).
+The remaining matrices exceeded the Native probe budget (see the notes above). The Native rows use the simplicial path; the experimental supernodal path can be selected with `--native-supernodal`, and its four-matrix results are kept under [`results/arch/native-supernodal/`](results/arch/native-supernodal).
 
 ### Information about the tested matrices
 
@@ -179,10 +179,10 @@ The remaining matrices exceeded the Native probe budget (see the notes above).
 
 | Matrix | Native Time | Native Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| bwm2000 | 21.156ms | 1.90e-15 | 750.259µs | 5.30e-16 | 6.054ms | 7.50e-16 |
-| rdb5000 | 18.931s | 1.03e-14 | 13.569ms | 1.93e-15 | 9.946ms | 9.40e-13 |
+| bwm2000 | 575.198µs | 1.48e-15 | 750.259µs | 5.30e-16 | 6.054ms | 7.50e-16 |
+| rdb5000 | 30.269ms | 1.01e-14 | 13.569ms | 1.93e-15 | 9.946ms | 9.40e-13 |
 | Goodwin_040 | n/a | n/a | 107.091ms | 6.62e-13 | 104.564ms | 1.65e-11 |
-| fp | 49.891s | 4.88e-20 | 154.476ms | 2.57e-21 | 168.911ms | 1.16e-20 |
+| fp | 929.008ms | 4.88e-20 | 154.476ms | 2.57e-21 | 168.911ms | 1.16e-20 |
 | xenon1 | n/a | n/a | 598.244ms | 5.55e-40 | 365.443ms | 5.86e-40 |
 | twotone | n/a | n/a | 337.133ms | 1.13e-14 | 983.724ms | 1.99e-13 |
 | Raj1 | n/a | n/a | oom | oom | 947.420ms | 3.63e-13 |
@@ -218,7 +218,7 @@ The remaining matrices exceeded the Native probe budget (see the notes above).
 
 | Matrix | Native Time | Native Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| mhd1280b | 4.989ms | 1.17e-15 | 382.531µs | 7.41e-16 | 5.759ms | 1.17e-15 |
+| mhd1280b | 659.004µs | 1.31e-15 | 382.531µs | 7.41e-16 | 5.759ms | 1.17e-15 |
 | mplate | n/a | n/a | 627.467ms | 1.86e-11 | 109.002ms | 6.28e-11 |
 | RFdevice | n/a | n/a | 4.342s | 1.22e-13 | 1.803s | 1.52e-7 |
 | vfem | n/a | n/a | 4.088s | 4.70e-8 | 1.638s | 6.54e-8 |
