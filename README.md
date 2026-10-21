@@ -18,9 +18,9 @@
 
 This project contains performance benchmarks using the [Rust Scientific Library (Russell)](https://github.com/cpmech/russell).
 
-We compare the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse): the pure-Rust **Native** solver (the default in Russell 4.0), **UMFPACK**, and **MUMPS**.
+We compare the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse): the pure-Rust **Native** solver (the default in Russell 4.1), **UMFPACK**, and **MUMPS**.
 
-The computations presented here use the `intel_mkl`, `umfpack`, and `mumps` features of Russell 4.0. Thus, UMFPACK and MUMPS are compiled locally with Intel MKL. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
+The computations presented here use `russell_sparse` 4.1 (with `algebra_linear` 1.2) and the `intel_mkl`, `umfpack`, and `mumps` features. Thus, UMFPACK and MUMPS are compiled locally with Intel MKL. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
 
 The cuDSS and KLU results from the earlier Russell 2.8 benchmark are kept under [`results/legacy-2.8/`](results/legacy-2.8) for reference; they are not part of the current comparison.
 
