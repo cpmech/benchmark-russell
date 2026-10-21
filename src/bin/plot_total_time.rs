@@ -173,5 +173,49 @@ fn main() -> Result<(), StrError> {
         .save("results/plot_speedup.svg")?;
     plot_speed.save("results/plot_speedup.png")?;
 
+    // ---- figure 3: speed-up over Native, UMFPACK only ----
+    let mut plot_umfpack = Plot::new();
+    let mut parity = Curve::new();
+    parity
+        .set_label("1×")
+        .set_line_color("#888888")
+        .set_line_style("--")
+        .set_line_width(1.0);
+    parity.draw(&[1.0, 1.0], &[-0.5, n as f64 - 0.5]);
+    plot_umfpack.add(&parity);
+
+    let mut x = Vec::new();
+    let mut y = Vec::new();
+    for (i, times) in rows.iter().enumerate() {
+        if let (Some(native), Some(t)) = (times[0], times[1]) {
+            x.push(native / t);
+            y.push(i as f64);
+        }
+    }
+    let mut curve = Curve::new();
+    curve
+        .set_label(genie_display_name(Genie::Umfpack))
+        .set_line_color("#1f77b4")
+        .set_marker_style("o")
+        .set_marker_color("#1f77b4")
+        .set_marker_size(9.0)
+        .set_line_style("None");
+    curve.draw(&x, &y);
+    plot_umfpack.add(&curve);
+
+    plot_umfpack.set_ticks_y_labels(&ticks, &labels);
+    let mut legend3 = Legend::new();
+    legend3.set_location("lower right").draw();
+    plot_umfpack
+        .add(&legend3)
+        .extra("plt.xscale('log')\n")
+        .extra("plt.grid(True, which='major', axis='x', linestyle=':', alpha=0.5)\n")
+        .set_labels("Speed-up over Native (×)", "")
+        .set_title("Speed-up over Native")
+        .set_figure_size_points(1.618 * 380.0, 340.0)
+        .extra("plt.tight_layout()\n")
+        .save("results/plot_speedup_umfpack.svg")?;
+    plot_umfpack.save("results/plot_speedup_umfpack.png")?;
+
     Ok(())
 }
