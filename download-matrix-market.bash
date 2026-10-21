@@ -1,6 +1,14 @@
 #!/bin/bash
 
 # see: https://sparse.tamu.edu/
+#
+# Note (2026-10): the SuiteSparse download host
+# (sparse-files.engr.tamu.edu, reached through a redirect from
+# suitesparse-collection-website.herokuapp.com) currently answers
+# 403 AccessDenied at the bucket root. The benchmark data is therefore
+# expected to be already present in ~/Downloads/matrix-market; this script
+# skips any file that is already there and only tries the network for the
+# ones that are missing.
 
 set -e
 
@@ -11,6 +19,10 @@ cd matrix-market
 get_matrix() {
   GROUP=$1
   NAME=$2
+  if [ -f "$NAME.mtx" ]; then
+    echo "skip $NAME.mtx (already present)"
+    return
+  fi
   wget https://suitesparse-collection-website.herokuapp.com/MM/$GROUP/$NAME.tar.gz
   tar xzf $NAME.tar.gz
   mv $NAME/$NAME.mtx .

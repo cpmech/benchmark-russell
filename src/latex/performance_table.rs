@@ -1,12 +1,8 @@
 use crate::constants::{BIG_REL_ERROR, BIG_TIME_MIN};
-use crate::{AllResults, StrError};
+use crate::{AllResults, MatricesInfo, StrError, genie_display_name};
 use fancy_regex::Regex;
 use russell_lab::format_nanoseconds_with_digits as fmt_nano;
-use russell_sparse::Genie;
 use std::fmt::Write;
-
-/// Column label: two-line stacked "Matching / Algorithm"
-const STR_M_ALGO: &str = "{\\shortstack[l]{Matching\\\\Algorithm}}";
 
 /// Column label: two-line stacked "Total / Time"
 const STR_TOT_TIME: &str = "{\\shortstack[l]{Total\\\\Time}}";
@@ -16,12 +12,10 @@ const STR_REL_ERROR: &str = "{\\shortstack[l]{Relative\\\\Error}}";
 
 /// Generates a LaTeX comparison table for the linear solvers
 ///
-/// 1. Reads StatsLinSol JSON result files from `data/results/{genie}-{matrix}.json`.
-/// 2. Builds a NiceTabular with alternating row colors and grouped multi-column headers (Total Time / Relative Error per solver).
-/// 3. Times and errors exceeding the configured thresholds are rendered bold.
-/// 4. Handles out-of-memory (oom) and not-available (n/a).
-///
-/// Returns the LaTeX code as a String
+/// Reads the `StatsLinSol` JSON files from `results/{genie}/{genie}-{matrix}.json`
+/// and the matrix metadata from `data/matrices.json`. Solver blocks are two
+/// columns wide (time and relative error); a missing result is rendered `n/a`
+/// and an out-of-memory run is rendered `oom`.
 pub fn performance_table<'a>(
     caption: &str,
     label: &str,
@@ -35,6 +29,9 @@ pub fn performance_table<'a>(
     if data.map.is_empty() {
         return Err("results map must not be empty");
     }
+
+    // ----- matrix metadata -----
+    let info = MatricesInfo::new()?;
 
     // ----- setup: regex for thousand-separator insertion -----
     let re = Regex::new(r"\B(?=(\d{3})+(?!\d))").unwrap();
@@ -76,36 +73,26 @@ pub fn performance_table<'a>(
     // optional horizontal rules (top/mid/bottom)
     let str_top_rule = if with_horiz_lines { "\n\\toprule" } else { "" };
     let str_mid_rule = if with_horiz_lines { "\\midrule" } else { "" };
-    let str_bot_rule = if with_horiz_lines { "\\bottomrule\n" } else { "" };
+    let str_bot_rule = if with_horiz_lines { "\n\\bottomrule\n" } else { "" };
 
-    // build dynamic column specs: 4 fixed cols (l, r, r, c) + 2 per genie (l + S[1.2e-2])
+    // build dynamic column specs: 4 fixed cols (l, r, r, c) + 2 per genie
     write!(
         &mut buf,
         "\\begin{{NiceTabular}}{{\n\
          \x20\x20 l\n\
-         \x20\x20 r % ndim\n\
+         \x20\x20 r % nrow\n\
          \x20\x20 r % nnz\n\
          \x20\x20 c % sym\n"
     )
     .unwrap();
     for genie in data.genies {
-        let name = genie.to_string();
-        if *genie == Genie::Cudss {
-            writeln!(
-                &mut buf,
-                "\x20\x20 l                                                                          % {name} extra\n\
-                 \x20\x20 l                                                                          % {name} time\n\
-                 \x20\x20 S[table-format=1.2e-2, exponent-mode=scientific, print-zero-exponent=true] % {name} error"
-            )
-            .unwrap();
-        } else {
-            writeln!(
-                &mut buf,
-                "\x20\x20 l                                                                          % {name} time\n\
-                 \x20\x20 S[table-format=1.2e-2, exponent-mode=scientific, print-zero-exponent=true] % {name} error"
-            )
-            .unwrap();
-        }
+        let name = genie_display_name(*genie);
+        writeln!(
+            &mut buf,
+            "\x20\x20 l                                                                          % {name} time\n\
+             \x20\x20 S[table-format=1.2e-2, exponent-mode=scientific, print-zero-exponent=true] % {name} error"
+        )
+        .unwrap();
     }
     writeln!(
         &mut buf,
@@ -122,16 +109,8 @@ pub fn performance_table<'a>(
     // ----- sub-header: grouped multi-column spans for each solver -----
     write!(&mut buf, "& & & & ").unwrap();
     for (k, genie) in data.genies.iter().enumerate() {
-        let name = genie.to_string();
-        let display: String = if name == "cudss" {
-            "cuDSS".to_string()
-        } else if name == "klu" {
-            "KLU".to_string()
-        } else {
-            name.to_uppercase()
-        };
-        let ncol = if *genie == Genie::Cudss { 3 } else { 2 };
-        write!(&mut buf, "\\multicolumn{{{ncol}}}{{c}}{{\\bfseries {display}}}").unwrap();
+        let name = genie_display_name(*genie);
+        write!(&mut buf, "\\multicolumn{{2}}{{c}}{{\\bfseries {name}}}").unwrap();
         if k < data.genies.len() - 1 {
             write!(&mut buf, " & ").unwrap();
         }
@@ -140,26 +119,19 @@ pub fn performance_table<'a>(
 
     // cmidrules: span the time-error columns within each solver block
     let mut col = 5; // first solver column (1-indexed, after Matrix/Nrow/NNZ/Sym)
-    for (k, genie) in data.genies.iter().enumerate() {
-        let has_extra = *genie == Genie::Cudss;
-        let start = col;
-        let end = col + if has_extra { 2 } else { 1 };
-        write!(&mut buf, "\\cmidrule(lr){{{start}-{end}}}").unwrap();
-        col += if has_extra { 3 } else { 2 };
+    for (k, _) in data.genies.iter().enumerate() {
+        write!(&mut buf, "\\cmidrule(lr){{{}-{}}}", col, col + 1).unwrap();
+        col += 2;
         if k < data.genies.len() - 1 {
             write!(&mut buf, " ").unwrap();
         }
     }
     writeln!(&mut buf).unwrap();
 
-    // column labels: Matrix | Nrow | NNZ | Sym | {MA}|Time|Error per solver
+    // column labels: Matrix | Nrow | NNZ | Sym | {Time}|Error per solver
     write!(&mut buf, "\\RowStyle{{\\bfseries}} Matrix & Nrow & NNZ & Sym").unwrap();
     for k in 0..data.genies.len() {
-        if data.genies[k] == Genie::Cudss {
-            write!(&mut buf, " & {} & {} & {}", STR_M_ALGO, STR_TOT_TIME, STR_REL_ERROR).unwrap();
-        } else {
-            write!(&mut buf, " & {} & {}", STR_TOT_TIME, STR_REL_ERROR).unwrap();
-        }
+        write!(&mut buf, " & {} & {}", STR_TOT_TIME, STR_REL_ERROR).unwrap();
         if k == data.genies.len() - 1 {
             write!(&mut buf, "\\\\{}", str_mid_rule).unwrap();
         }
@@ -170,76 +142,70 @@ pub fn performance_table<'a>(
     let i_last = data.matrices.len() - 1;
 
     for (i, matrix) in data.matrices.iter().enumerate() {
-        // ----- fill solver columns -----
-        for (j, genie) in data.genies.iter().enumerate() {
-            // Get the specific results set
-            let dat = data.map.get(&(*genie, matrix)).unwrap();
+        // matrix name, with long-name abbreviations
+        if *matrix == "pres-cylin-3d-tet10-fine-nu499" {
+            write!(&mut buf, "pres-cylinNI").unwrap();
+        } else if *matrix == "pres-cylin-3d-tet10-fine" {
+            write!(&mut buf, "pres-cylin").unwrap();
+        } else if *matrix == "dielFilterV2real" {
+            write!(&mut buf, "dielFilterV2").unwrap();
+        } else {
+            write!(&mut buf, "{}", matrix.replace("_", "\\_")).unwrap();
+        }
 
-            // Write "Matrix & Nrow & NNZ & Sym"
-            if j == 0 {
-                // write the matrix name, with long-name abbreviations
-                if *matrix == "pres-cylin-3d-tet10-fine-nu499" {
-                    write!(&mut buf, "pres-cylinNI").unwrap();
-                } else if *matrix == "pres-cylin-3d-tet10-fine" {
-                    write!(&mut buf, "pres-cylin").unwrap();
-                } else if *matrix == "dielFilterV2real" {
-                    write!(&mut buf, "dielFilterV2").unwrap();
-                } else {
-                    write!(&mut buf, "{}", matrix.replace("_", "\\_")).unwrap();
-                }
-
-                let tmp_ndim = format!("{}", dat.matrix.nrow);
-                let tmp_nnz = format!("{}", dat.matrix.nnz_actual);
-                let str_ndim = re.replace_all(&tmp_ndim, ",");
+        // matrix metadata
+        match info.all.get(*matrix) {
+            Some(m) => {
+                let tmp_nrow = format!("{}", m.num_rows);
+                let tmp_nnz = format!("{}", m.pattern_entries);
+                let str_nrow = re.replace_all(&tmp_nrow, ",");
                 let str_nnz = re.replace_all(&tmp_nnz, ",");
-                write!(&mut buf, "& {} & {}", str_ndim, str_nnz).unwrap();
-                if dat.matrix.symmetric == "No" {
-                    write!(&mut buf, " & No").unwrap();
-                } else if dat.requests.positive_definite {
-                    write!(&mut buf, " & Yes*").unwrap();
+                let str_sym = if m.symmetric == "No" {
+                    "No"
+                } else if m.positive_definite.as_deref() == Some("yes") {
+                    "Yes*"
                 } else {
-                    write!(&mut buf, " & Yes").unwrap();
+                    "Yes"
+                };
+                write!(&mut buf, "& {} & {} & {}", str_nrow, str_nnz, str_sym).unwrap();
+            }
+            None => {
+                write!(&mut buf, "& --- & --- & ---").unwrap();
+            }
+        }
+
+        // solver columns
+        for genie in data.genies {
+            match data.get(*genie, *matrix) {
+                None => {
+                    write!(&mut buf, " & n/a & n/a").unwrap();
                 }
-            }
-
-            // Write extra column if cuDSS
-            if *genie == Genie::Cudss {
-                write!(
-                    &mut buf,
-                    " & {}",
-                    // get_key_for_matching_algorithm(&dat.requests.matching)
-                    dat.requests.matching
-                )
-                .unwrap();
-            }
-
-            // Write " & Total Time & Relative Error"
-            if dat.main.out_of_memory {
-                // Handle out-of-memory (oom) case
-                write!(&mut buf, "& oom & oom").unwrap();
-            } else if dat.time_nanoseconds.total_ifs == 0 {
-                // Handle not-available (n/a) case
-                write!(&mut buf, "& n/a & n/a").unwrap();
-            } else {
-                // Set time string
-                let time = data.recalculate_total_time_without_outliers(*genie, matrix).unwrap();
-                let time_str = if (time as f64) / 6e+10 > BIG_TIME_MIN {
-                    // bold if total time exceeds threshold
-                    format!("\\bfseries {}", fmt_nano(time, 3))
-                } else {
-                    // normal font weight
-                    fmt_nano(time, 3)
-                };
-                // Set error string
-                let str_err = if dat.verify.relative_error > BIG_REL_ERROR {
-                    // bold if error exceeds threshold
-                    format!("\\bfseries {:.2e}", dat.verify.relative_error)
-                } else {
-                    // normal font weight
-                    format!("{:.2e}", dat.verify.relative_error)
-                };
-                // Write Time and Error
-                write!(&mut buf, " & {} & {}", time_str, str_err).unwrap();
+                Some(dat) if dat.main.out_of_memory => {
+                    write!(&mut buf, " & oom & oom").unwrap();
+                }
+                Some(dat) if dat.time_nanoseconds.total_ifs_array.is_empty() => {
+                    write!(&mut buf, " & n/a & n/a").unwrap();
+                }
+                Some(dat) => {
+                    // time string (outlier-free)
+                    match data.recalculate_total_time_without_outliers(*genie, *matrix) {
+                        Some(time) => {
+                            let time_str = if (time as f64) / 6e+10 > BIG_TIME_MIN {
+                                format!("\\bfseries {}", fmt_nano(time, 3))
+                            } else {
+                                fmt_nano(time, 3)
+                            };
+                            // error string
+                            let str_err = if dat.verify.relative_error > BIG_REL_ERROR {
+                                format!("\\bfseries {:.2e}", dat.verify.relative_error)
+                            } else {
+                                format!("{:.2e}", dat.verify.relative_error)
+                            };
+                            write!(&mut buf, " & {} & {}", time_str, str_err).unwrap();
+                        }
+                        None => write!(&mut buf, " & n/a & n/a").unwrap(),
+                    }
+                }
             }
         }
 
@@ -251,7 +217,7 @@ pub fn performance_table<'a>(
         }
     }
 
-    // ----- close table and compile to PDF -----
+    // ----- close table -----
     writeln!(
         &mut buf,
         "{}\\end{{NiceTabular}}\n\
@@ -283,8 +249,6 @@ mod tests {
             .unwrap_or(false)
     }
 
-    // Test: generates a performance table with 6 sample matrices and verifies
-    // the PDF is produced by latexmk.
     #[test]
     fn performance_table_works() {
         if !has_latexmk() {
@@ -301,7 +265,7 @@ mod tests {
 
         // load results
         let data = AllResults::new(
-            &[Genie::Umfpack, Genie::Mumps],
+            &[Genie::Native, Genie::Umfpack, Genie::Mumps],
             &[
                 "ASIC_680k",
                 "bwm2000",

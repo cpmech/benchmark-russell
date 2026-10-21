@@ -1,38 +1,20 @@
-use benchmark_russell::{AllResults, MATRICES, StrError};
-use russell_sparse::Genie;
+use benchmark_russell::{AllResults, GENIES, MATRICES, StrError, genie_display_name};
 
 const RESULTS_DIR: &str = "results/arch";
 
 fn main() -> Result<(), StrError> {
     // read the results
-    let genies = &[Genie::Cudss, Genie::Mumps, Genie::Umfpack];
-    let data = AllResults::new(genies, MATRICES, RESULTS_DIR)?;
+    let data = AllResults::new(GENIES, MATRICES, RESULTS_DIR)?;
 
-    // print statistics: cuDSS
-    println!("### cuDSS\n");
-    println!("| Matrix | Min Time | Median Time | Max Time | Outlier |");
-    println!("| --- | ---: | ---: | ---: | ---: |");
-    for matrix in MATRICES {
-        let row = data.get_statistics(Genie::Cudss, matrix)?;
-        println!("{row}");
-    }
-
-    // print statistics: MUMPS
-    println!("\n### MUMPS\n");
-    println!("| Matrix | Min Time | Median Time | Max Time | Outlier |");
-    println!("| --- | ---: | ---: | ---: | ---: |");
-    for matrix in MATRICES {
-        let row = data.get_statistics(Genie::Mumps, matrix)?;
-        println!("{row}");
-    }
-
-    // print statistics: UMFPACK
-    println!("\n### UMFPACK\n");
-    println!("| Matrix | Min Time | Median Time | Max Time | Outlier |");
-    println!("| --- | ---: | ---: | ---: | ---: |");
-    for matrix in MATRICES {
-        let row = data.get_statistics(Genie::Umfpack, matrix)?;
-        println!("{row}");
+    // print statistics per solver
+    for genie in GENIES {
+        println!("\n### {}\n", genie_display_name(*genie));
+        println!("| Matrix | Min Time | Median Time | Max Time | Outlier |");
+        println!("| --- | ---: | ---: | ---: | ---: |");
+        for matrix in MATRICES {
+            let row = data.get_statistics(*genie, *matrix)?;
+            println!("{row}");
+        }
     }
 
     Ok(())
