@@ -110,17 +110,17 @@ The complex-valued tested matrices are:
 
 ### Native at a glance
 
-The pure-Rust Native solver completed on the following matrices; it ranges from 1.5× to 92× slower than UMFPACK:
+The pure-Rust Native solver completed on the following matrices. The last two columns show how much faster UMFPACK and MUMPS are (where MUMPS is slower than Native, the entry says so):
 
-| Matrix | Native | UMFPACK | MUMPS | Native / UMFPACK |
-| --- | ---: | ---: | ---: | ---: |
-| bwm2000 | 1.11 ms | 0.750 ms | 6.05 ms | 1.47× slower |
-| rdb5000 | 39.0 ms | 13.6 ms | 9.95 ms | 2.88× slower |
-| Goodwin_040 | 449 ms | 107 ms | 105 ms | 4.19× slower |
-| fp | 904 ms | 154 ms | 169 ms | 5.85× slower |
-| xenon1 | 55.2 s | 598 ms | 365 ms | 92× slower |
-| mhd1280b | 0.717 ms | 0.383 ms | 5.76 ms | 1.87× slower |
-| mplate | 3.13 s | 627 ms | 109 ms | 4.99× slower |
+| Matrix | Native | UMFPACK | MUMPS | UMFPACK / Native | MUMPS / Native |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| bwm2000 | 1.11 ms | 0.750 ms | 6.05 ms | 1.47× faster | 5.47× slower |
+| rdb5000 | 39.0 ms | 13.6 ms | 9.95 ms | 2.88× faster | 3.92× faster |
+| Goodwin_040 | 449 ms | 107 ms | 105 ms | 4.19× faster | 4.29× faster |
+| fp | 904 ms | 154 ms | 169 ms | 5.85× faster | 5.35× faster |
+| xenon1 | 55.2 s | 598 ms | 365 ms | 92× faster | 151× faster |
+| mhd1280b | 0.717 ms | 0.383 ms | 5.76 ms | 1.87× faster | 8.03× slower |
+| mplate | 3.13 s | 627 ms | 109 ms | 4.99× faster | 28.7× faster |
 
 The remaining matrices, including `RFdevice`, exceeded the Native probe budget (see the notes above). The Native rows use the simplicial path; the experimental supernodal path can be selected with `--native-supernodal`, and its four-matrix results are kept under [`results/arch/native-supernodal/`](results/arch/native-supernodal).
 
