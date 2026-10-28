@@ -7,7 +7,7 @@ pub const BIG_REL_ERROR: f64 = 2.5e-6;
 pub const BIG_TIME_MIN: f64 = 1.0;
 
 /// Solvers compared across the benchmark
-pub const GENIES: &[Genie] = &[Genie::Native, Genie::Umfpack, Genie::Mumps];
+pub const GENIES: &[Genie] = &[Genie::Direct, Genie::Umfpack, Genie::Mumps];
 
 /// Matrix names used across benchmarks
 pub const MATRICES: &[&str] = &[

@@ -51,14 +51,14 @@
       "505.527188ms"
     ],
     "initialize": "512.661691ms",
-    "factorize_array": [
+    "preprocess_array": [
       "660.310685ms",
       "763.127033ms",
       "720.743115ms",
       "537.261041ms",
       "538.09766ms"
     ],
-    "factorize": "643.907906ms",
+    "preprocess": "643.907906ms",
     "solve_array": [
       "72.268581ms",
       "19.554996ms",
@@ -87,14 +87,14 @@
       505527188
     ],
     "initialize": 512661691,
-    "factorize_array": [
+    "preprocess_array": [
       660310685,
       763127033,
       720743115,
       537261041,
       538097660
     ],
-    "factorize": 643907906,
+    "preprocess": 643907906,
     "solve_array": [
       72268581,
       19554996,

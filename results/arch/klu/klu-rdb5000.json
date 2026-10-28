@@ -61,7 +61,7 @@
       "902.106µs"
     ],
     "initialize": "930.503µs",
-    "factorize_array": [
+    "preprocess_array": [
       "5.893092ms",
       "5.553161ms",
       "5.446165ms",
@@ -73,7 +73,7 @@
       "5.411073ms",
       "5.410096ms"
     ],
-    "factorize": "5.495444ms",
+    "preprocess": "5.495444ms",
     "solve_array": [
       "176.605µs",
       "159.217µs",
@@ -117,7 +117,7 @@
       902106
     ],
     "initialize": 930503,
-    "factorize_array": [
+    "preprocess_array": [
       5893092,
       5553161,
       5446165,
@@ -129,7 +129,7 @@
       5411073,
       5410096
     ],
-    "factorize": 5495444,
+    "preprocess": 5495444,
     "solve_array": [
       176605,
       159217,
