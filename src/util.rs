@@ -5,7 +5,8 @@ use std::fmt::Write;
 /// Returns the display name of a solver
 pub fn genie_display_name(genie: Genie) -> &'static str {
     match genie {
-        Genie::Native => "Native",
+        Genie::Direct => "Direct",
+        Genie::Iterative(_) => "Iterative",
         Genie::Umfpack => "UMFPACK",
         Genie::Mumps => "MUMPS",
     }
@@ -79,7 +80,7 @@ mod tests {
 
     #[test]
     fn genie_display_name_works() {
-        assert_eq!(genie_display_name(Genie::Native), "Native");
+        assert_eq!(genie_display_name(Genie::Direct), "Direct");
         assert_eq!(genie_display_name(Genie::Umfpack), "UMFPACK");
         assert_eq!(genie_display_name(Genie::Mumps), "MUMPS");
     }

@@ -21,21 +21,21 @@ fn main() -> Result<(), StrError> {
     println!("**Real-valued matrices:**\n{}", txt_re);
     println!("**Complex-valued matrices:**\n{}", txt_co);
 
-    // ---- Native, UMFPACK and MUMPS ----
+    // ---- Direct, UMFPACK and MUMPS ----
     let caption1 = format!(
-        "Calculations on {}. Native, UMFPACK and MUMPS. Real-valued matrices.",
+        "Calculations on {}. Direct, UMFPACK and MUMPS. Real-valued matrices.",
         OS
     );
     let caption2 = format!(
-        "Calculations on {}. Native, UMFPACK and MUMPS. Complex-valued matrices.",
+        "Calculations on {}. Direct, UMFPACK and MUMPS. Complex-valued matrices.",
         OS
     );
-    let native_umfpack_mumps_re = AllResults::new(GENIES, MATRICES, &results_dir)?;
-    let native_umfpack_mumps_co = AllResults::new(GENIES, MATRICES_COMPLEX, &results_dir)?;
-    native_umfpack_mumps_re.print_run_counts();
-    native_umfpack_mumps_co.print_run_counts();
-    print_table(&caption1, &native_umfpack_mumps_re)?;
-    print_table(&caption2, &native_umfpack_mumps_co)?;
+    let direct_umfpack_mumps_re = AllResults::new(GENIES, MATRICES, &results_dir)?;
+    let direct_umfpack_mumps_co = AllResults::new(GENIES, MATRICES_COMPLEX, &results_dir)?;
+    direct_umfpack_mumps_re.print_run_counts();
+    direct_umfpack_mumps_co.print_run_counts();
+    print_table(&caption1, &direct_umfpack_mumps_re)?;
+    print_table(&caption2, &direct_umfpack_mumps_co)?;
 
     // done
     Ok(())

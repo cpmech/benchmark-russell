@@ -163,14 +163,14 @@ mod tests {
 
     #[test]
     fn new_tolerates_missing_results() {
-        let data = AllResults::new(&[Genie::Native], &["this-matrix-does-not-exist"], RESULTS_DIR).unwrap();
+        let data = AllResults::new(&[Genie::Direct], &["this-matrix-does-not-exist"], RESULTS_DIR).unwrap();
         assert!(
             data.map
-                .contains_key(&(Genie::Native, "this-matrix-does-not-exist".to_string()))
+                .contains_key(&(Genie::Direct, "this-matrix-does-not-exist".to_string()))
         );
-        assert!(data.get(Genie::Native, "this-matrix-does-not-exist").is_none());
+        assert!(data.get(Genie::Direct, "this-matrix-does-not-exist").is_none());
         let row = data
-            .get_statistics(Genie::Native, "this-matrix-does-not-exist")
+            .get_statistics(Genie::Direct, "this-matrix-does-not-exist")
             .unwrap();
         assert_eq!(row, "| this-matrix-does-not-exist | n/a | n/a | n/a | n/a |");
     }

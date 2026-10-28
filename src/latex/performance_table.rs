@@ -265,7 +265,7 @@ mod tests {
 
         // load results
         let data = AllResults::new(
-            &[Genie::Native, Genie::Umfpack, Genie::Mumps],
+            &[Genie::Direct, Genie::Umfpack, Genie::Mumps],
             &[
                 "ASIC_680k",
                 "bwm2000",

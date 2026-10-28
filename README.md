@@ -5,10 +5,10 @@
 - [Introduction](#introduction)
 - [Solvers for large sparse linear systems](#solvers-for-large-sparse-linear-systems)
 - [Results](#results)
-  - [Native at a glance](#native-at-a-glance)
+  - [Direct at a glance](#direct-at-a-glance)
   - [Information about the tested matrices](#information-about-the-tested-matrices)
-  - [Calculations on Arch. Native, UMFPACK and MUMPS. Real-valued matrices.](#calculations-on-arch-native-umfpack-and-mumps-real-valued-matrices)
-  - [Calculations on Arch. Native, UMFPACK and MUMPS. Complex-valued matrices.](#calculations-on-arch-native-umfpack-and-mumps-complex-valued-matrices)
+  - [Calculations on Arch. Direct, UMFPACK and MUMPS. Real-valued matrices.](#calculations-on-arch-direct-umfpack-and-mumps-real-valued-matrices)
+  - [Calculations on Arch. Direct, UMFPACK and MUMPS. Complex-valued matrices.](#calculations-on-arch-direct-umfpack-and-mumps-complex-valued-matrices)
   - [Legacy results](#legacy-results)
 - [System and libraries information](#system-and-libraries-information)
 
@@ -18,9 +18,9 @@
 
 This project contains performance benchmarks using the [Rust Scientific Library (Russell)](https://github.com/cpmech/russell).
 
-We compare the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse): the pure-Rust **Native** solver (the default in Russell 4.1), **UMFPACK**, and **MUMPS**.
+We compare the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse): the pure-Rust **Direct** solver (the default in Russell 5.0), **UMFPACK**, and **MUMPS**.
 
-The computations presented here use `russell_sparse` 4.1 (with `algebra_linear` 1.2) and the `intel_mkl`, `umfpack`, and `mumps` features. Thus, UMFPACK and MUMPS are compiled locally with Intel MKL. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
+The results presented here were produced with `russell_sparse` 4.1 (with `algebra_linear` 1.2) and the `intel_mkl`, `umfpack`, and `mumps` features; the crate now builds against `russell_sparse` 5.0 and `algebra_linear` 2, and the stored results were migrated to the 5.0 statistics schema rather than re-measured. Thus, UMFPACK and MUMPS are compiled locally with Intel MKL. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
 
 The cuDSS and KLU results from the earlier Russell 2.8 benchmark are kept under [`results/legacy-2.8/`](results/legacy-2.8) for reference; they are not part of the current comparison.
 
@@ -28,7 +28,7 @@ The cuDSS and KLU results from the earlier Russell 2.8 benchmark are kept under 
 
 ## Solvers for large sparse linear systems
 
-- **Native** — the pure-Rust LU factorization from [`algebra_linear`](https://github.com/cpmech/algebra_linear), with COLAMD ordering, partial pivoting, and a simplicial/supernodal choice made by a flop proxy. It requires no external library.
+- **Direct** — the pure-Rust LU factorization from [`algebra_linear`](https://github.com/cpmech/algebra_linear), with COLAMD ordering, partial pivoting, and a simplicial/supernodal choice made by a flop proxy. It requires no external library.
 - **UMFPACK** — the unsymmetric multifrontal solver from [SuiteSparse](https://github.com/DrTimothyAldenDavis/SuiteSparse).
 - **MUMPS** — the multifrontal massively parallel sparse direct solver ([mumps-solver.org](https://mumps-solver.org/index.php)).
 
@@ -96,23 +96,23 @@ The complex-valued tested matrices are:
 
 **Additional notes:**
 
-1. Each problem is solved five times. The reported error is the maximum among runs. The reported computer time is the average without outliers. The Native solver uses five runs for fast matrices, three for slower ones, and a single probe run for the rest.
+1. Each problem is solved five times. The reported error is the maximum among runs. The reported computer time is the average without outliers. The Direct solver uses five runs for fast matrices, three for slower ones, and a single probe run for the rest.
 2. Total time includes initialization (memory allocation + symbolic factorization), numeric factorization, and solve.
 3. Column NNZ (number of non-zeros) corresponds to Pattern Entries reported by the [SuiteSparse Matrix Collection](https://sparse.tamu.edu).
 4. Column Sym shows if symmetry information was provided to the solver. An asterisk means positive definite information was also given.
 5. oom (out-of-memory) indicates that the symbolic factorization was terminated due to insufficient memory.
-6. n/a indicates that the run was not attempted, or that the Native solver exceeded its probe budget. The results shown here used a five-minute budget; the runner now defaults to three minutes.
+6. n/a indicates that the run was not attempted, or that the Direct solver exceeded its probe budget. The results shown here used a five-minute budget; the runner now defaults to three minutes.
 7. Bold values highlight significant results, such as large errors or high computation times.
-8. The Native solver is pure Rust; it does not compute determinants, error estimates or condition numbers.
+8. The Direct solver is pure Rust; it does not compute determinants, error estimates or condition numbers.
 
 
 ## Results
 
-### Native at a glance
+### Direct at a glance
 
-The pure-Rust Native solver completed on the following matrices. The last two columns show how much faster UMFPACK and MUMPS are (where MUMPS is slower than Native, the entry says so):
+The pure-Rust Direct solver completed on the following matrices. The last two columns show how much faster UMFPACK and MUMPS are (where MUMPS is slower than Direct, the entry says so):
 
-| Matrix | Native | UMFPACK | MUMPS | UMFPACK / Native | MUMPS / Native |
+| Matrix | Direct | UMFPACK | MUMPS | UMFPACK / Direct | MUMPS / Direct |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | bwm2000 | 1.11 ms | 0.750 ms | 6.05 ms | 1.47× faster | 5.47× slower |
 | rdb5000 | 39.0 ms | 13.6 ms | 9.95 ms | 2.88× faster | 3.92× faster |
@@ -122,21 +122,21 @@ The pure-Rust Native solver completed on the following matrices. The last two co
 | mhd1280b | 0.717 ms | 0.383 ms | 5.76 ms | 1.87× faster | 8.03× slower |
 | mplate | 3.13 s | 627 ms | 109 ms | 4.99× faster | 28.7× faster |
 
-The remaining matrices, including `RFdevice`, exceeded the Native probe budget (see the notes above). The Native rows use the simplicial path; the experimental supernodal path can be selected with `--native-supernodal`, and its four-matrix results are kept under [`results/arch/native-supernodal/`](results/arch/native-supernodal).
+The remaining matrices, including `RFdevice`, exceeded the Direct probe budget (see the notes above). The Direct rows use the simplicial path; the four supernodal results were produced with `LinSolParams::direct_supernodal` and are kept under [`results/arch/direct-supernodal/`](results/arch/direct-supernodal).
 
 Total time per matrix on a log scale, sorted by NNZ (`(c)` marks a complex-valued matrix):
 
-![Total time for Native, UMFPACK and MUMPS](results/plot_time.png)
+![Total time for Direct, UMFPACK and MUMPS](results/plot_time.png)
 
-Speed-up over Native (`>1` means faster than Native; the dashed line is parity):
+Speed-up over Direct (`>1` means faster than Direct; the dashed line is parity):
 
-![Speed-up over Native for UMFPACK and MUMPS](results/plot_speedup.png)
+![Speed-up over Direct for UMFPACK and MUMPS](results/plot_speedup.png)
 
 UMFPACK / MUMPS speed-up for every matrix where both solvers completed (25 of 42; UMFPACK runs out of memory on the remaining matrices). Values above 1 mean UMFPACK is faster; below 1, MUMPS is faster:
 
 ![UMFPACK / MUMPS speed-up across all matrices](results/plot_speedup_umfpack_mumps.png)
 
-The Native solver is fast on small systems: up to about 30,000 non-zeros it takes at most a few tens of milliseconds. It becomes very slow for matrices with more than **1 million** non-zeros: the `xenon1` case (NROW=48,600, 1,181,120 non-zeros) takes **55 s**, and the next real case (`twotone`, NROW=120,750, 1,224,224 non-zeros) did not finish within the 3-minute probe. For matrices with more than **1 million** non-zeros, expect **nearly a minute** or more.
+The Direct solver is fast on small systems: up to about 30,000 non-zeros it takes at most a few tens of milliseconds. It becomes very slow for matrices with more than **1 million** non-zeros: the `xenon1` case (NROW=48,600, 1,181,120 non-zeros) takes **55 s**, and the next real case (`twotone`, NROW=120,750, 1,224,224 non-zeros) did not finish within the 3-minute probe. For matrices with more than **1 million** non-zeros, expect **nearly a minute** or more.
 
 The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 142,190 non-zeros) takes **3.13 s**, and `RFdevice` (NROW=74,104, 365,580 non-zeros) did not finish in **15 minutes**; sparsity structure and numerical type matter as much as the non-zero count.
 
@@ -194,9 +194,9 @@ The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 
 
 
 
-### Calculations on Arch. Native, UMFPACK and MUMPS. Real-valued matrices.
+### Calculations on Arch. Direct, UMFPACK and MUMPS. Real-valued matrices.
 
-| Matrix | Native Time | Native Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
+| Matrix | Direct Time | Direct Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | bwm2000 | 1.106ms | 1.48e-15 | 750.259µs | 5.30e-16 | 6.054ms | 7.50e-16 |
 | rdb5000 | 39.034ms | 1.01e-14 | 13.569ms | 1.93e-15 | 9.946ms | 9.40e-13 |
@@ -233,9 +233,9 @@ The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 
 
 
 
-### Calculations on Arch. Native, UMFPACK and MUMPS. Complex-valued matrices.
+### Calculations on Arch. Direct, UMFPACK and MUMPS. Complex-valued matrices.
 
-| Matrix | Native Time | Native Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
+| Matrix | Direct Time | Direct Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | mhd1280b | 717.206µs | 1.31e-15 | 382.531µs | 7.41e-16 | 5.759ms | 1.17e-15 |
 | mplate | 3.131s | 4.66e-11 | 627.467ms | 1.86e-11 | 109.002ms | 6.28e-11 |

@@ -2,7 +2,7 @@
   "main": {
     "platform": "Russell",
     "blas_lib": "Intel MKL",
-    "solver": "Native",
+    "solver": "Direct",
     "mumps": true,
     "out_of_memory": false
   },
@@ -51,14 +51,14 @@
       "381.27µs"
     ],
     "initialize": "417.476µs",
-    "factorize_array": [
+    "preprocess_array": [
       "337.27µs",
       "320.103µs",
       "303.91µs",
       "300.184µs",
       "294.063µs"
     ],
-    "factorize": "311.106µs",
+    "preprocess": "311.106µs",
     "solve_array": [
       "21.749µs",
       "18.86µs",
@@ -87,14 +87,14 @@
       381270
     ],
     "initialize": 417476,
-    "factorize_array": [
+    "preprocess_array": [
       337270,
       320103,
       303910,
       300184,
       294063
     ],
-    "factorize": 311106,
+    "preprocess": 311106,
     "solve_array": [
       21749,
       18860,
