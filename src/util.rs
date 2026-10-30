@@ -1,12 +1,14 @@
 use crate::{MatricesInfo, StrError};
-use russell_sparse::Genie;
+use russell_sparse::{Genie, IterativeMethod};
 use std::fmt::Write;
 
 /// Returns the display name of a solver
 pub fn genie_display_name(genie: Genie) -> &'static str {
     match genie {
         Genie::Direct => "Direct",
-        Genie::Iterative(_) => "Iterative",
+        Genie::Iterative(IterativeMethod::Cg) => "CG",
+        Genie::Iterative(IterativeMethod::BiCgStab) => "BiCGStab",
+        Genie::Iterative(IterativeMethod::Gmres) => "GMRES",
         Genie::Umfpack => "UMFPACK",
         Genie::Mumps => "MUMPS",
     }
@@ -76,7 +78,7 @@ pub fn get_matrix_list_md(matrices: &[&str]) -> Result<String, StrError> {
 #[cfg(test)]
 mod tests {
     use super::{genie_display_name, get_matrix_list_md};
-    use russell_sparse::Genie;
+    use russell_sparse::{Genie, IterativeMethod};
 
     #[test]
     fn genie_display_name_works() {

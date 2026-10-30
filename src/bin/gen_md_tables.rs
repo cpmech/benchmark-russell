@@ -1,4 +1,4 @@
-use benchmark_russell::{AllResults, GENIES, MATRICES, MATRICES_COMPLEX, StrError};
+use benchmark_russell::{AllResults, GENIES, GENIES_UMFPACK_ITERATIVE, MATRICES, MATRICES_COMPLEX, StrError};
 use benchmark_russell::{matrix_table_md, performance_table_md};
 
 const OS: &str = "Arch";
@@ -36,6 +36,22 @@ fn main() -> Result<(), StrError> {
     direct_umfpack_mumps_co.print_run_counts();
     print_table(&caption1, &direct_umfpack_mumps_re)?;
     print_table(&caption2, &direct_umfpack_mumps_co)?;
+
+    // ---- UMFPACK against the two iterative solvers that converge widely ----
+    let caption3 = format!(
+        "Calculations on {}. UMFPACK compared with the iterative solvers. Real-valued matrices.",
+        OS
+    );
+    let iterative = AllResults::new(GENIES_UMFPACK_ITERATIVE, MATRICES, &results_dir)?;
+    iterative.print_run_counts();
+    print_table(&caption3, &iterative)?;
+    println!(
+        "\n\nThe iterative columns are BiCGStab and GMRES on the AMG preconditioner, five runs each with \
+         the default settings. CG is not in the table because it requires a symmetric positive definite \
+         system and reaches the error gate on one matrix of the set. An `n/a` in an iterative column means \
+         the iteration did not reach 1e-10 within 1 000 iterations, or that the run was killed by the \
+         memory or time cap; it does not mean `not measured`."
+    );
 
     // done
     Ok(())

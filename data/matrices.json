@@ -557,5 +557,18 @@
     "Positive Definite": "yes",
     "Type": "real",
     "Description": "FEM stiffness matrix of a pressurized cylinder (Tet10 with 1,711,464 DOF)"
+  },
+  {
+    "Name": "pmsim-hex8-27",
+    "Group": "Pedroso",
+    "Num Rows": 157,
+    "Num Cols": 157,
+    "Nonzeros": 3369,
+    "Pattern Entries": 6581,
+    "Kind": "Structural Problem",
+    "Symmetric": "Yes",
+    "Positive Definite": "yes",
+    "Type": "real",
+    "Description": "Global stiffness matrix of the stress-strain driver's 3x3x3 Hex8 block (27 elements, 157 unknowns after the essential boundary conditions)"
   }
 ]
