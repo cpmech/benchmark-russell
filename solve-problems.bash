@@ -24,6 +24,8 @@ set -euo pipefail
 #   DIRECT_MAX_NNZ       Skip Native above this pattern size; 0 disables it (default: 0)
 #   DIRECT_SUPERNODAL    1 selects the experimental supernodal LU (default: 0)
 #   STAGES               all | external | direct | iterative (default: all)
+#   ITERATIVE_MEMORY_KB  per-run memory cap, KiB (default: 8000000, ~8 GB)
+#   ITERATIVE_TIMEOUT    per-run time cap, s    (default: 1200)
 
 NRUN=${NRUN:-5}
 DIRECT_MAX_RUNS=${DIRECT_MAX_RUNS:-5}
@@ -32,6 +34,8 @@ DIRECT_MEMORY_KB=${DIRECT_MEMORY_KB:-20000000}
 DIRECT_MAX_NNZ=${DIRECT_MAX_NNZ:-0}
 DIRECT_SUPERNODAL=${DIRECT_SUPERNODAL:-0}
 STAGES=${STAGES:-all}
+ITERATIVE_MEMORY_KB=${ITERATIVE_MEMORY_KB:-8000000}
+ITERATIVE_TIMEOUT=${ITERATIVE_TIMEOUT:-1200}
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 RUSSELL_DIR=${RUSSELL_DIR:-$HERE/../russell}
@@ -218,16 +222,36 @@ run_direct() {
     done
 }
 
+# Tells whether a matrix is symmetric, read from data/matrices.json
+is_symmetric() {
+    python3 -c 'import json,sys
+data = json.load(open(sys.argv[2]))
+print("yes" if next((m["Symmetric"] for m in data if m["Name"] == sys.argv[1]), "No") == "Yes" else "no")' "$1" "$HERE/data/matrices.json"
+}
+
 # Runs one Krylov method through russell_sparse's iterative solver
+#
+# Each run is capped in memory and in time: the AMG setup on a million-dof matrix can ask for more
+# than this machine has, and a killed shell loses every result after it. CG is skipped on the
+# matrices that are not symmetric, because it requires a symmetric positive definite one -- the
+# solver says so and the row is better left empty than reported as a failure.
 run_iterative() {
     local genie=$1
     local list=$2
     local outdir="$OUTPUT_DIR/$genie"
     mkdir -p "$outdir"
     for mat in $list; do
+        if [ "$genie" = "cg" ] && [ "$(is_symmetric "$mat")" != "yes" ]; then
+            echo "... $genie / $mat ... skipping (not symmetric)"
+            rm -f "$outdir/$genie-$mat.json"
+            continue
+        fi
         echo "... $genie / $mat ..."
-        if ! timeout 3600 "$COMMAND" -g "$genie" -r "$NRUN" "$INPUT_DIR/$mat.mtx" > "$outdir/$genie-$mat.json"; then
-            echo "    failed or timed out; removing the partial result"
+        if ! (
+            ulimit -v "$ITERATIVE_MEMORY_KB"
+            exec timeout "$ITERATIVE_TIMEOUT" "$COMMAND" -g "$genie" -r "$NRUN" "$INPUT_DIR/$mat.mtx"
+        ) > "$outdir/$genie-$mat.json" 2> /dev/null; then
+            echo "    failed, killed or timed out; removing the partial result"
             rm -f "$outdir/$genie-$mat.json"
         fi
     done
