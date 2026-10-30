@@ -1,0 +1,151 @@
+{
+  "main": {
+    "platform": "Russell",
+    "blas_lib": "Intel MKL",
+    "solver": "GMRES",
+    "mumps": true,
+    "out_of_memory": false
+  },
+  "matrix": {
+    "name": "xenon1",
+    "nrow": 48600,
+    "ncol": 48600,
+    "nnz": 1181120,
+    "nnz_actual": 1181120,
+    "complex": false,
+    "symmetric": "No"
+  },
+  "requests": {
+    "ordering": "Auto",
+    "scaling": "Auto",
+    "mumps_num_threads": 0,
+    "positive_definite": false
+  },
+  "output": {
+    "effective_ordering": "None",
+    "effective_scaling": "None",
+    "effective_mumps_num_threads": 0,
+    "openmp_num_threads": 24,
+    "umfpack_strategy": "Unknown",
+    "umfpack_rcond_estimate": 0.0
+  },
+  "determinant": {
+    "mantissa_real": 0.0,
+    "mantissa_imag": 0.0,
+    "base": 0.0,
+    "exponent": 0.0
+  },
+  "verify": {
+    "max_abs_a": 3.1734352336727296e+28,
+    "max_abs_ax": 1.0000000037294008,
+    "max_abs_diff": 3.729400788188286e-9,
+    "relative_error": 1.1751936036432413e-37
+  },
+  "time_human": {
+    "read_matrix": "111.533608ms",
+    "initialize_array": [
+      "8.110173ms",
+      "15.233327ms",
+      "8.139072ms",
+      "8.025503ms",
+      "7.982384ms"
+    ],
+    "initialize": "9.498091ms",
+    "preprocess_array": [
+      "83.959419ms",
+      "128.588417ms",
+      "87.986278ms",
+      "86.10083ms",
+      "85.085685ms"
+    ],
+    "preprocess": "94.344125ms",
+    "solve_array": [
+      "2.851250403s",
+      "3.102029462s",
+      "2.842924577s",
+      "2.83992731s",
+      "2.831940678s"
+    ],
+    "solve": "2.893614486s",
+    "total_ifs_array": [
+      "2.943319995s",
+      "3.245851206s",
+      "2.939049927s",
+      "2.934053643s",
+      "2.925008747s"
+    ],
+    "total_ifs": "2.997456703s",
+    "verify": "1.258759ms"
+  },
+  "time_nanoseconds": {
+    "read_matrix": 111533608,
+    "initialize_array": [
+      8110173,
+      15233327,
+      8139072,
+      8025503,
+      7982384
+    ],
+    "initialize": 9498091,
+    "preprocess_array": [
+      83959419,
+      128588417,
+      87986278,
+      86100830,
+      85085685
+    ],
+    "preprocess": 94344125,
+    "solve_array": [
+      2851250403,
+      3102029462,
+      2842924577,
+      2839927310,
+      2831940678
+    ],
+    "solve": 2893614486,
+    "total_ifs_array": [
+      2943319995,
+      3245851206,
+      2939049927,
+      2934053643,
+      2925008747
+    ],
+    "total_ifs": 2997456703,
+    "verify": 1258759
+  },
+  "mumps_stats": {
+    "inf_norm_a": 0.0,
+    "inf_norm_x": 0.0,
+    "scaled_residual": 0.0,
+    "backward_error_omega1": 0.0,
+    "backward_error_omega2": 0.0,
+    "normalized_delta_x": 0.0,
+    "condition_number1": 0.0,
+    "condition_number2": 0.0
+  },
+  "iterative": {
+    "method": "GMRES",
+    "preconditioner": "AMG",
+    "tolerance": 1e-10,
+    "max_iterations": 1000,
+    "restart": 30,
+    "num_threads": 1,
+    "amg_coarsening": "RugeStuben",
+    "amg_smoother": "GaussSeidel",
+    "amg_levels": 6,
+    "iterations_array": [
+      460,
+      460,
+      460,
+      460,
+      460
+    ],
+    "relative_residual_array": [
+      9.432133138382918e-11,
+      9.432133138382918e-11,
+      9.432133138382918e-11,
+      9.432133138382918e-11,
+      9.432133138382918e-11
+    ]
+  }
+}
