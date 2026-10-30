@@ -1,4 +1,4 @@
-use benchmark_russell::{AllResults, GENIES, MATRICES, MATRICES_COMPLEX, StrError};
+use benchmark_russell::{AllResults, GENIES, GENIES_ITERATIVE, MATRICES, MATRICES_COMPLEX, StrError};
 use benchmark_russell::{matrix_table_md, performance_table_md};
 
 const OS: &str = "Arch";
@@ -36,6 +36,15 @@ fn main() -> Result<(), StrError> {
     direct_umfpack_mumps_co.print_run_counts();
     print_table(&caption1, &direct_umfpack_mumps_re)?;
     print_table(&caption2, &direct_umfpack_mumps_co)?;
+
+    // ---- the iterative solvers ----
+    let caption3 = format!(
+        "Calculations on {}. Iterative solvers (AMG preconditioner). Real-valued matrices.",
+        OS
+    );
+    let iterative = AllResults::new(GENIES_ITERATIVE, MATRICES, &results_dir)?;
+    iterative.print_run_counts();
+    print_table(&caption3, &iterative)?;
 
     // done
     Ok(())

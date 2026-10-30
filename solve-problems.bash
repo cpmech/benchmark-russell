@@ -18,19 +18,19 @@ set -euo pipefail
 #   INPUT_DIR            .mtx directory          (default: ~/Downloads/matrix-market)
 #   SYSTEM               results subdirectory    (default: arch)
 #   NRUN                 UMFPACK/MUMPS runs      (default: 5)
-#   NATIVE_MAX_RUNS      Native run ceiling      (default: 5)
-#   NATIVE_PROBE_TIMEOUT Native probe time, s    (default: 180)
-#   NATIVE_MEMORY_KB     Native memory cap, KiB  (default: 20000000, ~20 GB)
-#   NATIVE_MAX_NNZ       Skip Native above this pattern size; 0 disables it (default: 0)
-#   NATIVE_SUPERNODAL    1 selects the experimental supernodal LU (default: 0)
-#   STAGES               all | external | native (default: all)
+#   DIRECT_MAX_RUNS      Native run ceiling      (default: 5)
+#   DIRECT_PROBE_TIMEOUT Native probe time, s    (default: 180)
+#   DIRECT_MEMORY_KB     Native memory cap, KiB  (default: 20000000, ~20 GB)
+#   DIRECT_MAX_NNZ       Skip Native above this pattern size; 0 disables it (default: 0)
+#   DIRECT_SUPERNODAL    1 selects the experimental supernodal LU (default: 0)
+#   STAGES               all | external | direct | iterative (default: all)
 
 NRUN=${NRUN:-5}
-NATIVE_MAX_RUNS=${NATIVE_MAX_RUNS:-5}
-NATIVE_PROBE_TIMEOUT=${NATIVE_PROBE_TIMEOUT:-180}
-NATIVE_MEMORY_KB=${NATIVE_MEMORY_KB:-20000000}
-NATIVE_MAX_NNZ=${NATIVE_MAX_NNZ:-0}
-NATIVE_SUPERNODAL=${NATIVE_SUPERNODAL:-0}
+DIRECT_MAX_RUNS=${DIRECT_MAX_RUNS:-5}
+DIRECT_PROBE_TIMEOUT=${DIRECT_PROBE_TIMEOUT:-180}
+DIRECT_MEMORY_KB=${DIRECT_MEMORY_KB:-20000000}
+DIRECT_MAX_NNZ=${DIRECT_MAX_NNZ:-0}
+DIRECT_SUPERNODAL=${DIRECT_SUPERNODAL:-0}
 STAGES=${STAGES:-all}
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -92,6 +92,7 @@ REAL_MATS="
     dielFilterV2real
     Flan_1565
     pres-cylin-3d-tet10-fine
+    pmsim-hex8-27
 "
 
 # Complex matrices
@@ -148,76 +149,91 @@ run_external() {
     done
 }
 
-# Runs Native on one matrix, with a probe pass to decide how many runs are worth doing
-run_native_matrix() {
+# Runs the Direct solver on one matrix, with a probe pass to decide how many runs are worth doing
+run_direct_matrix() {
     local mat=$1
     local extra
     extra=$(extra_args "$mat")
-    local outdir="$OUTPUT_DIR/native"
-    local native_flag=""
-    if [ "$NATIVE_SUPERNODAL" = "1" ]; then
-        outdir="$OUTPUT_DIR/native-supernodal"
-        native_flag="--native-supernodal"
+    local outdir="$OUTPUT_DIR/direct"
+    local direct_flag=""
+    if [ "$DIRECT_SUPERNODAL" = "1" ]; then
+        outdir="$OUTPUT_DIR/direct-supernodal"
+        direct_flag="--direct-supernodal"
     fi
-    local probe="/tmp/benchmark-russell/native-probe-$mat.json"
+    local probe="/tmp/benchmark-russell/direct-probe-$mat.json"
     mkdir -p "$outdir" /tmp/benchmark-russell
 
     local nnz
     nnz=$(get_pattern_entries "$mat")
-    if [ "$NATIVE_MAX_NNZ" -gt 0 ] && [ "$nnz" -gt "$NATIVE_MAX_NNZ" ]; then
-        echo "... native / $mat ... skipping (pattern entries $nnz > $NATIVE_MAX_NNZ)"
-        rm -f "$outdir/native-$mat.json"
+    if [ "$DIRECT_MAX_NNZ" -gt 0 ] && [ "$nnz" -gt "$DIRECT_MAX_NNZ" ]; then
+        echo "... direct / $mat ... skipping (pattern entries $nnz > $DIRECT_MAX_NNZ)"
+        rm -f "$outdir/direct-$mat.json"
         return
     fi
 
-    echo "... native / $mat (probe) ..."
+    echo "... direct / $mat (probe) ..."
     local t0 t1 elapsed
     t0=$(date +%s%N)
     if (
-        ulimit -v "$NATIVE_MEMORY_KB"
-        exec timeout "$NATIVE_PROBE_TIMEOUT" "$COMMAND" -g native -r 1 $native_flag $extra "$INPUT_DIR/$mat.mtx"
+        ulimit -v "$DIRECT_MEMORY_KB"
+        exec timeout "$DIRECT_PROBE_TIMEOUT" "$COMMAND" -g direct -r 1 $direct_flag $extra "$INPUT_DIR/$mat.mtx"
     ) > "$probe" 2> /dev/null; then
         t1=$(date +%s%N)
         elapsed=$(((t1 - t0) / 1000000000))
 
         local nrun
         if [ "$elapsed" -lt 2 ]; then
-            nrun=$NATIVE_MAX_RUNS
+            nrun=$DIRECT_MAX_RUNS
         elif [ "$elapsed" -lt 30 ]; then
-            nrun=$((NATIVE_MAX_RUNS > 3 ? 3 : NATIVE_MAX_RUNS))
+            nrun=$((DIRECT_MAX_RUNS > 3 ? 3 : DIRECT_MAX_RUNS))
         else
             nrun=1
         fi
 
         if [ "$nrun" -eq 1 ]; then
-            mv "$probe" "$outdir/native-$mat.json"
+            mv "$probe" "$outdir/direct-$mat.json"
             echo "    probe took ${elapsed}s; keeping the single run"
         else
             echo "    probe took ${elapsed}s; running $nrun times"
             if ! (
-                ulimit -v "$NATIVE_MEMORY_KB"
-                exec timeout $((elapsed * nrun * 3 + 600)) "$COMMAND" -g native -r "$nrun" $native_flag $extra "$INPUT_DIR/$mat.mtx"
-            ) > "$outdir/native-$mat.json" 2> /dev/null; then
+                ulimit -v "$DIRECT_MEMORY_KB"
+                exec timeout $((elapsed * nrun * 3 + 600)) "$COMMAND" -g direct -r "$nrun" $direct_flag $extra "$INPUT_DIR/$mat.mtx"
+            ) > "$outdir/direct-$mat.json" 2> /dev/null; then
                 echo "    full run failed or timed out; keeping the probe result"
-                mv "$probe" "$outdir/native-$mat.json"
+                mv "$probe" "$outdir/direct-$mat.json"
             else
                 rm -f "$probe"
             fi
         fi
     else
         echo "    probe failed or timed out; marking n/a"
-        rm -f "$probe" "$outdir/native-$mat.json"
+        rm -f "$probe" "$outdir/direct-$mat.json"
     fi
 }
 
-run_native() {
+run_direct() {
     local list=$1
     for mat in $list; do
-        run_native_matrix "$mat"
+        run_direct_matrix "$mat"
     done
 }
 
-# External solvers first so the long Native pass can be interrupted without
+# Runs one Krylov method through russell_sparse's iterative solver
+run_iterative() {
+    local genie=$1
+    local list=$2
+    local outdir="$OUTPUT_DIR/$genie"
+    mkdir -p "$outdir"
+    for mat in $list; do
+        echo "... $genie / $mat ..."
+        if ! timeout 3600 "$COMMAND" -g "$genie" -r "$NRUN" "$INPUT_DIR/$mat.mtx" > "$outdir/$genie-$mat.json"; then
+            echo "    failed or timed out; removing the partial result"
+            rm -f "$outdir/$genie-$mat.json"
+        fi
+    done
+}
+
+# External solvers first so the long Direct pass can be interrupted without
 # losing their results
 if [ "$STAGES" = "all" ] || [ "$STAGES" = "external" ]; then
     run_external umfpack "$REAL_MATS"
@@ -226,9 +242,17 @@ if [ "$STAGES" = "all" ] || [ "$STAGES" = "external" ]; then
     run_external mumps "$COMPLEX_MATS"
 fi
 
-if [ "$STAGES" = "all" ] || [ "$STAGES" = "native" ]; then
-    run_native "$REAL_MATS"
-    run_native "$COMPLEX_MATS"
+if [ "$STAGES" = "all" ] || [ "$STAGES" = "direct" ]; then
+    run_direct "$REAL_MATS"
+    run_direct "$COMPLEX_MATS"
+fi
+
+# The iterative solvers are real-valued only: CG needs a symmetric matrix, and the
+# preconditioner is built from the same real pattern
+if [ "$STAGES" = "all" ] || [ "$STAGES" = "iterative" ]; then
+    run_iterative cg "$REAL_MATS"
+    run_iterative bicgstab "$REAL_MATS"
+    run_iterative gmres "$REAL_MATS"
 fi
 
 echo "done: results in $OUTPUT_DIR"
