@@ -13,6 +13,17 @@ pub const GENIES: &[Genie] = &[Genie::Direct, Genie::Umfpack, Genie::Mumps];
 ///
 /// All three run on the AMG preconditioner with the default parameters of
 /// `russell_sparse`, so the comparison is between the Krylov methods and not between settings.
+/// The comparison the README and the PDF report beside the direct trio
+///
+/// UMFPACK is the reference because it is what the direct benchmark recommends for sequential use;
+/// the two Krylov methods are the ones that converge on more than one or two of the matrices. CG is
+/// left out of the table: it needs a symmetric positive definite system and reaches the gate on one.
+pub const GENIES_UMFPACK_ITERATIVE: &[Genie] = &[
+    Genie::Umfpack,
+    Genie::Iterative(IterativeMethod::BiCgStab),
+    Genie::Iterative(IterativeMethod::Gmres),
+];
+
 pub const GENIES_ITERATIVE: &[Genie] = &[
     Genie::Iterative(IterativeMethod::Cg),
     Genie::Iterative(IterativeMethod::BiCgStab),

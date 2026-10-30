@@ -9,6 +9,7 @@
   - [Information about the tested matrices](#information-about-the-tested-matrices)
   - [Calculations on Arch. Direct, UMFPACK and MUMPS. Real-valued matrices.](#calculations-on-arch-direct-umfpack-and-mumps-real-valued-matrices)
   - [Calculations on Arch. Direct, UMFPACK and MUMPS. Complex-valued matrices.](#calculations-on-arch-direct-umfpack-and-mumps-complex-valued-matrices)
+  - [Calculations on Arch. UMFPACK compared with the iterative solvers. Real-valued matrices.](#calculations-on-arch-umfpack-compared-with-the-iterative-solvers-real-valued-matrices)
   - [Legacy results](#legacy-results)
 - [System and libraries information](#system-and-libraries-information)
 
@@ -18,9 +19,11 @@
 
 This project contains performance benchmarks using the [Rust Scientific Library (Russell)](https://github.com/cpmech/russell).
 
-We compare the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse): the pure-Rust **Direct** solver (the default in Russell 5.0), **UMFPACK**, and **MUMPS**.
+We compare the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse): the pure-Rust **Direct** solver (the default in Russell 5.0), **UMFPACK**, and **MUMPS**; and, in their own table, the pure-Rust iterative solvers — **BiCGStab** and **GMRES** on the algebraic-multigrid preconditioner — against UMFPACK.
 
-The results presented here were produced with `russell_sparse` 4.1 (with `algebra_linear` 1.2) and the `intel_mkl`, `umfpack`, and `mumps` features; the crate now builds against `russell_sparse` 5.0 and `algebra_linear` 2, and the stored results were migrated to the 5.0 statistics schema rather than re-measured. Thus, UMFPACK and MUMPS are compiled locally with Intel MKL. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
+The direct results for the SuiteSparse matrices were produced with `russell_sparse` 4.1 (with `algebra_linear` 1.2) and migrated to the 5.0 statistics schema rather than re-measured. The iterative results, and every result for `pmsim-hex8-27`, were measured for this version: `russell_sparse` 5.0 with `algebra_linear` 2.1, features `intel_mkl`, `umfpack` and `mumps`, so UMFPACK and MUMPS are linked against the local Intel MKL. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
+
+The iterative solvers are a limited backend and the tables show it: with the default AMG settings they converge on a minority of the matrices, and an `n/a` there means the iteration did not reach the requested tolerance (or the run hit the memory cap), not that it was skipped. For production work, the direct backends are the ones to use.
 
 The cuDSS and KLU results from the earlier Russell 2.8 benchmark are kept under [`results/legacy-2.8/`](results/legacy-2.8) for reference; they are not part of the current comparison.
 
@@ -142,59 +145,67 @@ The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 
 
 ### Information about the tested matrices
 
+
 **Real-valued matrices:**
-| Matrix       |      Nrow |         NNZ |  Sym  |
-| ------------ | --------: | ----------: | :---: |
-| bwm2000      |     2,000 |       7,996 |  No   |
-| rdb5000      |     5,000 |      29,600 |  No   |
-| Goodwin_040  |    17,922 |     561,677 |  No   |
-| fp           |     7,548 |     848,553 |  No   |
-| xenon1       |    48,600 |   1,181,120 |  No   |
-| twotone      |   120,750 |   1,224,224 |  No   |
-| Raj1         |   263,743 |   1,302,464 |  No   |
-| boyd2        |   466,316 |   1,500,397 |  Yes  |
-| Goodwin_071  |    56,021 |   1,797,934 |  No   |
-| darcy003     |   389,874 |   2,101,242 |  Yes  |
-| rma10        |    46,835 |   2,374,001 |  No   |
-| helm2d03     |   392,257 |   2,741,935 |  Yes  |
-| stomach      |   213,360 |   3,021,648 |  No   |
-| oilpan       |    73,752 |   3,597,188 | Yes*  |
-| ASIC_680k    |   682,862 |   3,871,773 |  No   |
-| tmt_unsym    |   917,825 |   4,584,801 |  No   |
-| Goodwin_127  |   178,437 |   5,778,545 |  No   |
-| pre2         |   659,033 |   5,959,282 |  No   |
-| marine1      |   400,320 |   6,226,538 |  No   |
-| torso1       |   116,158 |   8,516,500 |  No   |
-| atmosmodd    | 1,270,432 |   8,814,880 |  No   |
-| atmosmodl    | 1,489,752 |  10,319,760 |  No   |
-| memchip      | 2,707,524 |  14,810,202 |  No   |
-| Freescale1   | 3,428,755 |  18,920,347 |  No   |
-| rajat31      | 4,690,002 |  20,316,253 |  No   |
-| Transport    | 1,602,111 |  23,500,731 |  No   |
-| inline_1     |   503,712 |  36,816,342 | Yes*  |
-| PFlow_742    |   742,793 |  37,138,461 | Yes*  |
-| Emilia_923   |   923,136 |  41,005,206 | Yes*  |
-| dielFilterV2 | 1,157,456 |  48,538,952 |  Yes  |
-| Flan_1565    | 1,564,794 | 117,406,044 | Yes*  |
-| pres-cylin   | 1,711,464 | 133,562,188 | Yes*  |
+| Matrix | Nrow | NNZ | Sym |
+| --- | ---: | ---: | :-: |
+| bwm2000 | 2,000 | 7,996 | No |
+| rdb5000 | 5,000 | 29,600 | No |
+| Goodwin_040 | 17,922 | 561,677 | No |
+| fp | 7,548 | 848,553 | No |
+| xenon1 | 48,600 | 1,181,120 | No |
+| twotone | 120,750 | 1,224,224 | No |
+| Raj1 | 263,743 | 1,302,464 | No |
+| boyd2 | 466,316 | 1,500,397 | Yes |
+| Goodwin_071 | 56,021 | 1,797,934 | No |
+| darcy003 | 389,874 | 2,101,242 | Yes |
+| rma10 | 46,835 | 2,374,001 | No |
+| helm2d03 | 392,257 | 2,741,935 | Yes |
+| stomach | 213,360 | 3,021,648 | No |
+| oilpan | 73,752 | 3,597,188 | Yes* |
+| ASIC_680k | 682,862 | 3,871,773 | No |
+| tmt_unsym | 917,825 | 4,584,801 | No |
+| Goodwin_127 | 178,437 | 5,778,545 | No |
+| pre2 | 659,033 | 5,959,282 | No |
+| marine1 | 400,320 | 6,226,538 | No |
+| torso1 | 116,158 | 8,516,500 | No |
+| atmosmodd | 1,270,432 | 8,814,880 | No |
+| atmosmodl | 1,489,752 | 10,319,760 | No |
+| memchip | 2,707,524 | 14,810,202 | No |
+| Freescale1 | 3,428,755 | 18,920,347 | No |
+| rajat31 | 4,690,002 | 20,316,253 | No |
+| Transport | 1,602,111 | 23,500,731 | No |
+| inline_1 | 503,712 | 36,816,342 | Yes* |
+| PFlow_742 | 742,793 | 37,138,461 | Yes* |
+| Emilia_923 | 923,136 | 41,005,206 | Yes* |
+| dielFilterV2 | 1,157,456 | 48,538,952 | Yes |
+| Flan_1565 | 1,564,794 | 117,406,044 | Yes* |
+| pres-cylin | 1,711,464 | 133,562,188 | Yes* |
+| pmsim-hex8-27 | 157 | 6,581 | Yes* |
 
 **Complex-valued matrices:**
-| Matrix             |    Nrow |        NNZ |  Sym  |
-| ------------------ | ------: | ---------: | :---: |
-| mhd1280b           |   1,280 |     22,778 |  No   |
-| mplate             |   5,962 |    142,190 |  Yes  |
-| RFdevice           |  74,104 |    365,580 |  No   |
-| vfem               |  93,476 |  1,434,636 |  No   |
-| fem_filter         |  74,062 |  1,731,206 |  No   |
-| Chevron4           | 711,450 |  6,376,412 |  No   |
-| mono_500Hz         | 169,410 |  5,036,288 |  No   |
-| kim2               | 456,976 | 11,330,020 |  No   |
-| fem_hifreq_circuit | 491,100 | 20,239,237 |  No   |
-| dielFilterV3clx    | 420,408 | 32,886,208 |  Yes  |
+| Matrix | Nrow | NNZ | Sym |
+| --- | ---: | ---: | :-: |
+| mhd1280b | 1,280 | 22,778 | No |
+| mplate | 5,962 | 142,190 | Yes |
+| RFdevice | 74,104 | 365,580 | No |
+| vfem | 93,476 | 1,434,636 | No |
+| fem_filter | 74,062 | 1,731,206 | No |
+| Chevron4 | 711,450 | 6,376,412 | No |
+| mono_500Hz | 169,410 | 5,036,288 | No |
+| kim2 | 456,976 | 11,330,020 | No |
+| fem_hifreq_circuit | 491,100 | 20,239,237 | No |
+| dielFilterV3clx | 420,408 | 32,886,208 | Yes |
 
-
+... direct: 6 measured matrices, run counts [5]
+... umfpack: 20 measured matrices, run counts [5]
+... mumps: 33 measured matrices, run counts [5]
+... direct: 2 measured matrices, run counts [5]
+... umfpack: 6 measured matrices, run counts [5]
+... mumps: 10 measured matrices, run counts [5]
 
 ### Calculations on Arch. Direct, UMFPACK and MUMPS. Real-valued matrices.
+
 
 | Matrix | Direct Time | Direct Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -230,10 +241,10 @@ The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 
 | dielFilterV2 | n/a | n/a | oom | oom | 13.788s | 1.45e-11 |
 | Flan_1565 | n/a | n/a | oom | oom | 23.996s | 9.85e-16 |
 | pres-cylin | n/a | n/a | oom | oom | **2m6.195s** | 4.90e-13 |
-
-
+| pmsim-hex8-27 | 934.320µs | 1.16e-15 | 736.383µs | 2.85e-16 | 7.657ms | 5.62e-16 |
 
 ### Calculations on Arch. Direct, UMFPACK and MUMPS. Complex-valued matrices.
+
 
 | Matrix | Direct Time | Direct Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -248,6 +259,51 @@ The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 
 | fem_hifreq_circuit | n/a | n/a | oom | oom | 11.608s | 1.00e-10 |
 | dielFilterV3clx | n/a | n/a | oom | oom | 4.824s | 1.68e-11 |
 
+... umfpack: 20 measured matrices, run counts [5]
+... bicgstab: 12 measured matrices, run counts [5]
+... gmres: 7 measured matrices, run counts [5]
+
+### Calculations on Arch. UMFPACK compared with the iterative solvers. Real-valued matrices.
+
+| Matrix | UMFPACK Time | UMFPACK Error | BiCGStab Time | BiCGStab Error | GMRES Time | GMRES Error |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| bwm2000 | 750.259µs | 5.30e-16 | 28.781ms | 8.72e-15 | n/a | n/a |
+| rdb5000 | 13.569ms | 1.93e-15 | n/a | n/a | 25.734ms | 3.77e-12 |
+| Goodwin_040 | 107.091ms | 6.62e-13 | 1.477s | 7.75e-10 | n/a | n/a |
+| fp | 154.476ms | 2.57e-21 | n/a | n/a | n/a | n/a |
+| xenon1 | 598.244ms | 5.55e-40 | 2.732s | 6.02e-38 | 2.935s | 1.18e-37 |
+| twotone | 337.133ms | 1.13e-14 | n/a | n/a | n/a | n/a |
+| Raj1 | oom | oom | n/a | n/a | n/a | n/a |
+| boyd2 | **1m18.248s** | 2.86e-13 | n/a | n/a | n/a | n/a |
+| Goodwin_071 | 426.060ms | 2.77e-12 | 11.724s | 7.92e-9 | n/a | n/a |
+| darcy003 | 1.385s | 6.95e-12 | n/a | n/a | n/a | n/a |
+| rma10 | 410.052ms | 1.57e-17 | n/a | n/a | n/a | n/a |
+| helm2d03 | 1.683s | 2.37e-13 | n/a | n/a | n/a | n/a |
+| stomach | 1.781s | 5.13e-16 | n/a | n/a | n/a | n/a |
+| oilpan | 494.931ms | 1.26e-15 | n/a | n/a | n/a | n/a |
+| ASIC_680k | 1.318s | 2.20e-11 | n/a | n/a | n/a | n/a |
+| tmt_unsym | 3.747s | 5.96e-8 | 1.638s | 1.91e-7 | n/a | n/a |
+| Goodwin_127 | 1.173s | 6.03e-12 | n/a | n/a | n/a | n/a |
+| pre2 | oom | oom | n/a | n/a | n/a | n/a |
+| marine1 | oom | oom | n/a | n/a | n/a | n/a |
+| torso1 | 952.952ms | 3.82e-8 | n/a | n/a | n/a | n/a |
+| atmosmodd | oom | oom | 7.780s | 7.66e-15 | 14.514s | 6.88e-15 |
+| atmosmodl | oom | oom | 5.751s | 9.12e-16 | 7.781s | 1.59e-15 |
+| memchip | 26.259s | 2.04e-15 | 21.341s | 1.73e-11 | 8.059s | 2.65e-11 |
+| Freescale1 | 30.025s | 7.05e-10 | 7.383s | 1.64e-9 | n/a | n/a |
+| rajat31 | oom | oom | 37.987s | 4.75e-12 | n/a | n/a |
+| Transport | oom | oom | 6.315s | 1.90e-9 | 6.188s | 6.29e-10 |
+| inline_1 | oom | oom | n/a | n/a | n/a | n/a |
+| PFlow_742 | oom | oom | n/a | n/a | n/a | n/a |
+| Emilia_923 | oom | oom | n/a | n/a | n/a | n/a |
+| dielFilterV2 | oom | oom | n/a | n/a | n/a | n/a |
+| Flan_1565 | oom | oom | n/a | n/a | n/a | n/a |
+| pres-cylin | oom | oom | n/a | n/a | n/a | n/a |
+| pmsim-hex8-27 | 736.383µs | 2.85e-16 | 818.326µs | 8.57e-14 | 736.254µs | 1.53e-13 |
+
+
+
+The iterative columns are BiCGStab and GMRES on the AMG preconditioner, five runs each with the default settings. CG is not in the table because it requires a symmetric positive definite system and reaches the error gate on one matrix of the set. An `n/a` in an iterative column means the iteration did not reach 1e-10 within 1 000 iterations, or that the run was killed by the memory or time cap; it does not mean `not measured`.
 
 ### Legacy results
 

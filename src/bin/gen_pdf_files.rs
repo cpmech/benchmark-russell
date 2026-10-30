@@ -1,4 +1,4 @@
-use benchmark_russell::{AllResults, GENIES, MATRICES, MATRICES_COMPLEX, StrError};
+use benchmark_russell::{AllResults, GENIES, GENIES_UMFPACK_ITERATIVE, MATRICES, MATRICES_COMPLEX, StrError};
 use benchmark_russell::{call_latexmk, get_matrix_list_latex, performance_table};
 use russell_sparse::{get_library_versions, get_system_info_linux};
 
@@ -71,7 +71,7 @@ fn main() -> Result<(), StrError> {
     text += "\\end{verbatim}\n";
 
     // generate tables of results
-    text += "\n\\noindent The results are given in Tables \\ref{tab:1} and \\ref{tab:2}.\n";
+    text += "\n\\noindent The results are given in Tables \\ref{tab:1} and \\ref{tab:2}. The iterative solvers are compared with UMFPACK in Table \\ref{tab:3}.\n";
     let table1 = performance_table(
         &caption1,
         "tab:1",
@@ -92,6 +92,16 @@ fn main() -> Result<(), StrError> {
     )?;
     text += table1.as_str();
     text += table2.as_str();
+
+    // UMFPACK against the two Krylov methods that converge widely
+    let caption3 = format!(
+        "Calculations on {}. UMFPACK compared with the iterative solvers. Real-valued matrices.",
+        OS
+    );
+    let iterative = AllResults::new(GENIES_UMFPACK_ITERATIVE, MATRICES, &results_dir)?;
+    iterative.print_run_counts();
+    let table3 = performance_table(&caption3, "tab:3", &iterative, None, Some(4.0), false, false)?;
+    text += table3.as_str();
 
     // generate the PDF file
     let filename_stem = format!("{}-performance-tables", OS.to_lowercase());
