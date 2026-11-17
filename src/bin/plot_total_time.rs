@@ -11,7 +11,7 @@ const SELECTED: &[&str] = &[
     "rdb5000",
     "Goodwin_040",
     "fp",
-    "xenon1",
+    "twotone",
     "mplate",
 ];
 

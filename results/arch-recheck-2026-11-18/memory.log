@@ -1,0 +1,98 @@
+2026-11-18T06:42:15+10:00 check umfpack/bwm2000 avail_mb=24211 swap_used_mb=0
+2026-11-18T06:42:15+10:00 ran umfpack/bwm2000 swap_growth_mb=0 avail_mb=24220 swap_used_mb=0
+2026-11-18T06:42:15+10:00 check umfpack/rdb5000 avail_mb=24220 swap_used_mb=0
+2026-11-18T06:42:15+10:00 ran umfpack/rdb5000 swap_growth_mb=0 avail_mb=24240 swap_used_mb=0
+2026-11-18T06:42:15+10:00 check umfpack/Goodwin_040 avail_mb=24236 swap_used_mb=0
+2026-11-18T06:42:16+10:00 ran umfpack/Goodwin_040 swap_growth_mb=0 avail_mb=24282 swap_used_mb=0
+2026-11-18T06:42:16+10:00 check umfpack/fp avail_mb=24282 swap_used_mb=0
+2026-11-18T06:42:16+10:00 ran umfpack/fp swap_growth_mb=0 avail_mb=24272 swap_used_mb=0
+2026-11-18T06:42:17+10:00 check umfpack/xenon1 avail_mb=24272 swap_used_mb=0
+2026-11-18T06:42:20+10:00 ran umfpack/xenon1 swap_growth_mb=0 avail_mb=24238 swap_used_mb=0
+2026-11-18T06:42:20+10:00 check umfpack/twotone avail_mb=24238 swap_used_mb=0
+2026-11-18T06:42:22+10:00 ran umfpack/twotone swap_growth_mb=0 avail_mb=24261 swap_used_mb=0
+2026-11-18T06:42:22+10:00 check umfpack/Raj1 avail_mb=24261 swap_used_mb=0
+2026-11-18T06:43:48+10:00 ran umfpack/Raj1 swap_growth_mb=0 avail_mb=25687 swap_used_mb=0
+2026-11-18T06:43:48+10:00 check umfpack/boyd2 avail_mb=25687 swap_used_mb=0
+2026-11-18T06:50:18+10:00 ran umfpack/boyd2 swap_growth_mb=0 avail_mb=25520 swap_used_mb=0
+2026-11-18T06:50:18+10:00 check umfpack/Goodwin_071 avail_mb=25520 swap_used_mb=0
+2026-11-18T06:50:20+10:00 ran umfpack/Goodwin_071 swap_growth_mb=0 avail_mb=25543 swap_used_mb=0
+2026-11-18T06:50:20+10:00 check umfpack/darcy003 avail_mb=25542 swap_used_mb=0
+2026-11-18T06:50:28+10:00 ran umfpack/darcy003 swap_growth_mb=0 avail_mb=25645 swap_used_mb=0
+2026-11-18T06:50:28+10:00 check umfpack/rma10 avail_mb=25645 swap_used_mb=0
+2026-11-18T06:50:30+10:00 ran umfpack/rma10 swap_growth_mb=0 avail_mb=25537 swap_used_mb=0
+2026-11-18T06:50:30+10:00 check umfpack/helm2d03 avail_mb=25537 swap_used_mb=0
+2026-11-18T06:50:38+10:00 ran umfpack/helm2d03 swap_growth_mb=0 avail_mb=25527 swap_used_mb=0
+2026-11-18T06:50:38+10:00 check umfpack/stomach avail_mb=25527 swap_used_mb=0
+2026-11-18T06:50:47+10:00 ran umfpack/stomach swap_growth_mb=0 avail_mb=25577 swap_used_mb=0
+2026-11-18T06:50:47+10:00 check umfpack/oilpan avail_mb=25577 swap_used_mb=0
+2026-11-18T06:50:50+10:00 ran umfpack/oilpan swap_growth_mb=0 avail_mb=25543 swap_used_mb=0
+2026-11-18T06:50:50+10:00 check umfpack/ASIC_680k avail_mb=25543 swap_used_mb=0
+2026-11-18T06:50:58+10:00 ran umfpack/ASIC_680k swap_growth_mb=0 avail_mb=25593 swap_used_mb=0
+2026-11-18T06:50:58+10:00 check umfpack/tmt_unsym avail_mb=25603 swap_used_mb=0
+2026-11-18T06:51:18+10:00 ran umfpack/tmt_unsym swap_growth_mb=0 avail_mb=25515 swap_used_mb=0
+2026-11-18T06:51:18+10:00 check umfpack/Goodwin_127 avail_mb=25515 swap_used_mb=0
+2026-11-18T06:51:25+10:00 ran umfpack/Goodwin_127 swap_growth_mb=0 avail_mb=25560 swap_used_mb=0
+2026-11-18T06:51:25+10:00 check umfpack/pre2 avail_mb=25558 swap_used_mb=0
+2026-11-18T06:51:34+10:00 ran umfpack/pre2 swap_growth_mb=0 avail_mb=25616 swap_used_mb=0
+2026-11-18T06:51:34+10:00 check umfpack/marine1 avail_mb=25615 swap_used_mb=0
+2026-11-18T06:51:42+10:00 ran umfpack/marine1 swap_growth_mb=0 avail_mb=25589 swap_used_mb=0
+2026-11-18T06:51:42+10:00 check umfpack/torso1 avail_mb=25588 swap_used_mb=0
+2026-11-18T06:51:48+10:00 ran umfpack/torso1 swap_growth_mb=0 avail_mb=25455 swap_used_mb=0
+2026-11-18T06:51:48+10:00 check umfpack/atmosmodd avail_mb=25454 swap_used_mb=0
+2026-11-18T06:52:06+10:00 ran umfpack/atmosmodd swap_growth_mb=0 avail_mb=25499 swap_used_mb=0
+2026-11-18T06:52:06+10:00 check umfpack/atmosmodl avail_mb=25499 swap_used_mb=0
+2026-11-18T06:52:26+10:00 ran umfpack/atmosmodl swap_growth_mb=0 avail_mb=25538 swap_used_mb=0
+2026-11-18T06:52:26+10:00 check umfpack/memchip avail_mb=25571 swap_used_mb=0
+2026-11-18T06:54:12+10:00 ran umfpack/memchip swap_growth_mb=0 avail_mb=25557 swap_used_mb=0
+2026-11-18T06:54:12+10:00 check umfpack/Freescale1 avail_mb=25557 swap_used_mb=0
+2026-11-18T06:58:41+10:00 check mumps/bwm2000 avail_mb=25370 swap_used_mb=0
+2026-11-18T06:58:41+10:00 ran mumps/bwm2000 swap_growth_mb=0 avail_mb=25377 swap_used_mb=0
+2026-11-18T06:58:41+10:00 check mumps/rdb5000 avail_mb=25377 swap_used_mb=0
+2026-11-18T06:58:41+10:00 ran mumps/rdb5000 swap_growth_mb=0 avail_mb=25382 swap_used_mb=0
+2026-11-18T06:58:41+10:00 check mumps/Goodwin_040 avail_mb=25382 swap_used_mb=0
+2026-11-18T06:58:41+10:00 ran mumps/Goodwin_040 swap_growth_mb=0 avail_mb=25398 swap_used_mb=0
+2026-11-18T06:58:41+10:00 check mumps/fp avail_mb=25398 swap_used_mb=0
+2026-11-18T06:58:42+10:00 ran mumps/fp swap_growth_mb=0 avail_mb=25420 swap_used_mb=0
+2026-11-18T06:58:42+10:00 check mumps/xenon1 avail_mb=25419 swap_used_mb=0
+2026-11-18T06:58:44+10:00 ran mumps/xenon1 swap_growth_mb=0 avail_mb=25382 swap_used_mb=0
+2026-11-18T06:58:44+10:00 check mumps/twotone avail_mb=25382 swap_used_mb=0
+2026-11-18T06:58:49+10:00 ran mumps/twotone swap_growth_mb=0 avail_mb=24950 swap_used_mb=0
+2026-11-18T06:58:49+10:00 check mumps/Raj1 avail_mb=24953 swap_used_mb=0
+2026-11-18T06:58:54+10:00 ran mumps/Raj1 swap_growth_mb=0 avail_mb=25216 swap_used_mb=0
+2026-11-18T06:58:54+10:00 check mumps/boyd2 avail_mb=25216 swap_used_mb=0
+2026-11-18T06:58:58+10:00 ran mumps/boyd2 swap_growth_mb=0 avail_mb=25291 swap_used_mb=0
+2026-11-18T06:58:58+10:00 check mumps/Goodwin_071 avail_mb=25291 swap_used_mb=0
+2026-11-18T06:59:00+10:00 ran mumps/Goodwin_071 swap_growth_mb=0 avail_mb=25347 swap_used_mb=0
+2026-11-18T06:59:00+10:00 check mumps/darcy003 avail_mb=25347 swap_used_mb=0
+2026-11-18T06:59:55+10:00 ran mumps/darcy003 swap_growth_mb=0 avail_mb=25461 swap_used_mb=0
+2026-11-18T06:59:55+10:00 check mumps/rma10 avail_mb=25481 swap_used_mb=0
+2026-11-18T06:59:56+10:00 ran mumps/rma10 swap_growth_mb=0 avail_mb=25428 swap_used_mb=0
+2026-11-18T06:59:56+10:00 check mumps/helm2d03 avail_mb=25428 swap_used_mb=0
+2026-11-18T07:00:04+10:00 ran mumps/helm2d03 swap_growth_mb=0 avail_mb=25396 swap_used_mb=0
+2026-11-18T07:00:04+10:00 check mumps/stomach avail_mb=25411 swap_used_mb=0
+2026-11-18T07:00:13+10:00 ran mumps/stomach swap_growth_mb=0 avail_mb=25459 swap_used_mb=0
+2026-11-18T07:00:13+10:00 check mumps/oilpan avail_mb=25458 swap_used_mb=0
+2026-11-18T07:00:15+10:00 ran mumps/oilpan swap_growth_mb=0 avail_mb=25266 swap_used_mb=0
+2026-11-18T07:00:15+10:00 check mumps/ASIC_680k avail_mb=25266 swap_used_mb=0
+2026-11-18T07:06:43+10:00 ran mumps/ASIC_680k swap_growth_mb=3 avail_mb=25387 swap_used_mb=3
+2026-11-18T07:06:43+10:00 check mumps/tmt_unsym avail_mb=25387 swap_used_mb=3
+2026-11-18T07:06:59+10:00 ran mumps/tmt_unsym swap_growth_mb=-1 avail_mb=25459 swap_used_mb=2
+2026-11-18T07:06:59+10:00 check mumps/Goodwin_127 avail_mb=25458 swap_used_mb=2
+2026-11-18T07:07:04+10:00 ran mumps/Goodwin_127 swap_growth_mb=0 avail_mb=25452 swap_used_mb=2
+2026-11-18T07:07:04+10:00 check mumps/pre2 avail_mb=25452 swap_used_mb=2
+2026-11-18T07:07:28+10:00 ran mumps/pre2 swap_growth_mb=0 avail_mb=25442 swap_used_mb=2
+2026-11-18T07:07:28+10:00 check mumps/marine1 avail_mb=25442 swap_used_mb=2
+2026-11-18T07:08:13+10:00 ran mumps/marine1 swap_growth_mb=1 avail_mb=25358 swap_used_mb=3
+2026-11-18T07:08:13+10:00 check mumps/torso1 avail_mb=25358 swap_used_mb=3
+2026-11-18T07:08:23+10:00 ran mumps/torso1 swap_growth_mb=-1 avail_mb=25491 swap_used_mb=2
+2026-11-18T07:08:23+10:00 check mumps/atmosmodd avail_mb=25491 swap_used_mb=2
+2026-11-18T07:18:02+10:00 ran mumps/atmosmodd swap_growth_mb=1 avail_mb=25371 swap_used_mb=3
+2026-11-18T07:18:02+10:00 check mumps/atmosmodl avail_mb=25387 swap_used_mb=3
+2026-11-18T07:29:08+10:00 ran mumps/atmosmodl swap_growth_mb=0 avail_mb=25375 swap_used_mb=3
+2026-11-18T07:29:08+10:00 check mumps/memchip avail_mb=25375 swap_used_mb=3
+2026-11-18T07:29:47+10:00 ran mumps/memchip swap_growth_mb=-1 avail_mb=25451 swap_used_mb=2
+2026-11-18T07:29:47+10:00 check mumps/Freescale1 avail_mb=25450 swap_used_mb=2
+2026-11-18T07:30:37+10:00 ran mumps/Freescale1 swap_growth_mb=0 avail_mb=25467 swap_used_mb=2
+2026-11-18T07:30:37+10:00 check mumps/rajat31 avail_mb=25480 swap_used_mb=2
+2026-11-18T07:32:37+10:00 ran mumps/rajat31 swap_growth_mb=1 avail_mb=25338 swap_used_mb=3
+2026-11-18T07:32:37+10:00 check mumps/Transport avail_mb=25337 swap_used_mb=3

@@ -352,6 +352,22 @@ Libraries information:
 
 ```
 UMFPACK: local (/usr/local/lib/umfpack)
-MUMPS: 5.9.0
+MUMPS: 5.9.0 for the published rows; 5.9.2 thread-safe fork for the November 2026 re-check
 SuiteSparse: latest (from GitHub)
 ```
+
+## Re-check on the thread-safe stack (November 2026)
+
+The MUMPS rows were re-measured on 18 November 2026 with `russell_sparse` 5.4.0 — the release whose MUMPS
+calls run on the caller's thread — against the thread-safe MUMPS 5.9.2 fork, on the same workstation.
+Twenty of the twenty-five matrices measured reproduce the published total times between 0.92 and 1.26
+times with unchanged solve times, so the stack is the same solver family that produced the tables above.
+Five did not: in each case the solve inflated by 6 to 69 times while the factorization stayed within tens
+of per cent, because MUMPS's working memory no longer fit in the 32 GB of the machine once its zram device
+was removed, and the solve is bound by memory traffic rather than by arithmetic.
+
+The raw re-check results, the per-run memory log and the table are in
+[`results/arch-recheck-2026-11-18/`](results/arch-recheck-2026-11-18). The published table remains the
+reference for those rows. `solve-problems.bash` now refuses to time a matrix when `MemAvailable` is below
+`MIN_AVAILABLE_GB` and discards a result whose run grew the swap or paged by more than its limits, so a
+machine that cannot hold the factorization records that fact instead of a misleading number.

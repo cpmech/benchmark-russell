@@ -52,7 +52,7 @@ FEATURES="intel_mkl,umfpack,mumps"
     cd "$RUSSELL_DIR/russell_sparse"
     cargo build --release --features "$FEATURES"
 )
-TARGET_DIR=${CARGO_TARGET_DIR:-$RUSSELL_DIR/target}
+TARGET_DIR=${CARGO_TARGET_DIR:-$(cd "$RUSSELL_DIR/russell_sparse" && cargo metadata --format-version 1 --no-deps | python3 -c 'import json, sys; print(json.load(sys.stdin)["target_directory"])')}
 COMMAND="$TARGET_DIR/release/solve_matrix_market"
 if [ ! -x "$COMMAND" ]; then
     echo "error: cannot find $COMMAND"
@@ -61,6 +61,72 @@ fi
 
 OUTPUT_DIR="$HERE/results/$SYSTEM"
 mkdir -p "$OUTPUT_DIR"
+
+# --------------------------------------------------------------------------
+# Memory guard
+# --------------------------------------------------------------------------
+# A MUMPS solve reserves a workspace several times the factor size: on the
+# Transport matrix INFOG(17) estimates 39 GB for the in-core factorization and
+# the solve reports 33.7 GB used, with ICNTL(14) = 100 % memory relaxation and
+# out-of-core off. A 32 GB workstation serves that reservation lazily, so an
+# idle run touches only a few GB and is fast; once free memory falls behind the
+# reservation the solve pages and its timing grows by one to two orders of
+# magnitude (0.33 s measured idle, 35 s with 20 GB held by another process),
+# while the compute-bound factorization grows only two to three times. The
+# numbers in this directory are therefore only meaningful on a machine that is
+# not swapping, and the guard below enforces that instead of trusting the
+# operator: it refuses to start a matrix when free memory is short, and it
+# discards a result whose own run pushed pages into swap.
+MEMORY_LOG="$OUTPUT_DIR/memory.log"
+MIN_AVAILABLE_GB=${MIN_AVAILABLE_GB:-20}        # refuse to start below this much free memory
+MAX_SWAP_GROWTH_MB=${MAX_SWAP_GROWTH_MB:-256}   # a run that grows swap by more is contaminated
+MAX_SWAP_PAGES=${MAX_SWAP_PAGES:-4096}          # a run that pages more than this (16 MB) is contaminated
+
+mem_available_mb() { awk '/^MemAvailable/{print int($2 / 1024)}' /proc/meminfo; }
+swap_used_mb()     { awk '/^SwapTotal/{t=$2} /^SwapFree/{f=$2} END{print int((t - f) / 1024)}' /proc/meminfo; }
+# Cumulative page counters: net swap usage misses a run whose pages are swapped out and read back.
+swap_pages()       { awk '/^pswpin/{i=$2} /^pswpout/{o=$2} END{print i + o}' /proc/vmstat; }
+
+memory_log() {
+    echo "$(date -Is) $* avail_mb=$(mem_available_mb) swap_used_mb=$(swap_used_mb)" >> "$MEMORY_LOG"
+}
+
+# require_memory LABEL: abort the stage when the machine cannot host a solve
+require_memory() {
+    local avail
+    avail=$(mem_available_mb)
+    memory_log "check $1"
+    if [ "$avail" -lt $((MIN_AVAILABLE_GB * 1024)) ]; then
+        {
+            echo "error: only ${avail} MB available, below MIN_AVAILABLE_GB=${MIN_AVAILABLE_GB} GB"
+            echo "       MUMPS reserves up to 39 GB here; a solve that starts swapping is 50-100x slower"
+            echo "       and its timing is worthless. Reclaim memory (reset the swap, stop other jobs)"
+            echo "       or lower MIN_AVAILABLE_GB deliberately."
+            echo "       See the comment above and results/*/memory.log."
+        } >&2
+        exit 1
+    fi
+}
+
+# memory_begin / memory_end OUT LABEL: discard a result whose run paged
+memory_begin() {
+    MEM_BEFORE_SWAP=$(swap_used_mb)
+    MEM_BEFORE_PAGES=$(swap_pages)
+}
+
+memory_end() {
+    local out=$1 label=$2 after grew pages
+    after=$(swap_used_mb)
+    grew=$((after - MEM_BEFORE_SWAP))
+    pages=$(( $(swap_pages) - MEM_BEFORE_PAGES ))
+    memory_log "ran $label swap_growth_mb=$grew swap_pages=$pages"
+    if [ "$grew" -gt "$MAX_SWAP_GROWTH_MB" ] || [ "$pages" -gt "$MAX_SWAP_PAGES" ]; then
+        echo "    contaminated: swap grew by ${grew} MB and paged ${pages} pages during $label; discarding the result" >&2
+        rm -f "$out"
+        return 1
+    fi
+    return 0
+}
 
 # Real matrices
 REAL_MATS="
@@ -146,9 +212,13 @@ run_external() {
         local extra
         extra=$(extra_args "$mat")
         echo "... $genie / $mat ..."
+        require_memory "$genie/$mat"
+        memory_begin
         if ! timeout 3600 "$COMMAND" -g "$genie" -r "$NRUN" $extra "$INPUT_DIR/$mat.mtx" > "$outdir/$genie-$mat.json"; then
             echo "    failed or timed out; removing the partial result"
             rm -f "$outdir/$genie-$mat.json"
+        else
+            memory_end "$outdir/$genie-$mat.json" "$genie/$mat" || true
         fi
     done
 }
@@ -176,6 +246,7 @@ run_direct_matrix() {
     fi
 
     echo "... direct / $mat (probe) ..."
+    require_memory "direct/$mat"
     local t0 t1 elapsed
     t0=$(date +%s%N)
     if (
@@ -199,6 +270,7 @@ run_direct_matrix() {
             echo "    probe took ${elapsed}s; keeping the single run"
         else
             echo "    probe took ${elapsed}s; running $nrun times"
+            memory_begin
             if ! (
                 ulimit -v "$DIRECT_MEMORY_KB"
                 exec timeout $((elapsed * nrun * 3 + 600)) "$COMMAND" -g direct -r "$nrun" $direct_flag $extra "$INPUT_DIR/$mat.mtx"
@@ -206,6 +278,7 @@ run_direct_matrix() {
                 echo "    full run failed or timed out; keeping the probe result"
                 mv "$probe" "$outdir/direct-$mat.json"
             else
+                memory_end "$outdir/direct-$mat.json" "direct/$mat" || true
                 rm -f "$probe"
             fi
         fi
@@ -247,12 +320,16 @@ run_iterative() {
             continue
         fi
         echo "... $genie / $mat ..."
+        require_memory "$genie/$mat"
+        memory_begin
         if ! (
             ulimit -v "$ITERATIVE_MEMORY_KB"
             exec timeout "$ITERATIVE_TIMEOUT" "$COMMAND" -g "$genie" -r "$NRUN" "$INPUT_DIR/$mat.mtx"
         ) > "$outdir/$genie-$mat.json" 2> /dev/null; then
             echo "    failed, killed or timed out; removing the partial result"
             rm -f "$outdir/$genie-$mat.json"
+        else
+            memory_end "$outdir/$genie-$mat.json" "$genie/$mat" || true
         fi
     done
 }
