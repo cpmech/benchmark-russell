@@ -50,9 +50,13 @@ Each JSON here was produced by the same command the suite uses
   orders of magnitude while the factorization, which is compute-bound, moves by tens of per cent.
   `ASIC_680k` is that same effect hidden inside a factorization-dominated total: its total is
   unchanged while its solve inflates tenfold.
-- The October campaign had a zram device beside the swapfile; this one has only the 31 GB swapfile, so
-  the same overflow reaches the disk instead of compressed RAM. That is an environment change, not a
-  solver change, and it is why the published table remains the reference for those rows.
+- The requirement did not change with the library. Measured on `Transport` with each build (memory capped so
+  MUMPS stops after its own estimate): INFOG(17) = 39,362 MB, INFOG(27) = 13,553 MB and INFOG(3) =
+  2,635,174,153 entries are byte-identical for MUMPS 5.9.0, stock 5.9.2 and the patched 5.9.2, with analysis
+  times of 10.08, 10.19 and 10.45 s. What changed is the machine: the published campaign had a zram device
+  beside its swapfile (`SwapTotal` 62 GB in its system box), this one has only the 31 GB swapfile, so the
+  same overflow reaches the disk instead of compressed RAM. That is an environment change, not a solver
+  change, and it is why the published table remains the reference for those rows.
 
 ## Consequence for the harness
 
