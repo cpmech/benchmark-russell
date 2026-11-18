@@ -14,25 +14,29 @@ set -euo pipefail
 #   RUSSELL_DIR          Russell checkout        (default: ../russell)
 #   INPUT_DIR            .mtx directory          (default: ~/Downloads/matrix-market)
 #   SYSTEM               results subdirectory    (default: arch)
-#   NRUN                 runs per solver         (default: 5)
-#   DIRECT_MAX_RUNS      Native run ceiling      (default: 5)
+#   NRUN                 runs per solver         (default: 3)
+#   EXTERNAL_TIMEOUT     UMFPACK/MUMPS per-run time cap, s (default: 720)
+#   DIRECT_MAX_RUNS      Native run ceiling      (default: 3)
 #   DIRECT_PROBE_TIMEOUT Native probe time, s    (default: 180)
 #   DIRECT_MEMORY_KB     Native memory cap, KiB  (default: 20000000, ~20 GB)
-#   DIRECT_MAX_NNZ       Skip Native above this pattern size; 0 disables it (default: 0)
+#   DIRECT_MAX_NNZ       Skip Native above this pattern size; 0 disables it (default: 1200000)
 #   DIRECT_SUPERNODAL    1 selects the experimental supernodal LU (default: 0)
 #   STAGES               all | external | direct | iterative (default: all)
 #   ITERATIVE_MEMORY_KB  per-run memory cap, KiB (default: 8000000, ~8 GB)
-#   ITERATIVE_TIMEOUT    per-run time cap, s    (default: 1200)
+#   ITERATIVE_TIMEOUT    per-run time cap, s     (default: 240)
+#   TIMEOUT_OVERHEAD     batch read/verify allowance, s (default: 60)
 
-NRUN=${NRUN:-5}
-DIRECT_MAX_RUNS=${DIRECT_MAX_RUNS:-5}
+NRUN=${NRUN:-3}
+EXTERNAL_TIMEOUT=${EXTERNAL_TIMEOUT:-720}
+DIRECT_MAX_RUNS=${DIRECT_MAX_RUNS:-3}
 DIRECT_PROBE_TIMEOUT=${DIRECT_PROBE_TIMEOUT:-180}
 DIRECT_MEMORY_KB=${DIRECT_MEMORY_KB:-20000000}
-DIRECT_MAX_NNZ=${DIRECT_MAX_NNZ:-0}
+DIRECT_MAX_NNZ=${DIRECT_MAX_NNZ:-1200000}
 DIRECT_SUPERNODAL=${DIRECT_SUPERNODAL:-0}
 STAGES=${STAGES:-all}
 ITERATIVE_MEMORY_KB=${ITERATIVE_MEMORY_KB:-8000000}
-ITERATIVE_TIMEOUT=${ITERATIVE_TIMEOUT:-1200}
+ITERATIVE_TIMEOUT=${ITERATIVE_TIMEOUT:-240}
+TIMEOUT_OVERHEAD=${TIMEOUT_OVERHEAD:-60}
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 RUSSELL_DIR=${RUSSELL_DIR:-$HERE/../russell}
@@ -147,44 +151,57 @@ require_memory() {
     fi
 }
 
-# run_checked OUT LABEL MEM_KB CMD...: run CMD with its stdout in OUT, under an
-# optional address-space cap (MEM_KB, 0 = none) and a major-fault bound. The
-# fault count is the child's own, from wait4, not the system-wide swap figures.
+# run_checked OUT LABEL MEM_KB TMO_S CMD...: run CMD with its stdout in OUT,
+# under timeout TMO_S, an optional address-space cap (MEM_KB, 0 = none), and a
+# major-fault bound. The fault count is the child's own, from wait4, not the
+# system-wide swap figures. Populates RUN_EXIT, RUN_ELAPSED_S, RUN_MAJFLT, and
+# RUN_MAXRSS_MB for memory_end logging.
 run_checked() {
-    local out=$1 label=$2 memkb=$3
-    shift 3
+    local out=$1 label=$2 memkb=$3 tmo=$4 stats
+    shift 4
+    RUN_EXIT=1
+    RUN_ELAPSED_S=0
+    RUN_MAJFLT=0
+    RUN_MAXRSS_MB=0
+    set -- timeout "$tmo" "$@"
     if [ "$memkb" -gt 0 ]; then
         set -- bash -c 'ulimit -v "$0" || exit 9; exec "$@"' "$memkb" "$@"
     fi
-    python3 - "$out" "$label" "$MAX_MAJFLT" "$@" <<'PY'
-import os, subprocess, sys
-out, label, limit, cmd = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4:]
+    stats=$(python3 - "$out" "$label" "$tmo" "$@" <<'PY'
+import os, subprocess, sys, time
+out, label, tmo, cmd = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:]
+t0 = time.monotonic()
 with open(out, "w") as f:
     p = subprocess.Popen(cmd, stdout=f, stderr=subprocess.DEVNULL)
     _, status, ru = os.wait4(p.pid, 0)
-p.returncode = os.waitstatus_to_exitcode(status)
-print(f"    {label}: exit={p.returncode} majflt={ru.ru_majflt} maxrss_mb={ru.ru_maxrss // 1024}",
+elapsed = time.monotonic() - t0
+rc = os.waitstatus_to_exitcode(status)
+maxrss_mb = ru.ru_maxrss // 1024
+print(f"    {label}: exit={rc} elapsed_s={elapsed:.1f} timeout_s={tmo} majflt={ru.ru_majflt} maxrss_mb={maxrss_mb}",
       file=sys.stderr)
-if ru.ru_majflt > limit:
-    print(f"    contaminated: {ru.ru_majflt} major faults during {label}; discarding the result",
-          file=sys.stderr)
-    sys.exit(3)
-sys.exit(p.returncode)
+print(f"{rc} {elapsed:.2f} {ru.ru_majflt} {maxrss_mb}")
 PY
+    )
+    read -r RUN_EXIT RUN_ELAPSED_S RUN_MAJFLT RUN_MAXRSS_MB <<< "$stats"
+    if [ "$RUN_MAJFLT" -gt "$MAX_MAJFLT" ]; then
+        echo "    contaminated: $RUN_MAJFLT major faults during $label; discarding the result" >&2
+        return 3
+    fi
+    [ "$RUN_EXIT" -eq 0 ]
 }
 
-# memory_begin / memory_end OUT LABEL: discard a result whose run paged
+# memory_begin / memory_end OUT LABEL TMO_S: log run outcome and discard a result whose run paged
 memory_begin() {
     MEM_BEFORE_SWAP=$(swap_used_mb)
     MEM_BEFORE_PAGES=$(swap_pages)
 }
 
 memory_end() {
-    local out=$1 label=$2 after grew pages
+    local out=$1 label=$2 tmo=$3 after grew pages
     after=$(swap_used_mb)
     grew=$((after - MEM_BEFORE_SWAP))
     pages=$(( $(swap_pages) - MEM_BEFORE_PAGES ))
-    memory_log "ran $label swap_growth_mb=$grew swap_pages=$pages"
+    memory_log "ran $label exit=$RUN_EXIT elapsed_s=$RUN_ELAPSED_S timeout_s=$tmo majflt=$RUN_MAJFLT maxrss_mb=$RUN_MAXRSS_MB swap_growth_mb=$grew swap_pages=$pages"
     if [ "$grew" -gt "$MAX_SWAP_GROWTH_MB" ] || [ "$pages" -gt "$MAX_SWAP_PAGES" ]; then
         echo "    contaminated: swap grew by ${grew} MB and paged ${pages} pages during $label; discarding the result" >&2
         rm -f "$out"
@@ -193,19 +210,27 @@ memory_end() {
     return 0
 }
 
-# bench OUT LABEL MEM_KB CMD...: one guarded run; a failure or a contamination
-# removes the partial result so the table generators render "n/a"
+# bench OUT LABEL MEM_KB TMO_S CMD...: one guarded run; always logs the outcome
+# to memory.log, and a failure or contamination removes the partial result so
+# the table generators render "n/a"
 bench() {
-    local out=$1 label=$2
+    local out=$1 label=$2 memkb=$3 tmo=$4 rc=0
+    shift 4
     echo "... $label ..."
     require_memory "$label"
     memory_begin
-    if run_checked "$@"; then
-        memory_end "$out" "$label" || true
-    else
+    if ! run_checked "$out" "$label" "$memkb" "$tmo" "$@"; then
+        rc=1
+    fi
+    if ! memory_end "$out" "$label" "$tmo"; then
+        rc=1
+    fi
+    if [ "$rc" -ne 0 ]; then
         echo "    failed, timed out or contaminated; removing the partial result"
         rm -f "$out"
+        return 1
     fi
+    return 0
 }
 
 # A field of a matrix in data/matrices.json, e.g. matrix_field bwm2000 Symmetric
@@ -232,8 +257,8 @@ run_solver() {
     local outdir="$OUTPUT_DIR/$genie" memkb=0 tmo
     local mat
     case $genie in
-        umfpack | mumps) tmo=3600 ;;
-        *) memkb=$ITERATIVE_MEMORY_KB tmo=$ITERATIVE_TIMEOUT ;;
+        umfpack | mumps) tmo=$((NRUN * EXTERNAL_TIMEOUT + TIMEOUT_OVERHEAD)) ;;
+        *) memkb=$ITERATIVE_MEMORY_KB tmo=$((NRUN * ITERATIVE_TIMEOUT + TIMEOUT_OVERHEAD)) ;;
     esac
     mkdir -p "$outdir"
     for mat in "$@"; do
@@ -241,11 +266,12 @@ run_solver() {
         # and the row is better left empty than reported as a failure
         if [ "$genie" = cg ] && [ "$(matrix_field "$mat" Symmetric)" != Yes ]; then
             echo "... $genie/$mat ... skipping (not symmetric)"
+            memory_log "skip $genie/$mat reason=not_symmetric"
             rm -f "$outdir/$genie-$mat.json"
             continue
         fi
-        bench "$outdir/$genie-$mat.json" "$genie/$mat" "$memkb" \
-            timeout "$tmo" "$COMMAND" -g "$genie" -r "$NRUN" $(extra_args "$mat") "$INPUT_DIR/$mat.mtx"
+        bench "$outdir/$genie-$mat.json" "$genie/$mat" "$memkb" "$tmo" \
+            "$COMMAND" -g "$genie" -r "$NRUN" $(extra_args "$mat") "$INPUT_DIR/$mat.mtx" || true
     done
 }
 
@@ -253,7 +279,7 @@ run_solver() {
 # runs are worth doing
 run_direct_matrix() {
     local mat=$1 extra flag="" outdir="$OUTPUT_DIR/direct" probe
-    local t0 elapsed nrun nnz
+    local elapsed nrun nnz
     extra=$(extra_args "$mat")
     if [ "$DIRECT_SUPERNODAL" = 1 ]; then
         outdir="$OUTPUT_DIR/direct-supernodal"
@@ -262,24 +288,20 @@ run_direct_matrix() {
     nnz=$(matrix_field "$mat" "Pattern Entries")
     if [ "$DIRECT_MAX_NNZ" -gt 0 ] && [ "${nnz:-0}" -gt "$DIRECT_MAX_NNZ" ]; then
         echo "... direct/$mat ... skipping (pattern entries $nnz > $DIRECT_MAX_NNZ)"
+        memory_log "skip direct/$mat reason=max_nnz nnz=$nnz limit=$DIRECT_MAX_NNZ"
         rm -f "$outdir/direct-$mat.json"
         return
     fi
     mkdir -p "$outdir"
     probe="$outdir/.probe-$mat.json"
 
-    echo "... direct/$mat (probe) ..."
-    require_memory "direct/$mat"
-    t0=$(date +%s%N)
-    if ! (
-        ulimit -v "$DIRECT_MEMORY_KB"
-        exec timeout "$DIRECT_PROBE_TIMEOUT" "$COMMAND" -g direct -r 1 $flag $extra "$INPUT_DIR/$mat.mtx"
-    ) > "$probe" 2> /dev/null; then
+    if ! bench "$probe" "direct/$mat:probe" "$DIRECT_MEMORY_KB" "$DIRECT_PROBE_TIMEOUT" \
+        "$COMMAND" -g direct -r 1 $flag $extra "$INPUT_DIR/$mat.mtx"; then
         echo "    probe failed or timed out; marking n/a"
         rm -f "$probe" "$outdir/direct-$mat.json"
         return
     fi
-    elapsed=$(( ($(date +%s%N) - t0) / 1000000000 ))
+    elapsed=${RUN_ELAPSED_S%.*}
 
     nrun=1
     if [ "$elapsed" -lt 2 ]; then
@@ -294,12 +316,8 @@ run_direct_matrix() {
     fi
 
     echo "    probe took ${elapsed}s; running $nrun times"
-    memory_begin
-    if (
-        ulimit -v "$DIRECT_MEMORY_KB"
-        exec timeout $((elapsed * nrun * 3 + 600)) "$COMMAND" -g direct -r "$nrun" $flag $extra "$INPUT_DIR/$mat.mtx"
-    ) > "$outdir/direct-$mat.json" 2> /dev/null; then
-        memory_end "$outdir/direct-$mat.json" "direct/$mat" || true
+    if bench "$outdir/direct-$mat.json" "direct/$mat" "$DIRECT_MEMORY_KB" $((elapsed * nrun * 3 + 600)) \
+        "$COMMAND" -g direct -r "$nrun" $flag $extra "$INPUT_DIR/$mat.mtx"; then
         rm -f "$probe"
     else
         echo "    full run failed or timed out; keeping the probe result"
