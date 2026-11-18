@@ -26,7 +26,7 @@ set -euo pipefail
 #   ITERATIVE_TIMEOUT    per-run time cap, s     (default: 240)
 #   TIMEOUT_OVERHEAD     batch read/verify allowance, s (default: 60)
 
-NRUN=${NRUN:-3}
+NRUN=${NRUN:-5}
 EXTERNAL_TIMEOUT=${EXTERNAL_TIMEOUT:-720}
 DIRECT_MAX_RUNS=${DIRECT_MAX_RUNS:-3}
 DIRECT_PROBE_TIMEOUT=${DIRECT_PROBE_TIMEOUT:-180}
