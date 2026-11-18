@@ -6,6 +6,8 @@ set -euo pipefail
 # ~/Downloads/matrix-market, writing one JSON file per (solver, matrix) under
 # results/<system>/<solver>/<solver>-<matrix>.json. A failed, timed-out or
 # contaminated run leaves no file, and the table generators render it "n/a".
+# The whole execution is timed: wall and CPU totals print when the last stage
+# finishes, and the wall time is also appended to memory.log.
 #
 # Environment (required):
 #   export RUSSELL_LOCAL_PREFIX=/usr/local
@@ -14,7 +16,7 @@ set -euo pipefail
 #   RUSSELL_DIR          Russell checkout        (default: ../russell)
 #   INPUT_DIR            .mtx directory          (default: ~/Downloads/matrix-market)
 #   SYSTEM               results subdirectory    (default: arch)
-#   NRUN                 runs per solver         (default: 3)
+#   NRUN                 runs per solver         (default: 5)
 #   EXTERNAL_TIMEOUT     UMFPACK/MUMPS per-run time cap, s (default: 720)
 #   DIRECT_MAX_RUNS      Native run ceiling      (default: 3)
 #   DIRECT_PROBE_TIMEOUT Native probe time, s    (default: 180)
@@ -65,22 +67,6 @@ COMPLEX_MATS=(
     fem_filter Chevron4 mono_500Hz kim2
     fem_hifreq_circuit dielFilterV3clx
 )
-
-# Build the CLI from the local Russell checkout
-(cd "$RUSSELL_DIR/russell_sparse" && cargo build --release --features "$FEATURES")
-# cargo metadata reports the effective target directory, CARGO_TARGET_DIR included
-TARGET_DIR=$(
-    cd "$RUSSELL_DIR/russell_sparse"
-    cargo metadata --format-version 1 --no-deps |
-        python3 -c 'import json, sys; print(json.load(sys.stdin)["target_directory"])'
-)
-COMMAND=$TARGET_DIR/release/solve_matrix_market
-if [ ! -x "$COMMAND" ]; then
-    echo "error: cannot find $COMMAND"
-    exit 1
-fi
-
-mkdir -p "$OUTPUT_DIR"
 
 # --------------------------------------------------------------------------
 # Memory guard
@@ -328,33 +314,57 @@ run_direct_matrix() {
 # STAGES selects the stages to run: all, or one of external, direct, iterative
 want() { [ "$STAGES" = all ] || [ "$STAGES" = "$1" ]; }
 
-# Verify the inputs before starting
-for mat in "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"; do
-    if [ ! -f "$INPUT_DIR/$mat.mtx" ]; then
-        echo "error: missing $INPUT_DIR/$mat.mtx"
+# The whole run — build, input check, stages — in one function so the time
+# builtin can report the total at the end
+main() {
+    # Build the CLI from the workspace root, selecting the crate that holds it
+    (cd "$RUSSELL_DIR" && cargo build --release -p russell_sparse --features "$FEATURES")
+    # cargo metadata reports the effective target directory, CARGO_TARGET_DIR included
+    TARGET_DIR=$(
+        cd "$RUSSELL_DIR"
+        cargo metadata --format-version 1 --no-deps |
+            python3 -c 'import json, sys; print(json.load(sys.stdin)["target_directory"])'
+    )
+    COMMAND=$TARGET_DIR/release/solve_matrix_market
+    if [ ! -x "$COMMAND" ]; then
+        echo "error: cannot find $COMMAND"
         exit 1
     fi
-done
+    mkdir -p "$OUTPUT_DIR"
 
-# External solvers first so the long Direct pass can be interrupted without
-# losing their results
-if want external; then
-    run_solver umfpack "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"
-    run_solver mumps "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"
-fi
-
-if want direct; then
+    # Verify the inputs before starting
     for mat in "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"; do
-        run_direct_matrix "$mat"
+        if [ ! -f "$INPUT_DIR/$mat.mtx" ]; then
+            echo "error: missing $INPUT_DIR/$mat.mtx"
+            exit 1
+        fi
     done
-fi
 
-# The iterative solvers are real-valued only: CG needs a symmetric matrix, and
-# the preconditioner is built from the same real pattern
-if want iterative; then
-    run_solver cg "${REAL_MATS[@]}"
-    run_solver bicgstab "${REAL_MATS[@]}"
-    run_solver gmres "${REAL_MATS[@]}"
-fi
+    # External solvers first so the long Direct pass can be interrupted without
+    # losing their results
+    if want external; then
+        run_solver umfpack "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"
+        run_solver mumps "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"
+    fi
 
-echo "done: results in $OUTPUT_DIR"
+    if want direct; then
+        for mat in "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"; do
+            run_direct_matrix "$mat"
+        done
+    fi
+
+    # The iterative solvers are real-valued only: CG needs a symmetric matrix, and
+    # the preconditioner is built from the same real pattern
+    if want iterative; then
+        run_solver cg "${REAL_MATS[@]}"
+        run_solver bicgstab "${REAL_MATS[@]}"
+        run_solver gmres "${REAL_MATS[@]}"
+    fi
+
+    echo "done: results in $OUTPUT_DIR"
+    memory_log "suite done wall_s=$SECONDS stages=$STAGES"
+}
+
+# Wall and CPU time of the whole execution, printed once the last stage is done
+TIMEFORMAT='total: real %3Rs  user %3Us  sys %3Ss'
+time main
