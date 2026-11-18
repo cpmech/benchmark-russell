@@ -1,0 +1,94 @@
+{
+  "main": {
+    "platform": "Russell",
+    "blas_lib": "Intel MKL",
+    "solver": "MUMPS",
+    "mumps": true,
+    "out_of_memory": false
+  },
+  "matrix": {
+    "name": "Transport",
+    "nrow": 1602111,
+    "ncol": 1602111,
+    "nnz": 23500731,
+    "nnz_actual": 23500731,
+    "complex": false,
+    "symmetric": "No"
+  },
+  "requests": {
+    "ordering": "Auto",
+    "scaling": "Auto",
+    "mumps_num_threads": 0,
+    "positive_definite": false
+  },
+  "output": {
+    "effective_ordering": "Metis",
+    "effective_scaling": "RowColIter",
+    "effective_mumps_num_threads": 0,
+    "openmp_num_threads": 24,
+    "umfpack_strategy": "Unknown",
+    "umfpack_rcond_estimate": 0.0
+  },
+  "determinant": {
+    "mantissa_real": 0.0,
+    "mantissa_imag": 0.0,
+    "base": 2.0,
+    "exponent": 0.0
+  },
+  "verify": {
+    "max_abs_a": 1.0,
+    "max_abs_ax": 1.000000000691358,
+    "max_abs_diff": 7.624123554705875e-10,
+    "relative_error": 3.8120617773529375e-10
+  },
+  "time_human": {
+    "read_matrix": "1.888455122s",
+    "initialize_array": [
+      "10.147861824s"
+    ],
+    "initialize": "10.147861824s",
+    "preprocess_array": [
+      "44.496263398s"
+    ],
+    "preprocess": "44.496263398s",
+    "solve_array": [
+      "8.678814014s"
+    ],
+    "solve": "8.678814014s",
+    "total_ifs_array": [
+      "1m3.322939236s"
+    ],
+    "total_ifs": "1m3.322939236s",
+    "verify": "811.866581ms"
+  },
+  "time_nanoseconds": {
+    "read_matrix": 1888455122,
+    "initialize_array": [
+      10147861824
+    ],
+    "initialize": 10147861824,
+    "preprocess_array": [
+      44496263398
+    ],
+    "preprocess": 44496263398,
+    "solve_array": [
+      8678814014
+    ],
+    "solve": 8678814014,
+    "total_ifs_array": [
+      63322939236
+    ],
+    "total_ifs": 63322939236,
+    "verify": 811866581
+  },
+  "mumps_stats": {
+    "inf_norm_a": 0.0,
+    "inf_norm_x": 0.0,
+    "scaled_residual": 0.0,
+    "backward_error_omega1": 0.0,
+    "backward_error_omega2": 0.0,
+    "normalized_delta_x": 0.0,
+    "condition_number1": 0.0,
+    "condition_number2": 0.0
+  }
+}

@@ -67,3 +67,14 @@ results, which are currently moved into place unguarded.
 
 `memory.log` in this directory predates the `swap_pages` field; its lines carry only `avail_mb` and
 `swap_used_mb`.
+
+## Evidence in this directory
+
+- `mumps-*.json` — the 25 capped runs of the first pass (the 5 that paged are the outliers discussed above).
+- `uncapped-*.json` — the five re-run uncapped in the foreground: `marine1`, `rajat31`, `atmosmodd`,
+  `atmosmodl`, `ASIC_680k`.
+- `evidence/` — the raw measurements behind the diagnosis: `est-*.txt` (MUMPS's own memory estimate for the
+  three builds), `faul-samples.txt` (per-second `minflt`/`majflt` of a capped run), `instr-*.time` (user vs
+  system CPU), `pair-*.json` (foreground/background pair), `cap-*.json` (`ICNTL(23)` caps), `hp-*.json`
+  (huge-page test).
+- `memory.log` — the harness's own log of the first pass.
