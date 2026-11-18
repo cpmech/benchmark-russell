@@ -359,15 +359,15 @@ SuiteSparse: latest (from GitHub)
 ## Re-check on the thread-safe stack (November 2026)
 
 The MUMPS rows were re-measured on 18 November 2026 with `russell_sparse` 5.4.0 — the release whose MUMPS
-calls run on the caller's thread — against the thread-safe MUMPS 5.9.2 fork, on the same workstation.
-Twenty of the twenty-five matrices measured reproduce the published total times between 0.92 and 1.26
-times with unchanged solve times, so the stack is the same solver family that produced the tables above.
-Five did not: in each case the solve inflated by 6 to 69 times while the factorization stayed within tens
-of per cent, because MUMPS's working memory no longer fit in the 32 GB of the machine once its zram device
-was removed, and the solve is bound by memory traffic rather than by arithmetic.
+calls run on the caller's thread — against the thread-safe MUMPS 5.9.2 fork, on the same workstation. Twenty-
+five matrices were measured; they reproduce the published totals between 0.82 and 1.26 times, with solve times
+unchanged or faster, so the thread-safe stack is the same solver that produced the tables above, and a little
+quicker on this hardware.
 
-The raw re-check results, the per-run memory log and the table are in
-[`results/arch-recheck-2026-11-18/`](results/arch-recheck-2026-11-18). The published table remains the
-reference for those rows. `solve-problems.bash` now refuses to time a matrix when `MemAvailable` is below
-`MIN_AVAILABLE_GB` and discards a result whose run grew the swap or paged by more than its limits, so a
-machine that cannot hold the factorization records that fact instead of a misleading number.
+An earlier pass of the same re-check reported five matrices inflating 6 to 69 times in the solve. That was the
+execution environment, not the solver: the pass ran inside a job scope limited to 4 GiB of memory, which clamps
+a run that needs about 25 GiB and drives the rest through swap, producing 6.19 million major faults in one
+solve against 0 for the same binary run uncapped. The raw results, the per-run memory log and the table are in
+[`results/arch-recheck-2026-11-18/`](results/arch-recheck-2026-11-18); `solve-problems.bash` carries a memory
+guard and logs the free memory and the swap in use beside every run, and the cgroup ceiling — which is what
+actually bit here — is the next thing to check there.

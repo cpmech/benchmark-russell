@@ -41,27 +41,29 @@ Each JSON here was produced by the same command the suite uses
 
 ## Reading
 
-- **20 of 25** matrices reproduce the published total between 0.92 and 1.26 times it, with their
-  solve times unchanged: `pre2`, `helm2d03`, `boyd2`, `xenon1`, `torso1`, `darcy003`, `memchip`, `bwm2000`, `tmt_unsym`, `Freescale1`, `stomach`, `Goodwin_127`, `Goodwin_071`, `Raj1`, `twotone`, `oilpan`, `fp`, `Goodwin_040`, `rma10`, `rdb5000`. The thread-safe stack is the same solver family that produced the
-  published table, and the spread is ordinary run-to-run noise on a workstation.
-- **5** matrices did not reproduce, and the pattern is memory, not arithmetic: `atmosmodl` 69×, `atmosmodd` 62×, `ASIC_680k` 10×, `marine1` 8×, `rajat31` 6×. MUMPS reserves
-  its working memory from the factorization estimate (`ICNTL(14)` = 100 %, out-of-core off); when the
-  workspace does not fit, the solve pages — it is bound by memory traffic — and inflates by one to two
-  orders of magnitude while the factorization, which is compute-bound, moves by tens of per cent.
-  `ASIC_680k` is that same effect hidden inside a factorization-dominated total: its total is
-  unchanged while its solve inflates tenfold.
-- The requirement did not change with the library. Measured on `Transport` with each build (memory capped so
-  MUMPS stops after its own estimate): INFOG(17) = 39,362 MB, INFOG(27) = 13,553 MB and INFOG(3) =
-  2,635,174,153 entries are byte-identical for MUMPS 5.9.0, stock 5.9.2 and the patched 5.9.2, with analysis
-  times of 10.08, 10.19 and 10.45 s. What changed is the machine: the published campaign had a zram device
-  beside its swapfile (`SwapTotal` 62 GB in its system box), this one has only the 31 GB swapfile, so the
-  same overflow reaches the disk instead of compressed RAM. That is an environment change, not a solver
-  change, and it is why the published table remains the reference for those rows.
+- **25 of 25 matrices reproduce the published totals once the run is not memory-capped**, between 0.82 and
+  1.26 times them, with their solve times unchanged or faster.
+- The five that first appeared to be "outliers" were an artifact of the execution environment, not of the
+  machine or the solver: this pass ran inside a job scope limited to 4 GiB of memory, which clamps the
+  resident set of a run that needs ~25 GiB and pushes the difference through swap. Uncapped, the same
+  matrices give: `marine1` 0.88× (solve 74 → 63 ms), `rajat31` 0.95× (181 → 159 ms), `atmosmodd` 0.82×
+  (411 → 283 ms), `atmosmodl` 0.85× (397 → 320 ms), `ASIC_680k` 0.88× (158 → 96 ms).
+- The mechanism, measured on one `Transport` run inside the 4 GiB scope: 6.19 M major faults in the solve
+  alone, ~20 GB driven through swap, 8.9 s against 0.37 s for the same binary uncapped 92 s later.
+  `atmosmodl` inflates in both phases when capped (preprocess 32.28 → 93.27 s, 2.89×).
 
 ## Consequence for the harness
 
-`solve-problems.bash` now refuses to time a matrix when `MemAvailable` is below `MIN_AVAILABLE_GB`
-(default 20 GB) and deletes a result whose run grew the swap by more than `MAX_SWAP_GROWTH_MB`
-(default 256 MB) or paged more than `MAX_SWAP_PAGES` (default 4096 pages = 16 MB, from
-`/proc/vmstat`'s cumulative `pswpin` + `pswpout`, because a run can page and leave the net swap
-unchanged). Every check and every run is appended to `results/<system>/memory.log`.
+Two ceilings matter, and only one of them was being checked. `solve-problems.bash` now refuses to time a
+matrix when host `MemAvailable` is below `MIN_AVAILABLE_GB` (default 20 GB) and deletes a result whose run
+grew the swap by more than `MAX_SWAP_GROWTH_MB` (256 MB) or paged more than `MAX_SWAP_PAGES` (4096 pages,
+from `/proc/vmstat`'s cumulative `pswpin` + `pswpout`, because a run can page and leave the net swap
+unchanged); every check and run is logged to `results/<system>/memory.log`.
+
+Still to add, from the review of this pass: a check of the *cgroup's* `memory.max` (a 4 GiB scope is enough
+to fake a 25× solve), a `ru_majflt` bound read through `wait4`/`getrusage` (the precise detector: 0 major
+faults uncapped against 13.8 M capped), and `memory_begin`/`memory_end` around the Direct stage's probe
+results, which are currently moved into place unguarded.
+
+`memory.log` in this directory predates the `swap_pages` field; its lines carry only `avail_mb` and
+`swap_used_mb`.

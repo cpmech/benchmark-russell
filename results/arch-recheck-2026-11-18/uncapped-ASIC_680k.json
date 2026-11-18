@@ -1,0 +1,94 @@
+{
+  "main": {
+    "platform": "Russell",
+    "blas_lib": "Intel MKL",
+    "solver": "MUMPS",
+    "mumps": true,
+    "out_of_memory": false
+  },
+  "matrix": {
+    "name": "ASIC_680k",
+    "nrow": 682862,
+    "ncol": 682862,
+    "nnz": 3871773,
+    "nnz_actual": 3871773,
+    "complex": false,
+    "symmetric": "No"
+  },
+  "requests": {
+    "ordering": "Auto",
+    "scaling": "Auto",
+    "mumps_num_threads": 0,
+    "positive_definite": false
+  },
+  "output": {
+    "effective_ordering": "Metis",
+    "effective_scaling": "RowColIter",
+    "effective_mumps_num_threads": 0,
+    "openmp_num_threads": 24,
+    "umfpack_strategy": "Unknown",
+    "umfpack_rcond_estimate": 0.0
+  },
+  "determinant": {
+    "mantissa_real": 0.0,
+    "mantissa_imag": 0.0,
+    "base": 2.0,
+    "exponent": 0.0
+  },
+  "verify": {
+    "max_abs_a": 1000000.0533333333,
+    "max_abs_ax": 1.0000571321176608,
+    "max_abs_diff": 0.00008089563782687215,
+    "relative_error": 8.089555261689006e-11
+  },
+  "time_human": {
+    "read_matrix": "316.942644ms",
+    "initialize_array": [
+      "1.792374856s"
+    ],
+    "initialize": "1.792374856s",
+    "preprocess_array": [
+      "1m7.046396285s"
+    ],
+    "preprocess": "1m7.046396285s",
+    "solve_array": [
+      "95.707032ms"
+    ],
+    "solve": "95.707032ms",
+    "total_ifs_array": [
+      "1m8.934478173s"
+    ],
+    "total_ifs": "1m8.934478173s",
+    "verify": "6.828372ms"
+  },
+  "time_nanoseconds": {
+    "read_matrix": 316942644,
+    "initialize_array": [
+      1792374856
+    ],
+    "initialize": 1792374856,
+    "preprocess_array": [
+      67046396285
+    ],
+    "preprocess": 67046396285,
+    "solve_array": [
+      95707032
+    ],
+    "solve": 95707032,
+    "total_ifs_array": [
+      68934478173
+    ],
+    "total_ifs": 68934478173,
+    "verify": 6828372
+  },
+  "mumps_stats": {
+    "inf_norm_a": 0.0,
+    "inf_norm_x": 0.0,
+    "scaled_residual": 0.0,
+    "backward_error_omega1": 0.0,
+    "backward_error_omega2": 0.0,
+    "normalized_delta_x": 0.0,
+    "condition_number1": 0.0,
+    "condition_number2": 0.0
+  }
+}

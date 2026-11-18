@@ -1,0 +1,94 @@
+{
+  "main": {
+    "platform": "Russell",
+    "blas_lib": "Intel MKL",
+    "solver": "MUMPS",
+    "mumps": true,
+    "out_of_memory": false
+  },
+  "matrix": {
+    "name": "atmosmodd",
+    "nrow": 1270432,
+    "ncol": 1270432,
+    "nnz": 8814880,
+    "nnz_actual": 8814880,
+    "complex": false,
+    "symmetric": "No"
+  },
+  "requests": {
+    "ordering": "Auto",
+    "scaling": "Auto",
+    "mumps_num_threads": 0,
+    "positive_definite": false
+  },
+  "output": {
+    "effective_ordering": "Metis",
+    "effective_scaling": "RowColIter",
+    "effective_mumps_num_threads": 0,
+    "openmp_num_threads": 24,
+    "umfpack_strategy": "Unknown",
+    "umfpack_rcond_estimate": 0.0
+  },
+  "determinant": {
+    "mantissa_real": 0.0,
+    "mantissa_imag": 0.0,
+    "base": 2.0,
+    "exponent": 0.0
+  },
+  "verify": {
+    "max_abs_a": 95766.0991470128,
+    "max_abs_ax": 1.0000000000107008,
+    "max_abs_diff": 2.3717916519672144e-11,
+    "relative_error": 2.4766247209036363e-16
+  },
+  "time_human": {
+    "read_matrix": "710.591906ms",
+    "initialize_array": [
+      "6.550310921s"
+    ],
+    "initialize": "6.550310921s",
+    "preprocess_array": [
+      "30.943563891s"
+    ],
+    "preprocess": "30.943563891s",
+    "solve_array": [
+      "282.686666ms"
+    ],
+    "solve": "282.686666ms",
+    "total_ifs_array": [
+      "37.776561478s"
+    ],
+    "total_ifs": "37.776561478s",
+    "verify": "19.955948ms"
+  },
+  "time_nanoseconds": {
+    "read_matrix": 710591906,
+    "initialize_array": [
+      6550310921
+    ],
+    "initialize": 6550310921,
+    "preprocess_array": [
+      30943563891
+    ],
+    "preprocess": 30943563891,
+    "solve_array": [
+      282686666
+    ],
+    "solve": 282686666,
+    "total_ifs_array": [
+      37776561478
+    ],
+    "total_ifs": 37776561478,
+    "verify": 19955948
+  },
+  "mumps_stats": {
+    "inf_norm_a": 0.0,
+    "inf_norm_x": 0.0,
+    "scaled_residual": 0.0,
+    "backward_error_omega1": 0.0,
+    "backward_error_omega2": 0.0,
+    "normalized_delta_x": 0.0,
+    "condition_number1": 0.0,
+    "condition_number2": 0.0
+  }
+}

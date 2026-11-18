@@ -81,11 +81,25 @@ MEMORY_LOG="$OUTPUT_DIR/memory.log"
 MIN_AVAILABLE_GB=${MIN_AVAILABLE_GB:-20}        # refuse to start below this much free memory
 MAX_SWAP_GROWTH_MB=${MAX_SWAP_GROWTH_MB:-256}   # a run that grows swap by more is contaminated
 MAX_SWAP_PAGES=${MAX_SWAP_PAGES:-4096}          # a run that pages more than this (16 MB) is contaminated
+MIN_CGROUP_MB=${MIN_CGROUP_MB:-24000}           # refuse to time inside a memory-capped job scope
+MAX_MAJFLT=${MAX_MAJFLT:-1024}                  # a run that takes more major faults than this is contaminated
 
 mem_available_mb() { awk '/^MemAvailable/{print int($2 / 1024)}' /proc/meminfo; }
 swap_used_mb()     { awk '/^SwapTotal/{t=$2} /^SwapFree/{f=$2} END{print int((t - f) / 1024)}' /proc/meminfo; }
 # Cumulative page counters: net swap usage misses a run whose pages are swapped out and read back.
 swap_pages()       { awk '/^pswpin/{i=$2} /^pswpout/{o=$2} END{print i + o}' /proc/vmstat; }
+# The cgroup ceiling, not only the host's free memory: a job scope of a few GiB fakes a 25x solve.
+cgroup_memory_max_mb() {
+    local rel f v
+    rel=$(awk -F: '/^0::/{print $3}' /proc/self/cgroup)
+    f="/sys/fs/cgroup${rel}/memory.max"
+    if [ -r "$f" ]; then
+        v=$(cat "$f")
+        if [ "$v" = "max" ]; then echo 0; else echo $((v / 1024 / 1024)); fi
+    else
+        echo 0
+    fi
+}
 
 memory_log() {
     echo "$(date -Is) $* avail_mb=$(mem_available_mb) swap_used_mb=$(swap_used_mb)" >> "$MEMORY_LOG"
@@ -106,6 +120,39 @@ require_memory() {
         } >&2
         exit 1
     fi
+    local cg
+    cg=$(cgroup_memory_max_mb)
+    memory_log "cgroup_max_mb=$cg"
+    if [ "$cg" -gt 0 ] && [ "$cg" -lt "$MIN_CGROUP_MB" ]; then
+        {
+            echo "error: this process is capped by its cgroup to ${cg} MB (memory.max), below"
+            echo "       MIN_CGROUP_MB=${MIN_CGROUP_MB}. A job scope of a few GiB turns a 25 GiB workspace"
+            echo "       into permanent paging: measured 6.19 M major faults and 8.9 s where the same"
+            echo "       binary takes 0.37 s uncapped. Run the suite outside the capped scope (no big"
+            echo "       difference between host free memory and the result would show it otherwise)."
+        } >&2
+        exit 1
+    fi
+}
+
+# run_checked OUT LABEL CMD...: run under a major-fault bound (rusage of the child)
+run_checked() {
+    local out=$1 label=$2
+    shift 2
+    python3 - "$out" "$label" "$MAX_MAJFLT" "$@" <<'PY'
+import resource, subprocess, sys
+out, label, limit, cmd = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4:]
+before = resource.getrusage(resource.RUSAGE_CHILDREN)
+with open(out, 'w') as f:
+    rc = subprocess.call(cmd, stdout=f, stderr=subprocess.DEVNULL)
+after = resource.getrusage(resource.RUSAGE_CHILDREN)
+maj = after.ru_majflt - before.ru_majflt
+print(f"    {label}: exit={rc} majflt={maj} maxrss_mb={after.ru_maxrss // 1024}", file=sys.stderr)
+if maj > limit:
+    print(f"    contaminated: {maj} major faults during {label}; discarding the result", file=sys.stderr)
+    sys.exit(3)
+sys.exit(rc)
+PY
 }
 
 # memory_begin / memory_end OUT LABEL: discard a result whose run paged
@@ -214,8 +261,9 @@ run_external() {
         echo "... $genie / $mat ..."
         require_memory "$genie/$mat"
         memory_begin
-        if ! timeout 3600 "$COMMAND" -g "$genie" -r "$NRUN" $extra "$INPUT_DIR/$mat.mtx" > "$outdir/$genie-$mat.json"; then
-            echo "    failed or timed out; removing the partial result"
+        if ! run_checked "$outdir/$genie-$mat.json" "$genie/$mat" \
+                timeout 3600 "$COMMAND" -g "$genie" -r "$NRUN" $extra "$INPUT_DIR/$mat.mtx"; then
+            echo "    failed, timed out or contaminated; removing the partial result"
             rm -f "$outdir/$genie-$mat.json"
         else
             memory_end "$outdir/$genie-$mat.json" "$genie/$mat" || true
