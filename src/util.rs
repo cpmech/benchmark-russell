@@ -78,7 +78,7 @@ pub fn get_matrix_list_md(matrices: &[&str]) -> Result<String, StrError> {
 #[cfg(test)]
 mod tests {
     use super::{genie_display_name, get_matrix_list_md};
-    use russell_sparse::{Genie, IterativeMethod};
+    use russell_sparse::Genie;
 
     #[test]
     fn genie_display_name_works() {
