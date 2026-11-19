@@ -9,19 +9,16 @@ fn main() -> Result<(), StrError> {
     // results dir
     let results_dir = format!("results/{}", OS.to_lowercase());
 
-    // ---- Direct, UMFPACK and MUMPS ----
-    let caption1 = format!(
-        "Calculations on {}. Direct, UMFPACK and MUMPS. Real-valued matrices.",
-        OS
-    );
+    // ---- Faer, UMFPACK and MUMPS ----
+    let caption1 = format!("Calculations on {}. Faer, UMFPACK and MUMPS. Real-valued matrices.", OS);
     let caption2 = format!(
-        "Calculations on {}. Direct, UMFPACK and MUMPS. Complex-valued matrices.",
+        "Calculations on {}. Faer, UMFPACK and MUMPS. Complex-valued matrices.",
         OS
     );
-    let direct_umfpack_mumps_re = AllResults::new(GENIES, MATRICES, &results_dir)?;
-    let direct_umfpack_mumps_co = AllResults::new(GENIES, MATRICES_COMPLEX, &results_dir)?;
-    direct_umfpack_mumps_re.print_run_counts();
-    direct_umfpack_mumps_co.print_run_counts();
+    let faer_umfpack_mumps_re = AllResults::new(GENIES, MATRICES, &results_dir)?;
+    let faer_umfpack_mumps_co = AllResults::new(GENIES, MATRICES_COMPLEX, &results_dir)?;
+    faer_umfpack_mumps_re.print_run_counts();
+    faer_umfpack_mumps_co.print_run_counts();
 
     // write information
     let mut text = "\n\
@@ -54,10 +51,10 @@ fn main() -> Result<(), StrError> {
         \x20\x20 \\item Total time includes initialization (memory allocation + symbolic factorization), numeric factorization, and solve.\n\
         \x20\x20 \\item Column NNZ (number of non-zeros) corresponds to Pattern Entries reported by the \\href{https://sparse.tamu.edu}{SuiteSparse Matrix Collection}.\n\
         \x20\x20 \\item Column Sym shows if symmetry information was provided to the solver. An asterisk means positive definite information was also given.\n\
-        \x20\x20 \\item oom (out-of-memory) indicates that the symbolic factorization was terminated due to insufficient memory.\n\
-        \x20\x20 \\item n/a indicates that the run was not attempted, or that the Direct solver exceeded its time or memory budget.\n\
+        \x20\x20 \\item oom (out-of-memory) indicates that the solver exceeded its memory budget during setup, factorization, or solve.\n\
+        \x20\x20 \\item n/a indicates that the run was not attempted, that the Faer solver exceeded its time or memory budget, or that an iterative solver did not converge within its iteration or time limit.\n\
         \x20\x20 \\item Bold values highlight significant results, such as large errors or high computation times.\n\
-        \x20\x20 \\item The Direct solver is pure Rust; it does not compute determinants, error estimates or condition numbers.\n\
+        \x20\x20 \\item The Faer solver is pure Rust; it does not compute determinants, error estimates or condition numbers.\n\
     \\end{itemize}\n";
 
     // write information about the system
@@ -75,7 +72,7 @@ fn main() -> Result<(), StrError> {
     let table1 = performance_table(
         &caption1,
         "tab:1",
-        &direct_umfpack_mumps_re,
+        &faer_umfpack_mumps_re,
         None,
         Some(4.0),
         false,
@@ -84,7 +81,7 @@ fn main() -> Result<(), StrError> {
     let table2 = performance_table(
         &caption2,
         "tab:2",
-        &direct_umfpack_mumps_co,
+        &faer_umfpack_mumps_co,
         None,
         Some(4.0),
         false,

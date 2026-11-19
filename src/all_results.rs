@@ -163,16 +163,23 @@ mod tests {
 
     #[test]
     fn new_tolerates_missing_results() {
-        let data = AllResults::new(&[Genie::Direct], &["this-matrix-does-not-exist"], RESULTS_DIR).unwrap();
+        let data = AllResults::new(&[Genie::Faer], &["this-matrix-does-not-exist"], RESULTS_DIR).unwrap();
         assert!(
             data.map
-                .contains_key(&(Genie::Direct, "this-matrix-does-not-exist".to_string()))
+                .contains_key(&(Genie::Faer, "this-matrix-does-not-exist".to_string()))
         );
-        assert!(data.get(Genie::Direct, "this-matrix-does-not-exist").is_none());
-        let row = data
-            .get_statistics(Genie::Direct, "this-matrix-does-not-exist")
-            .unwrap();
+        assert!(data.get(Genie::Faer, "this-matrix-does-not-exist").is_none());
+        let row = data.get_statistics(Genie::Faer, "this-matrix-does-not-exist").unwrap();
         assert_eq!(row, "| this-matrix-does-not-exist | n/a | n/a | n/a | n/a |");
+    }
+
+    #[test]
+    fn new_loads_faer_results_when_data_exists() {
+        let data = AllResults::new(&[Genie::Faer], &["bwm2000"], RESULTS_DIR).unwrap();
+        let res = data.get(Genie::Faer, "bwm2000").expect("faer/faer-bwm2000.json");
+        assert_eq!(res.main.solver, "Faer");
+        assert_eq!(res.matrix.name, "bwm2000");
+        assert_eq!(res.matrix.nnz, 7996);
     }
 
     #[test]

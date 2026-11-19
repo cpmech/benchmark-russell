@@ -11,7 +11,7 @@ const SELECTED: &[&str] = &[
     "rdb5000",
     "Goodwin_040",
     "fp",
-    "twotone",
+    "xenon1",
     "mplate",
 ];
 
@@ -77,7 +77,7 @@ fn main() -> Result<(), StrError> {
             }
         }
         let (marker, color) = match genie {
-            Genie::Direct => ("*", "#111111"),
+            Genie::Faer => ("*", "#111111"),
             Genie::Iterative(_) => ("s", "#9467bd"),
             Genie::Umfpack => ("o", "#1f77b4"),
             Genie::Mumps => ("+", "#d62728"),
@@ -107,10 +107,10 @@ fn main() -> Result<(), StrError> {
         .save("results/plot_time.svg")?;
     plot_time.save("results/plot_time.png")?;
 
-    // ---- figure 2: speed-up over Direct ----
+    // ---- figure 2: speed-up over Faer ----
     let mut plot_speed = Plot::new();
 
-    // Parity line: 1x means the same time as Direct.
+    // Parity line: 1x means the same time as Faer.
     let mut parity = Curve::new();
     parity
         .set_label("1×")
@@ -122,11 +122,11 @@ fn main() -> Result<(), StrError> {
 
     // Light span from the smallest to the largest speed-up per matrix.
     for (i, times) in rows.iter().enumerate() {
-        let direct = times[0];
+        let faer = times[0];
         let mut factors: Vec<f64> = [times[1], times[2]]
             .iter()
             .flatten()
-            .filter_map(|t| direct.map(|nt| nt / t))
+            .filter_map(|t| faer.map(|nt| nt / t))
             .collect();
         if factors.len() < 2 {
             continue;
@@ -144,8 +144,8 @@ fn main() -> Result<(), StrError> {
         let mut x = Vec::new();
         let mut y = Vec::new();
         for (i, times) in rows.iter().enumerate() {
-            if let (Some(direct), Some(t)) = (times[0], times[gi]) {
-                x.push(direct / t);
+            if let (Some(faer), Some(t)) = (times[0], times[gi]) {
+                x.push(faer / t);
                 y.push(i as f64);
             }
         }
@@ -167,14 +167,14 @@ fn main() -> Result<(), StrError> {
         .add(&legend2)
         .extra("plt.xscale('log')\n")
         .extra("plt.grid(True, which='major', axis='x', linestyle=':', alpha=0.5)\n")
-        .set_labels("Speed-up over Direct (×)", "")
-        .set_title("Speed-up over Direct")
+        .set_labels("Speed-up over Faer (×)", "")
+        .set_title("Speed-up over Faer")
         .set_figure_size_points(1.618 * 380.0, 340.0)
         .extra("plt.tight_layout()\n")
         .save("results/plot_speedup.svg")?;
     plot_speed.save("results/plot_speedup.png")?;
 
-    // ---- figure 3: speed-up over Direct, UMFPACK only ----
+    // ---- figure 3: speed-up over Faer, UMFPACK only ----
     let mut plot_umfpack = Plot::new();
     let mut parity = Curve::new();
     parity
@@ -188,8 +188,8 @@ fn main() -> Result<(), StrError> {
     let mut x = Vec::new();
     let mut y = Vec::new();
     for (i, times) in rows.iter().enumerate() {
-        if let (Some(direct), Some(t)) = (times[0], times[1]) {
-            x.push(direct / t);
+        if let (Some(faer), Some(t)) = (times[0], times[1]) {
+            x.push(faer / t);
             y.push(i as f64);
         }
     }
@@ -211,8 +211,8 @@ fn main() -> Result<(), StrError> {
         .add(&legend3)
         .extra("plt.xscale('log')\n")
         .extra("plt.grid(True, which='major', axis='x', linestyle=':', alpha=0.5)\n")
-        .set_labels("Speed-up over Direct (×)", "")
-        .set_title("Speed-up over Direct")
+        .set_labels("Speed-up over Faer (×)", "")
+        .set_title("Speed-up over Faer")
         .set_figure_size_points(1.618 * 380.0, 340.0)
         .extra("plt.tight_layout()\n")
         .save("results/plot_speedup_umfpack.svg")?;

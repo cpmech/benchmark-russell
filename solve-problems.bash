@@ -18,25 +18,29 @@ set -euo pipefail
 #   SYSTEM               results subdirectory    (default: arch)
 #   NRUN                 runs per solver         (default: 5)
 #   EXTERNAL_TIMEOUT     UMFPACK/MUMPS per-run time cap, s (default: 720)
-#   DIRECT_MAX_RUNS      Native run ceiling      (default: 3)
-#   DIRECT_PROBE_TIMEOUT Native probe time, s    (default: 180)
-#   DIRECT_MEMORY_KB     Native memory cap, KiB  (default: 20000000, ~20 GB)
-#   DIRECT_MAX_NNZ       Skip Native above this pattern size; 0 disables it (default: 1200000)
-#   DIRECT_SUPERNODAL    1 selects the experimental supernodal LU (default: 0)
-#   STAGES               all | external | direct | iterative (default: all)
-#   ITERATIVE_MEMORY_KB  per-run memory cap, KiB (default: 8000000, ~8 GB)
+#   FAER_MAX_RUNS        Faer run ceiling        (default: 3)
+#   FAER_PROBE_TIMEOUT   Faer probe time, s      (default: 180)
+#   FAER_MEMORY_KB       Faer memory cap, KiB    (default: 20000000, ~20 GB)
+#   FAER_MAX_NNZ         Skip Faer above this pattern size; 0 disables it (default: 1200000)
+#   FAER_METHOD          Optional Faer LU method: auto | simplicial | supernodal (unset = default)
+#   FAER_FLOP_RATIO      Optional --faer-flop-ratio threshold (requires FAER_METHOD=auto)
+#   STAGES               all | external | faer | iterative (default: all)
+#   ITERATIVE_MEMORY_KB  per-run runaway memory cap, KiB (default: 13000000, ~12.4 GiB)
+#   ITERATIVE_VSZ_HEADROOM_MB VSZ/conversion headroom for --amg-max-memory-mb, MiB (default: 8300)
 #   ITERATIVE_TIMEOUT    per-run time cap, s     (default: 240)
 #   TIMEOUT_OVERHEAD     batch read/verify allowance, s (default: 60)
 
 NRUN=${NRUN:-5}
 EXTERNAL_TIMEOUT=${EXTERNAL_TIMEOUT:-720}
-DIRECT_MAX_RUNS=${DIRECT_MAX_RUNS:-3}
-DIRECT_PROBE_TIMEOUT=${DIRECT_PROBE_TIMEOUT:-180}
-DIRECT_MEMORY_KB=${DIRECT_MEMORY_KB:-20000000}
-DIRECT_MAX_NNZ=${DIRECT_MAX_NNZ:-1200000}
-DIRECT_SUPERNODAL=${DIRECT_SUPERNODAL:-0}
+FAER_MAX_RUNS=${FAER_MAX_RUNS:-3}
+FAER_PROBE_TIMEOUT=${FAER_PROBE_TIMEOUT:-180}
+FAER_MEMORY_KB=${FAER_MEMORY_KB:-20000000}
+FAER_MAX_NNZ=${FAER_MAX_NNZ:-1200000}
+FAER_METHOD=${FAER_METHOD:-}
+FAER_FLOP_RATIO=${FAER_FLOP_RATIO:-}
 STAGES=${STAGES:-all}
-ITERATIVE_MEMORY_KB=${ITERATIVE_MEMORY_KB:-8000000}
+ITERATIVE_MEMORY_KB=${ITERATIVE_MEMORY_KB:-13000000}
+ITERATIVE_VSZ_HEADROOM_MB=${ITERATIVE_VSZ_HEADROOM_MB:-8300}
 ITERATIVE_TIMEOUT=${ITERATIVE_TIMEOUT:-240}
 TIMEOUT_OVERHEAD=${TIMEOUT_OVERHEAD:-60}
 
@@ -158,7 +162,7 @@ import os, subprocess, sys, time
 out, label, tmo, cmd = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:]
 t0 = time.monotonic()
 with open(out, "w") as f:
-    p = subprocess.Popen(cmd, stdout=f, stderr=subprocess.DEVNULL)
+    p = subprocess.Popen(cmd, stdout=f)
     _, status, ru = os.wait4(p.pid, 0)
 elapsed = time.monotonic() - t0
 rc = os.waitstatus_to_exitcode(status)
@@ -183,11 +187,21 @@ memory_begin() {
 }
 
 memory_end() {
-    local out=$1 label=$2 tmo=$3 after grew pages
+    local out=$1 label=$2 tmo=$3 after grew pages reason=""
     after=$(swap_used_mb)
     grew=$((after - MEM_BEFORE_SWAP))
     pages=$(( $(swap_pages) - MEM_BEFORE_PAGES ))
-    memory_log "ran $label exit=$RUN_EXIT elapsed_s=$RUN_ELAPSED_S timeout_s=$tmo majflt=$RUN_MAJFLT maxrss_mb=$RUN_MAXRSS_MB swap_growth_mb=$grew swap_pages=$pages"
+    if [ "$RUN_EXIT" -eq 0 ] && [ -s "$out" ]; then
+        if python3 -c 'import json,sys
+try:
+    d = json.load(open(sys.argv[1]))
+    sys.exit(0 if d.get("main", {}).get("out_of_memory") is True else 1)
+except Exception:
+    sys.exit(1)' "$out"; then
+            reason=" reason=out_of_memory"
+        fi
+    fi
+    memory_log "ran $label exit=$RUN_EXIT elapsed_s=$RUN_ELAPSED_S timeout_s=$tmo majflt=$RUN_MAJFLT maxrss_mb=$RUN_MAXRSS_MB swap_growth_mb=$grew swap_pages=$pages$reason"
     if [ "$grew" -gt "$MAX_SWAP_GROWTH_MB" ] || [ "$pages" -gt "$MAX_SWAP_PAGES" ]; then
         echo "    contaminated: swap grew by ${grew} MB and paged ${pages} pages during $label; discarding the result" >&2
         rm -f "$out"
@@ -233,18 +247,39 @@ extra_args() {
     esac
 }
 
+# Per-matrix --amg-max-memory-mb from ITERATIVE_MEMORY_KB after subtracting that
+# matrix's caller memory (CooMatrix at 16 B/nnz + x and rhs at 16 B/nrow) and
+# the VSZ/conversion headroom under ulimit -v.
+iterative_budget_mb() {
+    local mat=$1
+    python3 - "$mat" "$ITERATIVE_MEMORY_KB" "$ITERATIVE_VSZ_HEADROOM_MB" "$HERE/data/matrices.json" <<'PY'
+import json, sys
+mat, mem_kb, headroom_mb, path = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
+if mem_kb <= 0:
+    print(0)
+    sys.exit(0)
+rows = json.load(open(path))
+m = next(r for r in rows if r["Name"] == mat)
+nrow, nnz = int(m["Num Rows"]), int(m["Pattern Entries"])
+caller_mb = (16 * nnz + 16 * nrow + 1024 * 1024 - 1) // (1024 * 1024)
+total_mb = mem_kb // 1024
+print(max(1, total_mb - headroom_mb - caller_mb))
+PY
+}
+
 # run_solver GENIE MATS...: one solver over a list of matrices. UMFPACK and
 # MUMPS run without an address-space cap, because their reservation is what is
-# being measured; the Krylov methods are capped because the AMG setup on a
-# million-dof matrix can ask for more than this machine has.
+# being measured; the Krylov methods are capped by a per-matrix memory budget
+# plus the ITERATIVE_MEMORY_KB runaway ceiling.
 run_solver() {
     local genie=$1
     shift
-    local outdir="$OUTPUT_DIR/$genie" memkb=0 tmo
-    local mat
+    local outdir="$OUTPUT_DIR/$genie" memkb=0 tmo is_iter=0
+    local mat extra budget_mb
+    local flags=()
     case $genie in
         umfpack | mumps) tmo=$((NRUN * EXTERNAL_TIMEOUT + TIMEOUT_OVERHEAD)) ;;
-        *) memkb=$ITERATIVE_MEMORY_KB tmo=$((NRUN * ITERATIVE_TIMEOUT + TIMEOUT_OVERHEAD)) ;;
+        *) is_iter=1 memkb=$ITERATIVE_MEMORY_KB tmo=$((NRUN * ITERATIVE_TIMEOUT + TIMEOUT_OVERHEAD)) ;;
     esac
     mkdir -p "$outdir"
     for mat in "$@"; do
@@ -256,62 +291,79 @@ run_solver() {
             rm -f "$outdir/$genie-$mat.json"
             continue
         fi
+        flags=()
+        extra=$(extra_args "$mat")
+        if [ -n "$extra" ]; then
+            flags+=("$extra")
+        fi
+        if [ "$is_iter" -eq 1 ]; then
+            budget_mb=$(iterative_budget_mb "$mat")
+            flags+=(--amg-max-memory-mb "$budget_mb")
+        fi
         bench "$outdir/$genie-$mat.json" "$genie/$mat" "$memkb" "$tmo" \
-            "$COMMAND" -g "$genie" -r "$NRUN" $(extra_args "$mat") "$INPUT_DIR/$mat.mtx" || true
+            "$COMMAND" -g "$genie" -r "$NRUN" "${flags[@]}" "$INPUT_DIR/$mat.mtx" || true
     done
 }
 
-# Runs the Direct solver on one matrix, with a probe pass to decide how many
+# Runs the Faer solver on one matrix, with a probe pass to decide how many
 # runs are worth doing
-run_direct_matrix() {
-    local mat=$1 extra flag="" outdir="$OUTPUT_DIR/direct" probe
+run_faer_matrix() {
+    local mat=$1 extra outdir="$OUTPUT_DIR/faer" label_prefix="faer" probe
     local elapsed nrun nnz
+    local flags=()
     extra=$(extra_args "$mat")
-    if [ "$DIRECT_SUPERNODAL" = 1 ]; then
-        outdir="$OUTPUT_DIR/direct-supernodal"
-        flag=--direct-supernodal
+    if [ -n "$extra" ]; then
+        flags+=("$extra")
+    fi
+    if [ -n "$FAER_METHOD" ]; then
+        outdir="$OUTPUT_DIR/faer-$FAER_METHOD"
+        label_prefix="faer-$FAER_METHOD"
+        flags+=(--faer-method "$FAER_METHOD")
+    fi
+    if [ -n "$FAER_FLOP_RATIO" ]; then
+        flags+=(--faer-flop-ratio "$FAER_FLOP_RATIO")
     fi
     nnz=$(matrix_field "$mat" "Pattern Entries")
-    if [ "$DIRECT_MAX_NNZ" -gt 0 ] && [ "${nnz:-0}" -gt "$DIRECT_MAX_NNZ" ]; then
-        echo "... direct/$mat ... skipping (pattern entries $nnz > $DIRECT_MAX_NNZ)"
-        memory_log "skip direct/$mat reason=max_nnz nnz=$nnz limit=$DIRECT_MAX_NNZ"
-        rm -f "$outdir/direct-$mat.json"
+    if [ "$FAER_MAX_NNZ" -gt 0 ] && [ "${nnz:-0}" -gt "$FAER_MAX_NNZ" ]; then
+        echo "... $label_prefix/$mat ... skipping (pattern entries $nnz > $FAER_MAX_NNZ)"
+        memory_log "skip $label_prefix/$mat reason=max_nnz nnz=$nnz limit=$FAER_MAX_NNZ"
+        rm -f "$outdir/faer-$mat.json"
         return
     fi
     mkdir -p "$outdir"
     probe="$outdir/.probe-$mat.json"
 
-    if ! bench "$probe" "direct/$mat:probe" "$DIRECT_MEMORY_KB" "$DIRECT_PROBE_TIMEOUT" \
-        "$COMMAND" -g direct -r 1 $flag $extra "$INPUT_DIR/$mat.mtx"; then
+    if ! bench "$probe" "$label_prefix/$mat:probe" "$FAER_MEMORY_KB" "$FAER_PROBE_TIMEOUT" \
+        "$COMMAND" -g faer -r 1 "${flags[@]}" "$INPUT_DIR/$mat.mtx"; then
         echo "    probe failed or timed out; marking n/a"
-        rm -f "$probe" "$outdir/direct-$mat.json"
+        rm -f "$probe" "$outdir/faer-$mat.json"
         return
     fi
     elapsed=${RUN_ELAPSED_S%.*}
 
     nrun=1
     if [ "$elapsed" -lt 2 ]; then
-        nrun=$DIRECT_MAX_RUNS
+        nrun=$FAER_MAX_RUNS
     elif [ "$elapsed" -lt 30 ]; then
-        nrun=$(( DIRECT_MAX_RUNS > 3 ? 3 : DIRECT_MAX_RUNS ))
+        nrun=$(( FAER_MAX_RUNS > 3 ? 3 : FAER_MAX_RUNS ))
     fi
     if [ "$nrun" -le 1 ]; then
-        mv "$probe" "$outdir/direct-$mat.json"
+        mv "$probe" "$outdir/faer-$mat.json"
         echo "    probe took ${elapsed}s; keeping the single run"
         return
     fi
 
     echo "    probe took ${elapsed}s; running $nrun times"
-    if bench "$outdir/direct-$mat.json" "direct/$mat" "$DIRECT_MEMORY_KB" $((elapsed * nrun * 3 + 600)) \
-        "$COMMAND" -g direct -r "$nrun" $flag $extra "$INPUT_DIR/$mat.mtx"; then
+    if bench "$outdir/faer-$mat.json" "$label_prefix/$mat" "$FAER_MEMORY_KB" $((elapsed * nrun * 3 + 600)) \
+        "$COMMAND" -g faer -r "$nrun" "${flags[@]}" "$INPUT_DIR/$mat.mtx"; then
         rm -f "$probe"
     else
         echo "    full run failed or timed out; keeping the probe result"
-        mv "$probe" "$outdir/direct-$mat.json"
+        mv "$probe" "$outdir/faer-$mat.json"
     fi
 }
 
-# STAGES selects the stages to run: all, or one of external, direct, iterative
+# STAGES selects the stages to run: all, or one of external, faer, iterative
 want() { [ "$STAGES" = all ] || [ "$STAGES" = "$1" ]; }
 
 # The whole run — build, input check, stages — in one function so the time
@@ -340,25 +392,33 @@ main() {
         fi
     done
 
-    # External solvers first so the long Direct pass can be interrupted without
+    # External solvers first so the long Faer pass can be interrupted without
     # losing their results
     if want external; then
         run_solver umfpack "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"
         run_solver mumps "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"
     fi
 
-    if want direct; then
+    if want faer; then
         for mat in "${REAL_MATS[@]}" "${COMPLEX_MATS[@]}"; do
-            run_direct_matrix "$mat"
+            run_faer_matrix "$mat"
         done
     fi
 
     # The iterative solvers are real-valued only: CG needs a symmetric matrix, and
     # the preconditioner is built from the same real pattern
     if want iterative; then
-        run_solver cg "${REAL_MATS[@]}"
-        run_solver bicgstab "${REAL_MATS[@]}"
-        run_solver gmres "${REAL_MATS[@]}"
+        local iter_mats=("${REAL_MATS[@]}")
+        if [ -n "${ITERATIVE_MATS:-}" ]; then
+            read -r -a iter_mats <<< "$ITERATIVE_MATS"
+        fi
+        local iter_genies=(cg bicgstab gmres)
+        if [ -n "${ITERATIVE_GENIES:-}" ]; then
+            read -r -a iter_genies <<< "$ITERATIVE_GENIES"
+        fi
+        for genie in "${iter_genies[@]}"; do
+            run_solver "$genie" "${iter_mats[@]}"
+        done
     fi
 
     echo "done: results in $OUTPUT_DIR"

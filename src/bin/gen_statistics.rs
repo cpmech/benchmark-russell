@@ -9,7 +9,11 @@ fn main() -> Result<(), StrError> {
 
     // print statistics per solver
     for genie in GENIES.iter().chain(GENIES_ITERATIVE.iter()) {
-        let data = if GENIES_ITERATIVE.contains(genie) { &data_it } else { &data };
+        let data = if GENIES_ITERATIVE.contains(genie) {
+            &data_it
+        } else {
+            &data
+        };
         println!("\n### {}\n", genie_display_name(*genie));
         println!("| Matrix | Min Time | Median Time | Max Time | Outlier |");
         println!("| --- | ---: | ---: | ---: | ---: |");

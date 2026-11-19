@@ -98,7 +98,7 @@ mod tests {
     #[test]
     fn performance_table_md_works() {
         let data = AllResults::new(
-            &[Genie::Direct, Genie::Umfpack, Genie::Mumps],
+            &[Genie::Faer, Genie::Umfpack, Genie::Mumps],
             &["bwm2000", "rdb5000", "Goodwin_040", "fp", "helm2d03", "pre2"],
             "results/arch",
         )
@@ -109,7 +109,7 @@ mod tests {
         assert!(!md.contains("| Nrow |"));
         assert!(!md.contains("| NNZ |"));
         assert!(!md.contains("| Sym |"));
-        assert!(md.contains("Direct Time | Direct Error |"));
+        assert!(md.contains("Faer Time | Faer Error |"));
         assert!(md.contains("UMFPACK Time | UMFPACK Error |"));
         assert!(md.contains("MUMPS Time | MUMPS Error |"));
         // verify separator row

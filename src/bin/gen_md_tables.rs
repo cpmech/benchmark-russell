@@ -21,21 +21,18 @@ fn main() -> Result<(), StrError> {
     println!("**Real-valued matrices:**\n{}", txt_re);
     println!("**Complex-valued matrices:**\n{}", txt_co);
 
-    // ---- Direct, UMFPACK and MUMPS ----
-    let caption1 = format!(
-        "Calculations on {}. Direct, UMFPACK and MUMPS. Real-valued matrices.",
-        OS
-    );
+    // ---- Faer, UMFPACK and MUMPS ----
+    let caption1 = format!("Calculations on {}. Faer, UMFPACK and MUMPS. Real-valued matrices.", OS);
     let caption2 = format!(
-        "Calculations on {}. Direct, UMFPACK and MUMPS. Complex-valued matrices.",
+        "Calculations on {}. Faer, UMFPACK and MUMPS. Complex-valued matrices.",
         OS
     );
-    let direct_umfpack_mumps_re = AllResults::new(GENIES, MATRICES, &results_dir)?;
-    let direct_umfpack_mumps_co = AllResults::new(GENIES, MATRICES_COMPLEX, &results_dir)?;
-    direct_umfpack_mumps_re.print_run_counts();
-    direct_umfpack_mumps_co.print_run_counts();
-    print_table(&caption1, &direct_umfpack_mumps_re)?;
-    print_table(&caption2, &direct_umfpack_mumps_co)?;
+    let faer_umfpack_mumps_re = AllResults::new(GENIES, MATRICES, &results_dir)?;
+    let faer_umfpack_mumps_co = AllResults::new(GENIES, MATRICES_COMPLEX, &results_dir)?;
+    faer_umfpack_mumps_re.print_run_counts();
+    faer_umfpack_mumps_co.print_run_counts();
+    print_table(&caption1, &faer_umfpack_mumps_re)?;
+    print_table(&caption2, &faer_umfpack_mumps_co)?;
 
     // ---- UMFPACK against the two iterative solvers that converge widely ----
     let caption3 = format!(
@@ -48,9 +45,9 @@ fn main() -> Result<(), StrError> {
     println!(
         "\n\nThe iterative columns are BiCGStab and GMRES on the AMG preconditioner, five runs each with \
          the default settings. CG is not in the table because it requires a symmetric positive definite \
-         system and reaches the error gate on one matrix of the set. An `n/a` in an iterative column means \
-         the iteration did not reach 1e-10 within 1 000 iterations, or that the run was killed by the \
-         memory or time cap; it does not mean `not measured`."
+         system and reaches the error gate on one matrix of the set. An `oom` in an iterative column means \
+         the solver exceeded its memory budget; an `n/a` means the iteration did not reach 1e-10 within \
+         1 000 iterations or exceeded its time cap; it does not mean `not measured`."
     );
 
     // done
