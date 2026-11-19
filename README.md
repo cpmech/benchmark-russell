@@ -5,10 +5,10 @@
 - [Introduction](#introduction)
 - [Solvers for large sparse linear systems](#solvers-for-large-sparse-linear-systems)
 - [Results](#results)
-  - [Direct at a glance](#direct-at-a-glance)
+  - [Faer at a glance](#faer-at-a-glance)
   - [Information about the tested matrices](#information-about-the-tested-matrices)
-  - [Calculations on Arch. Direct, UMFPACK and MUMPS. Real-valued matrices.](#calculations-on-arch-direct-umfpack-and-mumps-real-valued-matrices)
-  - [Calculations on Arch. Direct, UMFPACK and MUMPS. Complex-valued matrices.](#calculations-on-arch-direct-umfpack-and-mumps-complex-valued-matrices)
+  - [Calculations on Arch. Faer, UMFPACK and MUMPS. Real-valued matrices.](#calculations-on-arch-faer-umfpack-and-mumps-real-valued-matrices)
+  - [Calculations on Arch. Faer, UMFPACK and MUMPS. Complex-valued matrices.](#calculations-on-arch-faer-umfpack-and-mumps-complex-valued-matrices)
   - [Calculations on Arch. UMFPACK compared with the iterative solvers. Real-valued matrices.](#calculations-on-arch-umfpack-compared-with-the-iterative-solvers-real-valued-matrices)
   - [Legacy results](#legacy-results)
 - [System and libraries information](#system-and-libraries-information)
@@ -19,11 +19,11 @@
 
 This project contains performance benchmarks using the [Rust Scientific Library (Russell)](https://github.com/cpmech/russell).
 
-We compare the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse): the pure-Rust **Direct** solver (the default in Russell 5.0), **UMFPACK**, and **MUMPS**; and, in their own table, the pure-Rust iterative solvers — **BiCGStab** and **GMRES** on the algebraic-multigrid preconditioner — against UMFPACK.
+We compare the sparse linear solvers from [russell_sparse](https://github.com/cpmech/russell/tree/main/russell_sparse): the pure-Rust **Faer** solver (the default in Russell 5.5), **UMFPACK**, and **MUMPS**; and, in their own table, the pure-Rust iterative solvers — **BiCGStab** and **GMRES** on the algebraic-multigrid preconditioner — against UMFPACK.
 
-The direct results for the SuiteSparse matrices were produced with `russell_sparse` 4.1 (with `algebra_linear` 1.2) and migrated to the 5.0 statistics schema rather than re-measured. The iterative results, and every result for `pmsim-hex8-27`, were measured for this version: `russell_sparse` 5.0 with `algebra_linear` 2.1, features `intel_mkl`, `umfpack` and `mumps`, so UMFPACK and MUMPS are linked against the local Intel MKL. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
+The UMFPACK and MUMPS results for the SuiteSparse matrices were produced with `russell_sparse` 4.1 (with `algebra_linear` 1.2) and migrated to the 5.0 statistics schema rather than re-measured (the `pmsim-hex8-27` rows were added with `russell_sparse` 5.0). The Faer results (both the default simplicial rows under [`results/arch/faer/`](results/arch/faer) and the supernodal comparison under [`results/arch/faer-supernodal/`](results/arch/faer-supernodal)) and the three iterative out-of-memory rows (`Flan_1565`, `pres-cylin-3d-tet10-fine`, and `gmres/rajat31`) were measured with `russell_sparse` 5.5.0 and `algebra_linear` 3.0.0; the remaining iterative rows were measured with `russell_sparse` 5.0 and `algebra_linear` 2.1. All runs build with features `intel_mkl`, `umfpack` and `mumps`, so UMFPACK and MUMPS are linked against the local Intel MKL. See the [system and libraries information](#system-and-libraries-information) used in the benchmarks.
 
-The iterative solvers are a limited backend and the tables show it: with the default AMG settings they converge on a minority of the matrices, and an `n/a` there means the iteration did not reach the requested tolerance (or the run hit the memory cap), not that it was skipped. For production work, the direct backends are the ones to use.
+The iterative solvers are a limited backend and the tables show it: with the default AMG settings they converge on a minority of the matrices; an `oom` there means the solver exceeded its memory budget, and an `n/a` means the iteration did not reach the requested tolerance (or exceeded its time cap), not that it was skipped. For production work, the direct backends are the ones to use.
 
 The cuDSS and KLU results from the earlier Russell 2.8 benchmark are kept under [`results/legacy-2.8/`](results/legacy-2.8) for reference; they are not part of the current comparison.
 
@@ -31,7 +31,7 @@ The cuDSS and KLU results from the earlier Russell 2.8 benchmark are kept under 
 
 ## Solvers for large sparse linear systems
 
-- **Direct** — the pure-Rust LU factorization from [`algebra_linear`](https://github.com/cpmech/algebra_linear), with COLAMD ordering, partial pivoting, and a simplicial/supernodal choice made by a flop proxy. It requires no external library.
+- **Faer** — the pure-Rust sparse LU factorization in [`algebra_linear`](https://github.com/cpmech/algebra_linear), ported from [faer](https://codeberg.org/sarah-quinones/faer) (whose COLAMD ordering follows SuiteSparse), with partial pivoting and both simplicial and supernodal paths (`FaerMethod::default()` is `FaerMethod::Simplicial`). Unlike upstream `faer`, `algebra_linear`'s supernodal path omits contribution blocks between supernodes and updates fronts directly from the stored `L` and `U` columns, so large fronts are slower than upstream `faer`. It requires no external library.
 - **UMFPACK** — the unsymmetric multifrontal solver from [SuiteSparse](https://github.com/DrTimothyAldenDavis/SuiteSparse).
 - **MUMPS** — the multifrontal massively parallel sparse direct solver ([mumps-solver.org](https://mumps-solver.org/index.php)).
 
@@ -99,49 +99,50 @@ The complex-valued tested matrices are:
 
 **Additional notes:**
 
-1. Each problem is solved five times. The reported error is the maximum among runs. The reported computer time is the average without outliers. The Direct solver uses five runs for fast matrices, three for slower ones, and a single probe run for the rest.
+1. Each problem is solved five times. The reported error is the maximum among runs. The reported computer time is the average without outliers. The Faer solver uses up to three runs for matrices under 30 seconds and a single probe run for slower ones.
 2. Total time includes initialization (memory allocation + symbolic factorization), numeric factorization, and solve.
 3. Column NNZ (number of non-zeros) corresponds to Pattern Entries reported by the [SuiteSparse Matrix Collection](https://sparse.tamu.edu).
 4. Column Sym shows if symmetry information was provided to the solver. An asterisk means positive definite information was also given.
-5. oom (out-of-memory) indicates that the symbolic factorization was terminated due to insufficient memory.
-6. n/a indicates that the run was not attempted, or that the Direct solver exceeded its probe budget. The results shown here used a five-minute budget; the runner now defaults to three minutes.
+5. oom (out-of-memory) indicates that the solver exceeded its memory budget during setup, factorization, or solve.
+6. n/a indicates that the run was not attempted, that the Faer solver exceeded its probe or pattern-size budget, or that an iterative solver did not converge within its iteration or time limit.
 7. Bold values highlight significant results, such as large errors or high computation times.
-8. The Direct solver is pure Rust; it does not compute determinants, error estimates or condition numbers.
+8. The Faer solver is pure Rust; it does not compute determinants, error estimates or condition numbers.
 
 
 ## Results
 
-### Direct at a glance
+### Faer at a glance
 
-The pure-Rust Direct solver completed on the following matrices. The last two columns show how much faster UMFPACK and MUMPS are (where MUMPS is slower than Direct, the entry says so):
+The pure-Rust Faer solver completed on the following matrices. The last two columns show how much faster UMFPACK and MUMPS are (where MUMPS is slower than Faer, the entry says so):
 
-| Matrix | Direct | UMFPACK | MUMPS | UMFPACK / Direct | MUMPS / Direct |
+| Matrix | Faer | UMFPACK | MUMPS | UMFPACK / Faer | MUMPS / Faer |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| bwm2000 | 1.11 ms | 0.750 ms | 6.05 ms | 1.47× faster | 5.47× slower |
-| rdb5000 | 39.0 ms | 13.6 ms | 9.95 ms | 2.88× faster | 3.92× faster |
-| Goodwin_040 | 449 ms | 107 ms | 105 ms | 4.19× faster | 4.29× faster |
-| fp | 904 ms | 154 ms | 169 ms | 5.85× faster | 5.35× faster |
-| xenon1 | 55.2 s | 598 ms | 365 ms | 92× faster | 151× faster |
-| mhd1280b | 0.717 ms | 0.383 ms | 5.76 ms | 1.87× faster | 8.03× slower |
-| mplate | 3.13 s | 627 ms | 109 ms | 4.99× faster | 28.7× faster |
+| bwm2000 | 1.08 ms | 0.750 ms | 6.05 ms | 1.44× faster | 5.61× slower |
+| rdb5000 | 35.2 ms | 13.6 ms | 9.95 ms | 2.59× faster | 3.54× faster |
+| Goodwin_040 | 508 ms | 107 ms | 105 ms | 4.75× faster | 4.86× faster |
+| fp | 942 ms | 154 ms | 169 ms | 6.10× faster | 5.58× faster |
+| xenon1 | 55.0 s | 598 ms | 365 ms | 92× faster | 151× faster |
+| pmsim-hex8-27 | 0.863 ms | 0.736 ms | 7.66 ms | 1.17× faster | 8.87× slower |
+| mhd1280b | 0.740 ms | 0.383 ms | 5.76 ms | 1.93× faster | 7.79× slower |
+| mplate | 3.12 s | 627 ms | 109 ms | 4.97× faster | 28.6× faster |
 
-The remaining matrices, including `RFdevice`, exceeded the Direct probe budget (see the notes above). The Direct rows use the simplicial path; the four supernodal results were produced with `LinSolParams::direct_supernodal` and are kept under [`results/arch/direct-supernodal/`](results/arch/direct-supernodal).
+The remaining matrices were skipped above `FAER_MAX_NNZ = 1,200,000` pattern entries (34 matrices), or exceeded the 3-minute Faer probe budget (`RFdevice`). The Faer rows use the default simplicial path (`FaerMethod::Simplicial`); the seven supernodal comparison results were produced with `--faer-method supernodal` and are kept under [`results/arch/faer-supernodal/`](results/arch/faer-supernodal) (remember that `algebra_linear`'s supernodal port omits contribution blocks between supernodes, so its timings on large fronts should not be attributed to upstream `faer`).
 
 Total time per matrix on a log scale, sorted by NNZ (`(c)` marks a complex-valued matrix):
 
-![Total time for Direct, UMFPACK and MUMPS](results/plot_time.png)
+![Total time for Faer, UMFPACK and MUMPS](results/plot_time.png)
 
-Speed-up over Direct (`>1` means faster than Direct; the dashed line is parity):
+Speed-up over Faer (`>1` means faster than Faer; the dashed line is parity):
 
-![Speed-up over Direct for UMFPACK and MUMPS](results/plot_speedup.png)
+![Speed-up over Faer for UMFPACK and MUMPS](results/plot_speedup.png)
 
 UMFPACK / MUMPS speed-up for every matrix where both solvers completed (25 of 42; UMFPACK runs out of memory on the remaining matrices). Values above 1 mean UMFPACK is faster; below 1, MUMPS is faster:
 
 ![UMFPACK / MUMPS speed-up across all matrices](results/plot_speedup_umfpack_mumps.png)
 
-The Direct solver is fast on small systems: up to about 30,000 non-zeros it takes at most a few tens of milliseconds. It becomes very slow for matrices with more than **1 million** non-zeros: the `xenon1` case (NROW=48,600, 1,181,120 non-zeros) takes **55 s**, and the next real case (`twotone`, NROW=120,750, 1,224,224 non-zeros) did not finish within the 3-minute probe. For matrices with more than **1 million** non-zeros, expect **nearly a minute** or more.
+The Faer solver is fast on small systems: up to about 30,000 non-zeros it takes at most a few tens of milliseconds. It becomes very slow for matrices with more than **1 million** non-zeros: the `xenon1` case (NROW=48,600, 1,181,120 non-zeros) takes **55.0 s**, and matrices above 1.2 million pattern entries (starting with `twotone`, NROW=120,750, 1,224,224 non-zeros) are skipped by default. For matrices with more than **1 million** non-zeros, expect **nearly a minute** or more.
 
-The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 142,190 non-zeros) takes **3.13 s**, and `RFdevice` (NROW=74,104, 365,580 non-zeros) did not finish in **15 minutes**; sparsity structure and numerical type matter as much as the non-zero count.
+The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 142,190 non-zeros) takes **3.12 s**, and `RFdevice` (NROW=74,104, 365,580 non-zeros) did not finish within the **3-minute** probe; sparsity structure and numerical type matter as much as the non-zero count.
 
 ### Information about the tested matrices
 
@@ -197,23 +198,23 @@ The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 
 | fem_hifreq_circuit | 491,100 | 20,239,237 | No |
 | dielFilterV3clx | 420,408 | 32,886,208 | Yes |
 
-... direct: 6 measured matrices, run counts [5]
+... faer: 6 measured matrices, run counts [1, 3]
 ... umfpack: 20 measured matrices, run counts [5]
 ... mumps: 33 measured matrices, run counts [5]
-... direct: 2 measured matrices, run counts [5]
+... faer: 2 measured matrices, run counts [3]
 ... umfpack: 6 measured matrices, run counts [5]
 ... mumps: 10 measured matrices, run counts [5]
 
-### Calculations on Arch. Direct, UMFPACK and MUMPS. Real-valued matrices.
+### Calculations on Arch. Faer, UMFPACK and MUMPS. Real-valued matrices.
 
 
-| Matrix | Direct Time | Direct Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
+| Matrix | Faer Time | Faer Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| bwm2000 | 1.106ms | 1.48e-15 | 750.259µs | 5.30e-16 | 6.054ms | 7.50e-16 |
-| rdb5000 | 39.034ms | 1.01e-14 | 13.569ms | 1.93e-15 | 9.946ms | 9.40e-13 |
-| Goodwin_040 | 448.636ms | 9.71e-12 | 107.091ms | 6.62e-13 | 104.564ms | 1.65e-11 |
-| fp | 903.691ms | 4.88e-20 | 154.476ms | 2.57e-21 | 168.911ms | 1.16e-20 |
-| xenon1 | 55.233s | 1.19e-38 | 598.244ms | 5.55e-40 | 365.443ms | 5.86e-40 |
+| bwm2000 | 1.078ms | 1.48e-15 | 750.259µs | 5.30e-16 | 6.054ms | 7.50e-16 |
+| rdb5000 | 35.184ms | 1.01e-14 | 13.569ms | 1.93e-15 | 9.946ms | 9.40e-13 |
+| Goodwin_040 | 508.395ms | 9.71e-12 | 107.091ms | 6.62e-13 | 104.564ms | 1.65e-11 |
+| fp | 941.771ms | 4.88e-20 | 154.476ms | 2.57e-21 | 168.911ms | 1.16e-20 |
+| xenon1 | 55.043s | 1.19e-38 | 598.244ms | 5.55e-40 | 365.443ms | 5.86e-40 |
 | twotone | n/a | n/a | 337.133ms | 1.13e-14 | 983.724ms | 1.99e-13 |
 | Raj1 | n/a | n/a | oom | oom | 947.420ms | 3.63e-13 |
 | boyd2 | n/a | n/a | **1m18.248s** | 2.86e-13 | 844.848ms | 8.98e-11 |
@@ -241,15 +242,15 @@ The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 
 | dielFilterV2 | n/a | n/a | oom | oom | 13.788s | 1.45e-11 |
 | Flan_1565 | n/a | n/a | oom | oom | 23.996s | 9.85e-16 |
 | pres-cylin | n/a | n/a | oom | oom | **2m6.195s** | 4.90e-13 |
-| pmsim-hex8-27 | 934.320µs | 1.16e-15 | 736.383µs | 2.85e-16 | 7.657ms | 5.62e-16 |
+| pmsim-hex8-27 | 863.255µs | 8.23e-16 | 736.383µs | 2.85e-16 | 7.657ms | 5.62e-16 |
 
-### Calculations on Arch. Direct, UMFPACK and MUMPS. Complex-valued matrices.
+### Calculations on Arch. Faer, UMFPACK and MUMPS. Complex-valued matrices.
 
 
-| Matrix | Direct Time | Direct Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
+| Matrix | Faer Time | Faer Error | UMFPACK Time | UMFPACK Error | MUMPS Time | MUMPS Error |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| mhd1280b | 717.206µs | 1.31e-15 | 382.531µs | 7.41e-16 | 5.759ms | 1.17e-15 |
-| mplate | 3.131s | 4.66e-11 | 627.467ms | 1.86e-11 | 109.002ms | 6.28e-11 |
+| mhd1280b | 739.652µs | 1.31e-15 | 382.531µs | 7.41e-16 | 5.759ms | 1.17e-15 |
+| mplate | 3.116s | 4.66e-11 | 627.467ms | 1.86e-11 | 109.002ms | 6.28e-11 |
 | RFdevice | n/a | n/a | 4.342s | 1.22e-13 | 1.803s | 1.52e-7 |
 | vfem | n/a | n/a | 4.088s | 4.70e-8 | 1.638s | 6.54e-8 |
 | fem_filter | n/a | n/a | 2.627s | 6.61e-11 | 1.185s | 1.40e-10 |
@@ -291,19 +292,19 @@ The threshold is not a function of NNZ alone. The complex `mplate` (NROW=5,962, 
 | atmosmodl | oom | oom | 5.751s | 9.12e-16 | 7.781s | 1.59e-15 |
 | memchip | 26.259s | 2.04e-15 | 21.341s | 1.73e-11 | 8.059s | 2.65e-11 |
 | Freescale1 | 30.025s | 7.05e-10 | 7.383s | 1.64e-9 | n/a | n/a |
-| rajat31 | oom | oom | 37.987s | 4.75e-12 | n/a | n/a |
+| rajat31 | oom | oom | 37.987s | 4.75e-12 | oom | oom |
 | Transport | oom | oom | 6.315s | 1.90e-9 | 6.188s | 6.29e-10 |
 | inline_1 | oom | oom | n/a | n/a | n/a | n/a |
 | PFlow_742 | oom | oom | n/a | n/a | n/a | n/a |
 | Emilia_923 | oom | oom | n/a | n/a | n/a | n/a |
 | dielFilterV2 | oom | oom | n/a | n/a | n/a | n/a |
-| Flan_1565 | oom | oom | n/a | n/a | n/a | n/a |
-| pres-cylin | oom | oom | n/a | n/a | n/a | n/a |
+| Flan_1565 | oom | oom | oom | oom | oom | oom |
+| pres-cylin | oom | oom | oom | oom | oom | oom |
 | pmsim-hex8-27 | 736.383µs | 2.85e-16 | 818.326µs | 8.57e-14 | 736.254µs | 1.53e-13 |
 
 
 
-The iterative columns are BiCGStab and GMRES on the AMG preconditioner, five runs each with the default settings. CG is not in the table because it requires a symmetric positive definite system and reaches the error gate on one matrix of the set. An `n/a` in an iterative column means the iteration did not reach 1e-10 within 1 000 iterations, or that the run was killed by the memory or time cap; it does not mean `not measured`.
+The iterative columns are BiCGStab and GMRES on the AMG preconditioner, five runs each with the default settings. CG is not in the table because it requires a symmetric positive definite system and reaches the error gate on one matrix of the set. An `oom` in an iterative column means the solver exceeded its memory budget; an `n/a` means the iteration did not reach 1e-10 within 1 000 iterations or exceeded its time cap; it does not mean `not measured`.
 
 ### Legacy results
 
