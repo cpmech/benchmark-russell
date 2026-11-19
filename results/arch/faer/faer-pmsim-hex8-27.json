@@ -2,7 +2,7 @@
   "main": {
     "platform": "Russell",
     "blas_lib": "Native",
-    "solver": "Direct",
+    "solver": "Faer",
     "mumps": false,
     "out_of_memory": false
   },
