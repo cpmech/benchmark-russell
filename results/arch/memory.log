@@ -1,0 +1,187 @@
+2026-11-19T16:56:28+10:00 check faer/bwm2000:probe avail_mb=20890 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 cgroup_max_mb=0 avail_mb=20890 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 ran faer/bwm2000:probe exit=0 elapsed_s=0.02 timeout_s=180 majflt=1 maxrss_mb=23 swap_growth_mb=0 swap_pages=0 avail_mb=20887 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 check faer/bwm2000 avail_mb=20887 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 cgroup_max_mb=0 avail_mb=20887 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 ran faer/bwm2000 exit=0 elapsed_s=0.02 timeout_s=600 majflt=0 maxrss_mb=23 swap_growth_mb=0 swap_pages=0 avail_mb=20883 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 check faer/rdb5000:probe avail_mb=20883 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 cgroup_max_mb=0 avail_mb=20883 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 ran faer/rdb5000:probe exit=0 elapsed_s=0.05 timeout_s=180 majflt=0 maxrss_mb=32 swap_growth_mb=0 swap_pages=0 avail_mb=20890 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 check faer/rdb5000 avail_mb=20890 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 cgroup_max_mb=0 avail_mb=20890 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 ran faer/rdb5000 exit=0 elapsed_s=0.12 timeout_s=600 majflt=0 maxrss_mb=35 swap_growth_mb=0 swap_pages=0 avail_mb=20899 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 check faer/Goodwin_040:probe avail_mb=20903 swap_used_mb=3439
+2026-11-19T16:56:28+10:00 cgroup_max_mb=0 avail_mb=20903 swap_used_mb=3439
+2026-11-19T16:56:29+10:00 ran faer/Goodwin_040:probe exit=0 elapsed_s=0.55 timeout_s=180 majflt=0 maxrss_mb=161 swap_growth_mb=0 swap_pages=0 avail_mb=20853 swap_used_mb=3439
+2026-11-19T16:56:29+10:00 check faer/Goodwin_040 avail_mb=20853 swap_used_mb=3439
+2026-11-19T16:56:29+10:00 cgroup_max_mb=0 avail_mb=20852 swap_used_mb=3439
+2026-11-19T16:56:31+10:00 ran faer/Goodwin_040 exit=0 elapsed_s=1.60 timeout_s=600 majflt=0 maxrss_mb=182 swap_growth_mb=0 swap_pages=0 avail_mb=20805 swap_used_mb=3439
+2026-11-19T16:56:31+10:00 check faer/fp:probe avail_mb=20804 swap_used_mb=3439
+2026-11-19T16:56:31+10:00 cgroup_max_mb=0 avail_mb=20803 swap_used_mb=3439
+2026-11-19T16:56:32+10:00 ran faer/fp:probe exit=0 elapsed_s=1.02 timeout_s=180 majflt=0 maxrss_mb=175 swap_growth_mb=0 swap_pages=0 avail_mb=20756 swap_used_mb=3439
+2026-11-19T16:56:32+10:00 check faer/fp avail_mb=20756 swap_used_mb=3439
+2026-11-19T16:56:32+10:00 cgroup_max_mb=0 avail_mb=20756 swap_used_mb=3439
+2026-11-19T16:56:35+10:00 ran faer/fp exit=0 elapsed_s=2.91 timeout_s=609 majflt=0 maxrss_mb=182 swap_growth_mb=0 swap_pages=0 avail_mb=20872 swap_used_mb=3439
+2026-11-19T16:56:35+10:00 check faer/xenon1:probe avail_mb=20868 swap_used_mb=3439
+2026-11-19T16:56:35+10:00 cgroup_max_mb=0 avail_mb=20868 swap_used_mb=3439
+2026-11-19T16:57:30+10:00 ran faer/xenon1:probe exit=0 elapsed_s=55.21 timeout_s=180 majflt=0 maxrss_mb=1070 swap_growth_mb=-1 swap_pages=18 avail_mb=21013 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/twotone reason=max_nnz nnz=1224224 limit=1200000 avail_mb=21022 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/Raj1 reason=max_nnz nnz=1302464 limit=1200000 avail_mb=21021 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/boyd2 reason=max_nnz nnz=1500397 limit=1200000 avail_mb=21021 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/Goodwin_071 reason=max_nnz nnz=1797934 limit=1200000 avail_mb=21019 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/darcy003 reason=max_nnz nnz=2101242 limit=1200000 avail_mb=21019 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/rma10 reason=max_nnz nnz=2374001 limit=1200000 avail_mb=21022 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/helm2d03 reason=max_nnz nnz=2741935 limit=1200000 avail_mb=21023 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/stomach reason=max_nnz nnz=3021648 limit=1200000 avail_mb=21026 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/oilpan reason=max_nnz nnz=3597188 limit=1200000 avail_mb=21025 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/ASIC_680k reason=max_nnz nnz=3871773 limit=1200000 avail_mb=21025 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/tmt_unsym reason=max_nnz nnz=4584801 limit=1200000 avail_mb=21025 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/Goodwin_127 reason=max_nnz nnz=5778545 limit=1200000 avail_mb=21025 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/pre2 reason=max_nnz nnz=5959282 limit=1200000 avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/marine1 reason=max_nnz nnz=6226538 limit=1200000 avail_mb=21023 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/torso1 reason=max_nnz nnz=8516500 limit=1200000 avail_mb=21021 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/atmosmodd reason=max_nnz nnz=8814880 limit=1200000 avail_mb=21023 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/atmosmodl reason=max_nnz nnz=10319760 limit=1200000 avail_mb=21023 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/memchip reason=max_nnz nnz=14810202 limit=1200000 avail_mb=21026 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/Freescale1 reason=max_nnz nnz=18920347 limit=1200000 avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/rajat31 reason=max_nnz nnz=20316253 limit=1200000 avail_mb=21027 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/Transport reason=max_nnz nnz=23500731 limit=1200000 avail_mb=21025 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/inline_1 reason=max_nnz nnz=36816342 limit=1200000 avail_mb=21024 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/PFlow_742 reason=max_nnz nnz=37138461 limit=1200000 avail_mb=21026 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/Emilia_923 reason=max_nnz nnz=41005206 limit=1200000 avail_mb=21027 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/dielFilterV2real reason=max_nnz nnz=48538952 limit=1200000 avail_mb=21030 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/Flan_1565 reason=max_nnz nnz=117406044 limit=1200000 avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 skip faer/pres-cylin-3d-tet10-fine reason=max_nnz nnz=133562188 limit=1200000 avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 check faer/pmsim-hex8-27:probe avail_mb=21031 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 cgroup_max_mb=0 avail_mb=21030 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 ran faer/pmsim-hex8-27:probe exit=0 elapsed_s=0.02 timeout_s=180 majflt=0 maxrss_mb=23 swap_growth_mb=0 swap_pages=0 avail_mb=21027 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 check faer/pmsim-hex8-27 avail_mb=21027 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 cgroup_max_mb=0 avail_mb=21027 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 ran faer/pmsim-hex8-27 exit=0 elapsed_s=0.02 timeout_s=600 majflt=0 maxrss_mb=23 swap_growth_mb=0 swap_pages=0 avail_mb=21039 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 check faer/mhd1280b:probe avail_mb=21036 swap_used_mb=3438
+2026-11-19T16:57:30+10:00 cgroup_max_mb=0 avail_mb=21036 swap_used_mb=3438
+2026-11-19T16:57:31+10:00 ran faer/mhd1280b:probe exit=0 elapsed_s=0.02 timeout_s=180 majflt=0 maxrss_mb=24 swap_growth_mb=0 swap_pages=0 avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:31+10:00 check faer/mhd1280b avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:31+10:00 cgroup_max_mb=0 avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:31+10:00 ran faer/mhd1280b exit=0 elapsed_s=0.02 timeout_s=600 majflt=0 maxrss_mb=24 swap_growth_mb=0 swap_pages=0 avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:31+10:00 check faer/mplate:probe avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:31+10:00 cgroup_max_mb=0 avail_mb=21029 swap_used_mb=3438
+2026-11-19T16:57:34+10:00 ran faer/mplate:probe exit=0 elapsed_s=3.12 timeout_s=180 majflt=0 maxrss_mb=176 swap_growth_mb=0 swap_pages=0 avail_mb=21018 swap_used_mb=3438
+2026-11-19T16:57:34+10:00 check faer/mplate avail_mb=21018 swap_used_mb=3438
+2026-11-19T16:57:34+10:00 cgroup_max_mb=0 avail_mb=21018 swap_used_mb=3438
+2026-11-19T16:57:43+10:00 ran faer/mplate exit=0 elapsed_s=9.39 timeout_s=627 majflt=0 maxrss_mb=180 swap_growth_mb=0 swap_pages=4 avail_mb=21009 swap_used_mb=3438
+2026-11-19T16:57:43+10:00 check faer/RFdevice:probe avail_mb=21009 swap_used_mb=3438
+2026-11-19T16:57:43+10:00 cgroup_max_mb=0 avail_mb=21009 swap_used_mb=3438
+2026-11-19T17:00:43+10:00 ran faer/RFdevice:probe exit=124 elapsed_s=180.01 timeout_s=180 majflt=0 maxrss_mb=2393 swap_growth_mb=-1 swap_pages=412 avail_mb=20897 swap_used_mb=3437
+2026-11-19T17:00:43+10:00 skip faer/vfem reason=max_nnz nnz=1434636 limit=1200000 avail_mb=20896 swap_used_mb=3437
+2026-11-19T17:00:43+10:00 skip faer/fem_filter reason=max_nnz nnz=1731206 limit=1200000 avail_mb=20899 swap_used_mb=3437
+2026-11-19T17:00:43+10:00 skip faer/Chevron4 reason=max_nnz nnz=6376412 limit=1200000 avail_mb=20900 swap_used_mb=3437
+2026-11-19T17:00:43+10:00 skip faer/mono_500Hz reason=max_nnz nnz=5036288 limit=1200000 avail_mb=20900 swap_used_mb=3437
+2026-11-19T17:00:43+10:00 skip faer/kim2 reason=max_nnz nnz=11330020 limit=1200000 avail_mb=20899 swap_used_mb=3437
+2026-11-19T17:00:43+10:00 skip faer/fem_hifreq_circuit reason=max_nnz nnz=20239237 limit=1200000 avail_mb=20899 swap_used_mb=3437
+2026-11-19T17:00:43+10:00 skip faer/dielFilterV3clx reason=max_nnz nnz=32886208 limit=1200000 avail_mb=20900 swap_used_mb=3437
+2026-11-19T17:00:43+10:00 suite done wall_s=255 stages=faer avail_mb=20899 swap_used_mb=3437
+2026-11-19T17:01:46+10:00 check faer-supernodal/bwm2000:probe avail_mb=20867 swap_used_mb=3437
+2026-11-19T17:01:46+10:00 cgroup_max_mb=0 avail_mb=20867 swap_used_mb=3437
+2026-11-19T17:01:46+10:00 ran faer-supernodal/bwm2000:probe exit=0 elapsed_s=0.02 timeout_s=180 majflt=0 maxrss_mb=25 swap_growth_mb=0 swap_pages=0 avail_mb=20863 swap_used_mb=3437
+2026-11-19T17:01:46+10:00 check faer-supernodal/bwm2000 avail_mb=20863 swap_used_mb=3437
+2026-11-19T17:01:46+10:00 cgroup_max_mb=0 avail_mb=20863 swap_used_mb=3437
+2026-11-19T17:01:46+10:00 ran faer-supernodal/bwm2000 exit=0 elapsed_s=0.02 timeout_s=600 majflt=0 maxrss_mb=24 swap_growth_mb=0 swap_pages=0 avail_mb=20873 swap_used_mb=3437
+2026-11-19T17:01:46+10:00 check faer-supernodal/rdb5000:probe avail_mb=20875 swap_used_mb=3437
+2026-11-19T17:01:46+10:00 cgroup_max_mb=0 avail_mb=20875 swap_used_mb=3437
+2026-11-19T17:01:47+10:00 ran faer-supernodal/rdb5000:probe exit=0 elapsed_s=0.49 timeout_s=180 majflt=0 maxrss_mb=47 swap_growth_mb=0 swap_pages=0 avail_mb=20864 swap_used_mb=3437
+2026-11-19T17:01:47+10:00 check faer-supernodal/rdb5000 avail_mb=20863 swap_used_mb=3437
+2026-11-19T17:01:47+10:00 cgroup_max_mb=0 avail_mb=20870 swap_used_mb=3437
+2026-11-19T17:01:48+10:00 ran faer-supernodal/rdb5000 exit=0 elapsed_s=1.49 timeout_s=600 majflt=0 maxrss_mb=47 swap_growth_mb=0 swap_pages=0 avail_mb=20849 swap_used_mb=3437
+2026-11-19T17:01:48+10:00 check faer-supernodal/Goodwin_040:probe avail_mb=20849 swap_used_mb=3437
+2026-11-19T17:01:48+10:00 cgroup_max_mb=0 avail_mb=20849 swap_used_mb=3437
+2026-11-19T17:02:16+10:00 ran faer-supernodal/Goodwin_040:probe exit=0 elapsed_s=27.50 timeout_s=180 majflt=0 maxrss_mb=255 swap_growth_mb=0 swap_pages=4 avail_mb=20841 swap_used_mb=3437
+2026-11-19T17:02:16+10:00 check faer-supernodal/Goodwin_040 avail_mb=20838 swap_used_mb=3437
+2026-11-19T17:02:16+10:00 cgroup_max_mb=0 avail_mb=20882 swap_used_mb=3437
+2026-11-19T17:03:38+10:00 ran faer-supernodal/Goodwin_040 exit=0 elapsed_s=82.45 timeout_s=843 majflt=0 maxrss_mb=260 swap_growth_mb=0 swap_pages=14 avail_mb=20999 swap_used_mb=3437
+2026-11-19T17:03:38+10:00 check faer-supernodal/fp:probe avail_mb=21000 swap_used_mb=3437
+2026-11-19T17:03:38+10:00 cgroup_max_mb=0 avail_mb=21000 swap_used_mb=3437
+2026-11-19T17:03:45+10:00 ran faer-supernodal/fp:probe exit=0 elapsed_s=6.59 timeout_s=180 majflt=0 maxrss_mb=276 swap_growth_mb=0 swap_pages=0 avail_mb=20836 swap_used_mb=3437
+2026-11-19T17:03:45+10:00 check faer-supernodal/fp avail_mb=20836 swap_used_mb=3437
+2026-11-19T17:03:45+10:00 cgroup_max_mb=0 avail_mb=20919 swap_used_mb=3437
+2026-11-19T17:04:05+10:00 ran faer-supernodal/fp exit=0 elapsed_s=19.84 timeout_s=654 majflt=0 maxrss_mb=283 swap_growth_mb=0 swap_pages=3 avail_mb=20702 swap_used_mb=3437
+2026-11-19T17:04:05+10:00 check faer-supernodal/xenon1:probe avail_mb=20702 swap_used_mb=3437
+2026-11-19T17:04:05+10:00 cgroup_max_mb=0 avail_mb=20702 swap_used_mb=3437
+2026-11-19T17:07:05+10:00 ran faer-supernodal/xenon1:probe exit=124 elapsed_s=180.02 timeout_s=180 majflt=0 maxrss_mb=671 swap_growth_mb=-1 swap_pages=47 avail_mb=21010 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/twotone reason=max_nnz nnz=1224224 limit=1200000 avail_mb=21008 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/Raj1 reason=max_nnz nnz=1302464 limit=1200000 avail_mb=21009 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/boyd2 reason=max_nnz nnz=1500397 limit=1200000 avail_mb=21011 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/Goodwin_071 reason=max_nnz nnz=1797934 limit=1200000 avail_mb=21009 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/darcy003 reason=max_nnz nnz=2101242 limit=1200000 avail_mb=21009 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/rma10 reason=max_nnz nnz=2374001 limit=1200000 avail_mb=21009 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/helm2d03 reason=max_nnz nnz=2741935 limit=1200000 avail_mb=21009 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/stomach reason=max_nnz nnz=3021648 limit=1200000 avail_mb=21011 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/oilpan reason=max_nnz nnz=3597188 limit=1200000 avail_mb=21013 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/ASIC_680k reason=max_nnz nnz=3871773 limit=1200000 avail_mb=21013 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/tmt_unsym reason=max_nnz nnz=4584801 limit=1200000 avail_mb=21016 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/Goodwin_127 reason=max_nnz nnz=5778545 limit=1200000 avail_mb=21015 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/pre2 reason=max_nnz nnz=5959282 limit=1200000 avail_mb=21016 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/marine1 reason=max_nnz nnz=6226538 limit=1200000 avail_mb=21018 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/torso1 reason=max_nnz nnz=8516500 limit=1200000 avail_mb=21017 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/atmosmodd reason=max_nnz nnz=8814880 limit=1200000 avail_mb=21014 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/atmosmodl reason=max_nnz nnz=10319760 limit=1200000 avail_mb=21015 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/memchip reason=max_nnz nnz=14810202 limit=1200000 avail_mb=21020 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/Freescale1 reason=max_nnz nnz=18920347 limit=1200000 avail_mb=21019 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/rajat31 reason=max_nnz nnz=20316253 limit=1200000 avail_mb=21019 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/Transport reason=max_nnz nnz=23500731 limit=1200000 avail_mb=21021 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/inline_1 reason=max_nnz nnz=36816342 limit=1200000 avail_mb=21024 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/PFlow_742 reason=max_nnz nnz=37138461 limit=1200000 avail_mb=21025 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/Emilia_923 reason=max_nnz nnz=41005206 limit=1200000 avail_mb=21024 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/dielFilterV2real reason=max_nnz nnz=48538952 limit=1200000 avail_mb=21025 swap_used_mb=3436
+2026-11-19T17:07:05+10:00 skip faer-supernodal/Flan_1565 reason=max_nnz nnz=117406044 limit=1200000 avail_mb=21020 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 skip faer-supernodal/pres-cylin-3d-tet10-fine reason=max_nnz nnz=133562188 limit=1200000 avail_mb=21023 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 check faer-supernodal/pmsim-hex8-27:probe avail_mb=21022 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 cgroup_max_mb=0 avail_mb=21022 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 ran faer-supernodal/pmsim-hex8-27:probe exit=0 elapsed_s=0.01 timeout_s=180 majflt=0 maxrss_mb=24 swap_growth_mb=0 swap_pages=0 avail_mb=21021 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 check faer-supernodal/pmsim-hex8-27 avail_mb=21022 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 cgroup_max_mb=0 avail_mb=21021 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 ran faer-supernodal/pmsim-hex8-27 exit=0 elapsed_s=0.02 timeout_s=600 majflt=0 maxrss_mb=24 swap_growth_mb=0 swap_pages=0 avail_mb=21023 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 check faer-supernodal/mhd1280b:probe avail_mb=21023 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 cgroup_max_mb=0 avail_mb=21023 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 ran faer-supernodal/mhd1280b:probe exit=0 elapsed_s=0.02 timeout_s=180 majflt=0 maxrss_mb=25 swap_growth_mb=0 swap_pages=0 avail_mb=21023 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 check faer-supernodal/mhd1280b avail_mb=21023 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 cgroup_max_mb=0 avail_mb=21023 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 ran faer-supernodal/mhd1280b exit=0 elapsed_s=0.02 timeout_s=600 majflt=0 maxrss_mb=25 swap_growth_mb=0 swap_pages=0 avail_mb=21031 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 check faer-supernodal/mplate:probe avail_mb=21029 swap_used_mb=3436
+2026-11-19T17:07:06+10:00 cgroup_max_mb=0 avail_mb=21029 swap_used_mb=3436
+2026-11-19T17:07:42+10:00 ran faer-supernodal/mplate:probe exit=0 elapsed_s=35.65 timeout_s=180 majflt=0 maxrss_mb=359 swap_growth_mb=0 swap_pages=10 avail_mb=20953 swap_used_mb=3436
+2026-11-19T17:07:42+10:00 check faer-supernodal/RFdevice:probe avail_mb=21049 swap_used_mb=3436
+2026-11-19T17:07:42+10:00 cgroup_max_mb=0 avail_mb=21049 swap_used_mb=3436
+2026-11-19T17:10:42+10:00 ran faer-supernodal/RFdevice:probe exit=124 elapsed_s=180.01 timeout_s=180 majflt=0 maxrss_mb=544 swap_growth_mb=0 swap_pages=39 avail_mb=20897 swap_used_mb=3436
+2026-11-19T17:10:42+10:00 skip faer-supernodal/vfem reason=max_nnz nnz=1434636 limit=1200000 avail_mb=20897 swap_used_mb=3436
+2026-11-19T17:10:42+10:00 skip faer-supernodal/fem_filter reason=max_nnz nnz=1731206 limit=1200000 avail_mb=20897 swap_used_mb=3436
+2026-11-19T17:10:42+10:00 skip faer-supernodal/Chevron4 reason=max_nnz nnz=6376412 limit=1200000 avail_mb=20899 swap_used_mb=3436
+2026-11-19T17:10:42+10:00 skip faer-supernodal/mono_500Hz reason=max_nnz nnz=5036288 limit=1200000 avail_mb=20899 swap_used_mb=3436
+2026-11-19T17:10:42+10:00 skip faer-supernodal/kim2 reason=max_nnz nnz=11330020 limit=1200000 avail_mb=20901 swap_used_mb=3436
+2026-11-19T17:10:42+10:00 skip faer-supernodal/fem_hifreq_circuit reason=max_nnz nnz=20239237 limit=1200000 avail_mb=20901 swap_used_mb=3436
+2026-11-19T17:10:42+10:00 skip faer-supernodal/dielFilterV3clx reason=max_nnz nnz=32886208 limit=1200000 avail_mb=20904 swap_used_mb=3436
+2026-11-19T17:10:42+10:00 suite done wall_s=536 stages=faer avail_mb=20904 swap_used_mb=3436
+2026-11-19T17:11:50+10:00 check cg/Flan_1565 avail_mb=20910 swap_used_mb=3436
+2026-11-19T17:11:50+10:00 cgroup_max_mb=0 avail_mb=20909 swap_used_mb=3436
+2026-11-19T17:11:59+10:00 ran cg/Flan_1565 exit=0 elapsed_s=8.35 timeout_s=1260 majflt=0 maxrss_mb=4992 swap_growth_mb=0 swap_pages=3 reason=out_of_memory avail_mb=20905 swap_used_mb=3436
+2026-11-19T17:11:59+10:00 check cg/pres-cylin-3d-tet10-fine avail_mb=20928 swap_used_mb=3436
+2026-11-19T17:11:59+10:00 cgroup_max_mb=0 avail_mb=20928 swap_used_mb=3436
+2026-11-19T17:12:08+10:00 ran cg/pres-cylin-3d-tet10-fine exit=0 elapsed_s=8.82 timeout_s=1260 majflt=0 maxrss_mb=5671 swap_growth_mb=0 swap_pages=0 reason=out_of_memory avail_mb=20886 swap_used_mb=3436
+2026-11-19T17:12:08+10:00 check bicgstab/Flan_1565 avail_mb=20886 swap_used_mb=3436
+2026-11-19T17:12:08+10:00 cgroup_max_mb=0 avail_mb=20886 swap_used_mb=3436
+2026-11-19T17:12:16+10:00 ran bicgstab/Flan_1565 exit=0 elapsed_s=8.30 timeout_s=1260 majflt=0 maxrss_mb=4992 swap_growth_mb=0 swap_pages=4 reason=out_of_memory avail_mb=20855 swap_used_mb=3436
+2026-11-19T17:12:16+10:00 check bicgstab/pres-cylin-3d-tet10-fine avail_mb=20856 swap_used_mb=3436
+2026-11-19T17:12:16+10:00 cgroup_max_mb=0 avail_mb=20856 swap_used_mb=3436
+2026-11-19T17:12:24+10:00 ran bicgstab/pres-cylin-3d-tet10-fine exit=0 elapsed_s=8.41 timeout_s=1260 majflt=0 maxrss_mb=5670 swap_growth_mb=0 swap_pages=0 reason=out_of_memory avail_mb=20861 swap_used_mb=3436
+2026-11-19T17:12:24+10:00 check gmres/Flan_1565 avail_mb=20858 swap_used_mb=3436
+2026-11-19T17:12:24+10:00 cgroup_max_mb=0 avail_mb=20858 swap_used_mb=3436
+2026-11-19T17:12:33+10:00 ran gmres/Flan_1565 exit=0 elapsed_s=8.30 timeout_s=1260 majflt=0 maxrss_mb=4992 swap_growth_mb=0 swap_pages=51 reason=out_of_memory avail_mb=20848 swap_used_mb=3436
+2026-11-19T17:12:33+10:00 check gmres/pres-cylin-3d-tet10-fine avail_mb=20847 swap_used_mb=3436
+2026-11-19T17:12:33+10:00 cgroup_max_mb=0 avail_mb=20847 swap_used_mb=3436
+2026-11-19T17:12:41+10:00 ran gmres/pres-cylin-3d-tet10-fine exit=0 elapsed_s=8.42 timeout_s=1260 majflt=0 maxrss_mb=5670 swap_growth_mb=0 swap_pages=6 reason=out_of_memory avail_mb=20855 swap_used_mb=3436
+2026-11-19T17:12:41+10:00 suite done wall_s=51 stages=iterative avail_mb=20855 swap_used_mb=3436
+2026-11-19T17:13:50+10:00 skip cg/rajat31 reason=not_symmetric avail_mb=20685 swap_used_mb=3436
+2026-11-19T17:13:50+10:00 check gmres/rajat31 avail_mb=20686 swap_used_mb=3436
+2026-11-19T17:13:50+10:00 cgroup_max_mb=0 avail_mb=20686 swap_used_mb=3436
+2026-11-19T17:13:57+10:00 ran gmres/rajat31 exit=0 elapsed_s=6.31 timeout_s=1260 majflt=0 maxrss_mb=3571 swap_growth_mb=0 swap_pages=1 reason=out_of_memory avail_mb=20706 swap_used_mb=3436
+2026-11-19T17:13:57+10:00 suite done wall_s=7 stages=iterative avail_mb=20706 swap_used_mb=3436
