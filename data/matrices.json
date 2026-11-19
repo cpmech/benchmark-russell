@@ -1,5 +1,18 @@
 [
   {
+    "Name": "pmsim-hex8-27",
+    "Group": "Pedroso",
+    "Num Rows": 157,
+    "Num Cols": 157,
+    "Nonzeros": 3369,
+    "Pattern Entries": 6581,
+    "Kind": "Structural Problem",
+    "Symmetric": "Yes",
+    "Positive Definite": "yes",
+    "Type": "real",
+    "Description": "Global stiffness matrix of the stress-strain driver's 3x3x3 Hex8 block (27 elements, 157 unknowns after the essential boundary conditions)"
+  },
+  {
     "Name": "bwm2000",
     "Group": "Bai",
     "Num Rows": 2000,
@@ -102,6 +115,19 @@
     "Positive Definite": "no",
     "Type": "real",
     "Description": "Optimization problem (2004)"
+  },
+  {
+    "Name": "pres-cylin-3d-tet10-coarse",
+    "Group": "Pedroso",
+    "Num Rows": 23578,
+    "Num Cols": 23578,
+    "Nonzeros": 804045,
+    "Pattern Entries": 1584512,
+    "Kind": "Structural Problem",
+    "Symmetric": "Yes",
+    "Positive Definite": "yes",
+    "Type": "real",
+    "Description": "FEM stiffness matrix of the pressurized cylinder (Tet10, mesh 10x20, 23,578 DOF after the essential boundary conditions)"
   },
   {
     "Name": "Goodwin_071",
@@ -557,18 +583,5 @@
     "Positive Definite": "yes",
     "Type": "real",
     "Description": "FEM stiffness matrix of a pressurized cylinder (Tet10 with 1,711,464 DOF)"
-  },
-  {
-    "Name": "pmsim-hex8-27",
-    "Group": "Pedroso",
-    "Num Rows": 157,
-    "Num Cols": 157,
-    "Nonzeros": 3369,
-    "Pattern Entries": 6581,
-    "Kind": "Structural Problem",
-    "Symmetric": "Yes",
-    "Positive Definite": "yes",
-    "Type": "real",
-    "Description": "Global stiffness matrix of the stress-strain driver's 3x3x3 Hex8 block (27 elements, 157 unknowns after the essential boundary conditions)"
   }
 ]

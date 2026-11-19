@@ -32,6 +32,7 @@ pub const GENIES_ITERATIVE: &[Genie] = &[
 
 /// Matrix names used across benchmarks
 pub const MATRICES: &[&str] = &[
+    "pmsim-hex8-27",
     "bwm2000",
     "rdb5000",
     "Goodwin_040",
@@ -40,6 +41,7 @@ pub const MATRICES: &[&str] = &[
     "twotone",
     "Raj1",
     "boyd2",
+    "pres-cylin-3d-tet10-coarse",
     "Goodwin_071",
     "darcy003",
     "rma10",
@@ -64,7 +66,6 @@ pub const MATRICES: &[&str] = &[
     "dielFilterV2real",
     "Flan_1565",
     "pres-cylin-3d-tet10-fine",
-    "pmsim-hex8-27",
 ];
 
 /// Complex matrices
