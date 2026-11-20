@@ -1,0 +1,103 @@
+{
+  "main": {
+    "platform": "Russell",
+    "blas_lib": "Intel MKL",
+    "solver": "Faer",
+    "has_mumps": true,
+    "has_umfpack": true,
+    "solved": true,
+    "stopped_by_time_guard": false,
+    "out_of_memory": false,
+    "error_from_solver": null
+  },
+  "matrix": {
+    "name": "pres-cylin-3d-tet10-coarse",
+    "nrow": 23578,
+    "ncol": 23578,
+    "nnz": 1584512,
+    "nnz_actual": 1584512,
+    "complex": false,
+    "symmetric": "YesFull"
+  },
+  "requests": {
+    "ordering": "Auto",
+    "scaling": "Auto",
+    "mumps_num_threads": 0,
+    "positive_definite": false
+  },
+  "output": {
+    "effective_ordering": "Colamd",
+    "effective_scaling": "No",
+    "effective_mumps_num_threads": 0,
+    "openmp_num_threads": 24,
+    "umfpack_strategy": "Unknown",
+    "umfpack_rcond_estimate": 0.0,
+    "faer_effective_method": "Simplicial",
+    "faer_flop_ratio": 0.0,
+    "basiclu_rank": 0,
+    "qdldl_positive_inertia": 0
+  },
+  "determinant": {
+    "mantissa_real": 0.0,
+    "mantissa_imag": 0.0,
+    "base": 0.0,
+    "exponent": 0.0
+  },
+  "verify": {
+    "max_abs_a": 2694.967634070054,
+    "max_abs_ax": 1.0000000000610294,
+    "max_abs_diff": 8.297140752233645e-11,
+    "relative_error": 3.07761141023329e-14
+  },
+  "time_human": {
+    "read_matrix": "77.151051ms",
+    "initialize_array": [
+      "68.476067ms"
+    ],
+    "initialize": "68.476067ms",
+    "preprocess_array": [
+      "7.95283663s"
+    ],
+    "preprocess": "7.95283663s",
+    "solve_array": [
+      "18.239032ms"
+    ],
+    "solve": "18.239032ms",
+    "total_ifs_array": [
+      "8.039551729s"
+    ],
+    "total_ifs": "8.039551729s",
+    "verify": "9.530973ms"
+  },
+  "time_nanoseconds": {
+    "read_matrix": 77151051,
+    "initialize_array": [
+      68476067
+    ],
+    "initialize": 68476067,
+    "preprocess_array": [
+      7952836630
+    ],
+    "preprocess": 7952836630,
+    "solve_array": [
+      18239032
+    ],
+    "solve": 18239032,
+    "total_ifs_array": [
+      8039551729
+    ],
+    "total_ifs": 8039551729,
+    "verify": 9530973
+  },
+  "mumps_stats": {
+    "inf_norm_a": 0.0,
+    "inf_norm_x": 0.0,
+    "scaled_residual": 0.0,
+    "backward_error_omega1": 0.0,
+    "backward_error_omega2": 0.0,
+    "normalized_delta_x": 0.0,
+    "condition_number1": 0.0,
+    "condition_number2": 0.0
+  },
+  "iterative_stats": null
+}

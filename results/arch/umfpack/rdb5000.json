@@ -1,0 +1,103 @@
+{
+  "main": {
+    "platform": "Russell",
+    "blas_lib": "Intel MKL",
+    "solver": "UMFPACK",
+    "has_mumps": true,
+    "has_umfpack": true,
+    "solved": true,
+    "stopped_by_time_guard": false,
+    "out_of_memory": false,
+    "error_from_solver": null
+  },
+  "matrix": {
+    "name": "rdb5000",
+    "nrow": 5000,
+    "ncol": 5000,
+    "nnz": 29600,
+    "nnz_actual": 29600,
+    "complex": false,
+    "symmetric": "No"
+  },
+  "requests": {
+    "ordering": "Auto",
+    "scaling": "Auto",
+    "mumps_num_threads": 0,
+    "positive_definite": false
+  },
+  "output": {
+    "effective_ordering": "Amd",
+    "effective_scaling": "Sum",
+    "effective_mumps_num_threads": 0,
+    "openmp_num_threads": 24,
+    "umfpack_strategy": "Symmetric",
+    "umfpack_rcond_estimate": 1.7016470983666544e-6,
+    "faer_effective_method": "",
+    "faer_flop_ratio": 0.0,
+    "basiclu_rank": 0,
+    "qdldl_positive_inertia": 0
+  },
+  "determinant": {
+    "mantissa_real": 0.0,
+    "mantissa_imag": 0.0,
+    "base": 10.0,
+    "exponent": 0.0
+  },
+  "verify": {
+    "max_abs_a": 87.232,
+    "max_abs_ax": 1.0000000000001705,
+    "max_abs_diff": 1.7053025658242404e-13,
+    "relative_error": 1.932748397207635e-15
+  },
+  "time_human": {
+    "read_matrix": "1.808533ms",
+    "initialize_array": [
+      "1.676261ms"
+    ],
+    "initialize": "1.676261ms",
+    "preprocess_array": [
+      "17.587836ms"
+    ],
+    "preprocess": "17.587836ms",
+    "solve_array": [
+      "695.337µs"
+    ],
+    "solve": "695.337µs",
+    "total_ifs_array": [
+      "19.959434ms"
+    ],
+    "total_ifs": "19.959434ms",
+    "verify": "234.767µs"
+  },
+  "time_nanoseconds": {
+    "read_matrix": 1808533,
+    "initialize_array": [
+      1676261
+    ],
+    "initialize": 1676261,
+    "preprocess_array": [
+      17587836
+    ],
+    "preprocess": 17587836,
+    "solve_array": [
+      695337
+    ],
+    "solve": 695337,
+    "total_ifs_array": [
+      19959434
+    ],
+    "total_ifs": 19959434,
+    "verify": 234767
+  },
+  "mumps_stats": {
+    "inf_norm_a": 0.0,
+    "inf_norm_x": 0.0,
+    "scaled_residual": 0.0,
+    "backward_error_omega1": 0.0,
+    "backward_error_omega2": 0.0,
+    "normalized_delta_x": 0.0,
+    "condition_number1": 0.0,
+    "condition_number2": 0.0
+  },
+  "iterative_stats": null
+}
